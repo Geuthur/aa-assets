@@ -1,0 +1,22 @@
+{% load i18n %}
+{% load navactive %}
+
+{% if perms.assets.basic_access %}
+<div class="d-flex flex-row" id="aa-assets-tabs" role="tablist">
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" href="#tab-assets" data-bs-toggle="tab" data-bs-target="#tab-assets" >
+            {% translate "Corp Assets" %}
+        </a>
+    </li>
+{% endif %}
+{% if perms.assets.manage_requests %}
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" href="#tab-open-requests" data-bs-toggle="tab" data-bs-target="#tab-open-requests" >
+            {% translate "Requests" %}
+            {% if requests_count %}
+                &nbsp;<span class="badge bg-secondary">{{ requests_count }}</span>
+            {% endif %}
+        </a>
+    </li>
+</div>
+{% endif %}

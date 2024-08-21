@@ -1,0 +1,591 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2024-08-21 09:39+0200\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=2; plural=(n != 1);\n"
+#: assets/models.py:333
+msgid "Asset Safety"
+msgstr "Besitzsicherheit"
+
+#: assets/models.py:334
+msgid "Auto Fit"
+msgstr ""
+
+#: assets/models.py:335
+msgid "Bonus"
+msgstr ""
+
+#: assets/models.py:336
+msgid "Booster"
+msgstr ""
+
+#: assets/models.py:337
+msgid "Booster Hold"
+msgstr ""
+
+#: assets/models.py:338
+msgid "Capsule"
+msgstr ""
+
+#: assets/models.py:339
+msgid "Cargo"
+msgstr ""
+
+#: assets/models.py:340
+msgid "Corp Deliveries"
+msgstr ""
+
+#: assets/models.py:341
+msgid "Corp Security Access Group 1"
+msgstr ""
+
+#: assets/models.py:342
+msgid "Corp Security Access Group 2"
+msgstr ""
+
+#: assets/models.py:343
+msgid "Corp Security Access Group 3"
+msgstr ""
+
+#: assets/models.py:344
+msgid "Corp Security Access Group 4"
+msgstr ""
+
+#: assets/models.py:345
+msgid "Corp Security Access Group 5"
+msgstr ""
+
+#: assets/models.py:346
+msgid "Corp Security Access Group 6"
+msgstr ""
+
+#: assets/models.py:347
+msgid "Corp Security Access Group 7"
+msgstr ""
+
+#: assets/models.py:348
+msgid "Crate Loot"
+msgstr ""
+
+#: assets/models.py:349
+msgid "Deliveries"
+msgstr ""
+
+#: assets/models.py:350
+msgid "Drone Bay"
+msgstr ""
+
+#: assets/models.py:351
+msgid "Dust Battle"
+msgstr ""
+
+#: assets/models.py:352
+msgid "Dust Databank"
+msgstr ""
+
+#: assets/models.py:353
+msgid "Fighter Bay"
+msgstr ""
+
+#: assets/models.py:354
+msgid "Fighter Tube 0"
+msgstr ""
+
+#: assets/models.py:355
+msgid "Fighter Tube 1"
+msgstr ""
+
+#: assets/models.py:356
+msgid "Fighter Tube 2"
+msgstr ""
+
+#: assets/models.py:357
+msgid "Fighter Tube 3"
+msgstr ""
+
+#: assets/models.py:358
+msgid "Fighter Tube 4"
+msgstr ""
+
+#: assets/models.py:359
+msgid "Fleet Hangar"
+msgstr ""
+
+#: assets/models.py:360
+msgid "Frigate escape bay Hangar"
+msgstr ""
+
+#: assets/models.py:361
+msgid "Hangar"
+msgstr ""
+
+#: assets/models.py:362
+msgid "Hangar All"
+msgstr ""
+
+#: assets/models.py:363
+msgid "High power slot 1"
+msgstr ""
+
+#: assets/models.py:364
+msgid "High power slot 2"
+msgstr ""
+
+#: assets/models.py:365
+msgid "High power slot 3"
+msgstr ""
+
+#: assets/models.py:366
+msgid "High power slot 4"
+msgstr ""
+
+#: assets/models.py:367
+msgid "High power slot 5"
+msgstr ""
+
+#: assets/models.py:368
+msgid "High power slot 6"
+msgstr ""
+
+#: assets/models.py:369
+msgid "High power slot 7"
+msgstr ""
+
+#: assets/models.py:370
+msgid "High power slot 8"
+msgstr ""
+
+#: assets/models.py:371
+msgid "Hidden Modifiers"
+msgstr ""
+
+#: assets/models.py:372
+msgid "Implant"
+msgstr ""
+
+#: assets/models.py:373
+msgid "Impounded"
+msgstr ""
+
+#: assets/models.py:375
+msgid "This item was put into a junkyard through reprocessing."
+msgstr ""
+
+#: assets/models.py:378
+msgid "This item was put into a junkyard through being trashed by its owner."
+msgstr ""
+
+#: assets/models.py:380
+msgid "Low power slot 1"
+msgstr ""
+
+#: assets/models.py:381
+msgid "Low power slot 2"
+msgstr ""
+
+#: assets/models.py:382
+msgid "Low power slot 3"
+msgstr ""
+
+#: assets/models.py:383
+msgid "Low power slot 4"
+msgstr ""
+
+#: assets/models.py:384
+msgid "Low power slot 5"
+msgstr ""
+
+#: assets/models.py:385
+msgid "Low power slot 6"
+msgstr ""
+
+#: assets/models.py:386
+msgid "Low power slot 7"
+msgstr ""
+
+#: assets/models.py:387
+msgid "Low power slot 8"
+msgstr ""
+
+#: assets/models.py:388
+msgid "Locked item, can not be moved unless unlocked"
+msgstr ""
+
+#: assets/models.py:389
+msgid "Medium power slot 1"
+msgstr ""
+
+#: assets/models.py:390
+msgid "Medium power slot 2"
+msgstr ""
+
+#: assets/models.py:391
+msgid "Medium power slot 3"
+msgstr ""
+
+#: assets/models.py:392
+msgid "Medium power slot 4"
+msgstr ""
+
+#: assets/models.py:393
+msgid "Medium power slot 5"
+msgstr ""
+
+#: assets/models.py:394
+msgid "Medium power slot 6"
+msgstr ""
+
+#: assets/models.py:395
+msgid "Medium power slot 7"
+msgstr ""
+
+#: assets/models.py:396
+msgid "Medium power slot 8"
+msgstr ""
+
+#: assets/models.py:397
+msgid "Office Folder"
+msgstr ""
+
+#: assets/models.py:398
+msgid "Pilot"
+msgstr ""
+
+#: assets/models.py:399
+msgid "Planet Surface"
+msgstr ""
+
+#: assets/models.py:400
+msgid "Quafe Bay"
+msgstr ""
+
+#: assets/models.py:401
+msgid "Quantum Core Room"
+msgstr ""
+
+#: assets/models.py:402
+msgid "Reward"
+msgstr ""
+
+#: assets/models.py:403
+msgid "Rig power slot 1"
+msgstr ""
+
+#: assets/models.py:404
+msgid "Rig power slot 2"
+msgstr ""
+
+#: assets/models.py:405
+msgid "Rig power slot 3"
+msgstr ""
+
+#: assets/models.py:406
+msgid "Rig power slot 4"
+msgstr ""
+
+#: assets/models.py:407
+msgid "Rig power slot 5"
+msgstr ""
+
+#: assets/models.py:408
+msgid "Rig power slot 6"
+msgstr ""
+
+#: assets/models.py:409
+msgid "Rig power slot 7"
+msgstr ""
+
+#: assets/models.py:410
+msgid "Rig power slot 8"
+msgstr ""
+
+#: assets/models.py:411
+msgid "Secondary Storage"
+msgstr ""
+
+#: assets/models.py:412
+msgid "Service Slot 0"
+msgstr ""
+
+#: assets/models.py:413
+msgid "Service Slot 1"
+msgstr ""
+
+#: assets/models.py:414
+msgid "Service Slot 2"
+msgstr ""
+
+#: assets/models.py:415
+msgid "Service Slot 3"
+msgstr ""
+
+#: assets/models.py:416
+msgid "Service Slot 4"
+msgstr ""
+
+#: assets/models.py:417
+msgid "Service Slot 5"
+msgstr ""
+
+#: assets/models.py:418
+msgid "Service Slot 6"
+msgstr ""
+
+#: assets/models.py:419
+msgid "Service Slot 7"
+msgstr ""
+
+#: assets/models.py:420
+msgid "Ship Hangar"
+msgstr ""
+
+#: assets/models.py:421
+msgid "Ship Offline"
+msgstr ""
+
+#: assets/models.py:422
+msgid "Skill"
+msgstr ""
+
+#: assets/models.py:423
+msgid "Skill In Training"
+msgstr ""
+
+#: assets/models.py:424
+msgid "Specialized Ammo Hold"
+msgstr ""
+
+#: assets/models.py:426
+msgid "Specialized Command Center Hold"
+msgstr ""
+
+#: assets/models.py:428
+msgid "Specialized Fuel Bay"
+msgstr ""
+
+#: assets/models.py:429
+msgid "Specialized Gas Hold"
+msgstr ""
+
+#: assets/models.py:431
+msgid "Specialized Industrial Ship Hold"
+msgstr ""
+
+#: assets/models.py:434
+msgid "Specialized Large Ship Hold"
+msgstr ""
+
+#: assets/models.py:437
+msgid "Specialized Material Bay"
+msgstr ""
+
+#: assets/models.py:440
+msgid "Specialized Medium Ship Hold"
+msgstr ""
+
+#: assets/models.py:443
+msgid "Specialized Mineral Hold"
+msgstr ""
+
+#: assets/models.py:445
+msgid "Specialized Ore Hold"
+msgstr ""
+
+#: assets/models.py:448
+msgid "Specialized Planetary Commodities Hold"
+msgstr ""
+
+#: assets/models.py:451
+msgid "Specialized Salvage Hold"
+msgstr ""
+
+#: assets/models.py:453
+msgid "Specialized Ship Hold"
+msgstr ""
+
+#: assets/models.py:455
+msgid "Specialized Small Ship Hold"
+msgstr ""
+
+#: assets/models.py:457
+msgid "Structure Active"
+msgstr ""
+
+#: assets/models.py:458
+msgid "Structure Fuel"
+msgstr ""
+
+#: assets/models.py:459
+msgid "Structure Inactive"
+msgstr ""
+
+#: assets/models.py:460
+msgid "Structure Offline"
+msgstr ""
+
+#: assets/models.py:461
+msgid "Sub System Bay"
+msgstr ""
+
+#: assets/models.py:462
+msgid "Sub System Slot 0"
+msgstr ""
+
+#: assets/models.py:463
+msgid "Sub System Slot 1"
+msgstr ""
+
+#: assets/models.py:464
+msgid "Sub System Slot 2"
+msgstr ""
+
+#: assets/models.py:465
+msgid "Sub System Slot 3"
+msgstr ""
+
+#: assets/models.py:466
+msgid "Sub System Slot 4"
+msgstr ""
+
+#: assets/models.py:467
+msgid "Sub System Slot 5"
+msgstr ""
+
+#: assets/models.py:468
+msgid "Sub System Slot 6"
+msgstr ""
+
+#: assets/models.py:469
+msgid "Sub System Slot 7"
+msgstr ""
+
+#: assets/models.py:470
+msgid "Unlocked item, can be moved"
+msgstr ""
+
+#: assets/models.py:471
+msgid "Wallet"
+msgstr ""
+
+#: assets/models.py:472
+msgid "Wardrobe"
+msgstr ""
+
+#: assets/models.py:473
+msgid "undefined"
+msgstr "undefiniert"
+
+#: assets/templates/assets/assets-js.html:108
+msgid "Please enter a valid quantity."
+msgstr "Bitte gib eine gültige Zahl ein."
+
+#: assets/templates/assets/assets-js.html:125
+msgid "Please enter a valid quantity for at least one items."
+msgstr "Bitte gib mindestens eine gültige Zahl ein."
+
+#: assets/templates/assets/assets.html:12
+msgid "Quantity"
+msgstr "Anzahl"
+
+#: assets/templates/assets/assets.html:13
+msgid "Location"
+msgstr ""
+
+#: assets/templates/assets/assets.html:14
+msgid "Price"
+msgstr "Preis"
+
+#: assets/templates/assets/assets.html:15
+#: assets/templates/assets/requests.html:15
+msgid "Action"
+msgstr "Aktion"
+
+#: assets/templates/assets/assets.html:32
+msgid "Specific Buy"
+msgstr "Spezifische Käufe"
+
+#: assets/templates/assets/assets.html:46
+msgid "Buy Items"
+msgstr "Kaufe Gegenstände"
+
+#: assets/templates/assets/assets.html:57
+msgid "Close"
+msgstr "Schliessen"
+
+#: assets/templates/assets/assets.html:58
+msgid "Buy All"
+msgstr "Kaufe Alles"
+
+#: assets/templates/assets/assets.html:59
+msgid "Buy"
+msgstr "Kaufe"
+
+#: assets/templates/assets/assets.html:70
+msgid "Confirm Purchase"
+msgstr "Bestätige Einkauf"
+
+#: assets/templates/assets/assets.html:75
+msgid "Are you sure you want to proceed with the purchase?"
+msgstr "Bist du dir sicher das du den Kauf abschliessen möchtest?"
+
+#: assets/templates/assets/assets.html:78
+msgid "Cancel"
+msgstr "Abbrechen"
+
+#: assets/templates/assets/assets.html:79
+msgid "Confirm"
+msgstr "Bestätige"
+
+#: assets/templates/assets/base.html:11 assets/templates/assets/base.html:25
+msgid "Voices of War - Assets"
+msgstr "Voices of War - Besitz"
+
+#: assets/templates/assets/index.html:21
+msgid "Corp Assets"
+msgstr "Corp Besitz"
+
+#: assets/templates/assets/index.html:26
+msgid "Requests"
+msgstr "Anfragen"
+
+#: assets/templates/assets/menu.html:9
+msgid "Add Corporation"
+msgstr "Corporation hinzufügen"
+
+#: assets/templates/assets/menu.html:15
+msgid "Add Character"
+msgstr "Character hinzufügen"
+
+#: assets/templates/assets/requests.html:11
+msgid "Order List"
+msgstr "Einkaufliste"
+
+#: assets/templates/assets/requests.html:12
+msgid "Requestor"
+msgstr "Anforderer"
+
+#: assets/templates/assets/requests.html:13
+msgid "Status"
+msgstr ""
+
+#: assets/templates/assets/requests.html:14
+msgid "Created"
+msgstr "Erstellt"
+
+#: assets/templates/assets/requests.html:128
+msgid "pieces"
+msgstr "stück"

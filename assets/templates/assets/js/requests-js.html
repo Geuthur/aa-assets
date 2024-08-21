@@ -1,0 +1,150 @@
+{% load i18n %}
+{% load humanize %}
+{% load static %}
+
+<script type="application/javascript">
+var markRequestCancelledText = requestSettings.markRequestCancelledText;
+var markRequestCompletedText = requestSettings.markRequestCompletedText;
+var markRequestInProgressText = requestSettings.markRequestInProgressText;
+var markRequestOpenText = requestSettings.markRequestOpenText;
+
+var csrfToken = requestSettings.csrfToken;
+var orderData;
+
+document.addEventListener('DOMContentLoaded', function () {
+    urlRequests = '/assets/api/requests/';
+    // Initialisieren Sie die DataTable für assets
+    assets = initializeRequests('#requests', urlRequests);
+});
+
+function openRequestUrl(id) {
+    return requestSettings.openRequestUrl.replace("1337", id);
+}
+function cancelRequestUrl(id) {
+    return requestSettings.cancelRequestUrl.replace("1337", id);
+}
+function completeRequestUrl(id) {
+    return requestSettings.completeRequestUrl.replace("1337", id);
+}
+function inProgressRequestUrl(id) {
+    return requestSettings.inProgressRequestUrl.replace("1337", id);
+}
+
+function initializeRequests(tableId, url) {
+    return $(tableId).DataTable({
+        'ajax': {
+            'url': url,
+            'dataSrc': function(json) {
+                // Store the data in a global variable
+                orderData = json;
+                return json;
+            }
+        },
+        'columns': [
+            {
+                'data': 'order',
+                'render': function(data, type, row) {
+                    return '<button type="button" class="btn btn-info" onclick=\'showOrderDetails(`' + data + '`)\'><span class="fas fa-info"></span></button>';
+                }
+            },
+            {
+                'data': 'requestor',
+                'render': function(data, type, row) {
+                    return data;
+                }
+            },
+            {
+                'data': 'status',
+                'render': function(data, type, row) {
+                    return data;
+                }
+            },
+            {
+                'data': 'created',
+                'render': function(data, type, row) {
+                    return moment(data).format('L LT');
+                }
+            },
+            {
+                className: "d-flex",
+                'data': 'id',
+            },
+        ],
+        'order': [[3, 'desc']],
+        'pageLength': 25,
+        'autoWidth': false,
+        'columnDefs': [
+            { 'sortable': false, 'targets': [0, 4] },
+            {
+                // The `data` parameter refers to the data for the cell (defined by the
+                // `data` option, which defaults to the column being worked with, in
+                // this case `data: 0`.
+                render: function (data, type, row) {
+                if (type === "display") {
+                    var buttons = '';
+                    if (row.action === "OP") {
+                        buttons +=
+                            '<form class="inline" method="post" action="' + cancelRequestUrl(data) + '">' +
+                            csrfToken +
+                            '<button type="submit" class="btn btn-danger btn-sm btn-square" aria-label="' + markRequestCancelledText + '" title="' + markRequestCancelledText + '"><span class="fas fa-trash"></span></button></form>';
+                        buttons +=
+                            '<form class="inline" method="post" action="' + inProgressRequestUrl(data) + '">' +
+                            csrfToken +
+                            '<button type="submit" class="btn btn-primary btn-sm btn-square" aria-label="' + markRequestInProgressText + '" title="' + markRequestInProgressText + '"><span class="fas fa-clipboard-check"></span></button></form>';
+                        return buttons;
+                    } else if (row.action === "IP") {
+                        buttons +=
+                            '<form class="inline" method="post" action="' + openRequestUrl(data) + '">' +
+                            csrfToken +
+                            '<button type="submit" class="btn btn-warning btn-sm btn-square" aria-label="' + markRequestOpenText + '" title="' + markRequestOpenText + '"><span class="fas fa-undo"></span></button></form>';
+                        buttons +=
+                            '<form class="inline" method="post" action="' + cancelRequestUrl(data) + '">' +
+                            csrfToken +
+                            '<button type="submit" class="btn btn-danger btn-sm btn-square" aria-label="' + markRequestCancelledText + '" title="' + markRequestCancelledText + '"><span class="fas fa-trash"></span></button></form>';
+                        buttons +=
+                            '<form class="inline" method="post" action="' + completeRequestUrl(data) +'">' +
+                            csrfToken +
+                            '<button type="submit" class="btn btn-success btn-sm btn-square"  aria-label="' + markRequestCompletedText + '" title="' + markRequestCompletedText + '"><span class="fas fa-clipboard-check"></span></button></form>';
+                        return buttons;
+                    } else {
+                        return "";
+                    }
+                }
+
+                return data;
+            },
+            targets: [4],
+        },
+        ],
+    });
+}
+
+function showOrderDetails(data) {
+    // Parse the JSON string
+    var jsonData = JSON.parse(data);
+
+    // Initialize an empty HTML string
+    var html = '';
+
+    // Iterate through each entry in the JSON data
+    jsonData.forEach(function(entry) {
+        // Extract the required fields
+        var item_id = entry.item_id;
+        var name = entry.name;
+        var quantity = Number(entry.quantity);
+
+        // Append the formatted data to the HTML string
+        html += '<div class="d-flex justify-content-between align-items-center">';
+        html += '<img class="card-img-zoom" src="https://imageserver.eveonline.com/types/' + item_id + '/icon/?size=32" height="32" width="32"/>';
+        html += '<span>' + name + ':</span> <span class="text-end">' + quantity.toLocaleString() + ' {% translate "pieces" %}</span>';
+        html += '</div><br>';
+    });
+
+    // Set the HTML content of the modal body
+    document.getElementById('orderModalBody').innerHTML = html;
+
+    // Show the modal
+    var orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
+    orderModal.show();
+}
+</script>

@@ -1,0 +1,18 @@
+{% load i18n %}
+{% load navactive %}
+
+{% if perms.assets.add_corporate_owner %}
+    <li class="nav-item">
+        <a class="nav-link py-0" href="{% url 'assets:add_corp' %}">
+            <span class="btn btn-success">{% translate "Add Corporation" %}</span>
+        </a>
+    </li>
+{% endif %}
+
+{% if perms.assets.add_character_owner %}
+    <li class="nav-item">
+        <a class="nav-link py-0" href="{% url 'assets:add_char' %}">
+            <span class="btn btn-success">{% translate "Add Character" %}</span>
+        </a>
+    </li>
+{% endif %}

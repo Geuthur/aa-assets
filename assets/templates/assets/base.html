@@ -1,0 +1,39 @@
+{% extends 'allianceauth/base-bs5.html' %}
+{% load i18n %}
+{% block main_css %}
+{% endblock main_css %}
+{% block extra_css %}
+{% endblock extra_css %}
+
+{% block page_title %} {% translate "Assets System" %} {% endblock %}
+
+{% block header_nav_brand %}
+    {% translate "Assets System" %}
+{% endblock header_nav_brand %}
+
+{% block header_nav_collapse_left %}
+    {% include 'assets/partials/navigation.html' %}
+{% endblock %}
+
+{% block header_nav_collapse_right %}
+    {% include 'assets/partials/administration.html' %}
+{% endblock %}
+
+{% block content %}
+
+{% include 'bundles/datatables-css-bs5.html' %}
+
+<div class="allianceauth-assets-plugin card">
+    <div class="container-fluid card-body" id="assets_block">
+    {% block assets_block %}{% endblock %}
+    </div>
+    <br>
+</div>
+
+{% endblock %}
+
+{% block extra_javascript %}
+{% endblock %}
+
+{% block extra_script %}
+{% endblock %}
