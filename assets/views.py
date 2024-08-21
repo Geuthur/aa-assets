@@ -149,51 +149,7 @@ def create_order(request):
 
 
 @login_required
-@permission_required("assets.manage_requests")
-@require_POST
-def mark_request_in_progress(request, request_id: int):
-    """Render view to mark a order request as in progress."""
-    # Check Cooldown
-    cooldown = get_apr_cooldown(request, request_id, "in_progress")
-    if cooldown:
-        return redirect("assets:index")
-
-    user_request = get_object_or_404(Request, pk=request_id)
-    is_completed = user_request.mark_request(
-        user=request.user, status=Request.STATUS_IN_PROGRESS, closed=False
-    )
-
-    if is_completed:
-        # Set Cooldown
-        set_apr_cooldown(request.user, request_id, "in_progress")
-        msg = _(
-            "The request for Order {user_request_pk} from {user_request_requesting_user} has been marked as in progress."
-        ).format(
-            user_request_pk=user_request.pk,
-            user_request_requesting_user=user_request.requesting_user,
-        )
-        user_request.notify_request_in_progress()
-        messages.info(
-            request,
-            msg,
-        )
-        return redirect("assets:index")
-    msg = _(
-        "The request for Order {user_request_pk} from {user_request_requesting_user} has failed."
-    ).format(
-        user_request_pk=user_request.pk,
-        user_request_requesting_user=user_request.requesting_user,
-    )
-
-    messages.error(
-        request,
-        msg,
-    )
-    return redirect("assets:index")
-
-
-@login_required
-@permission_required("assets.manage_requests")
+@permission_required("assets.basic_access")
 @require_POST
 def mark_request_canceled(request, request_id: int):
     """Render view to mark a order request as canceled."""
@@ -219,7 +175,103 @@ def mark_request_canceled(request, request_id: int):
             user_request_pk=user_request.pk,
             user_request_requesting_user=user_request.requesting_user,
         )
-        user_request.notify_request_in_progress()
+        if request.user == user_request.requesting_user:
+            user_request.notify_request_canceled(requestor=True)
+        else:
+            user_request.notify_request_canceled()
+        messages.info(
+            request,
+            msg,
+        )
+        return redirect("assets:index")
+    msg = _(
+        "The request for Order {user_request_pk} from {user_request_requesting_user} has failed."
+    ).format(
+        user_request_pk=user_request.pk,
+        user_request_requesting_user=user_request.requesting_user,
+    )
+
+    messages.error(
+        request,
+        msg,
+    )
+    return redirect("assets:index")
+
+
+@login_required
+@permission_required("assets.manage_requests")
+@require_POST
+def mark_request_completed(request, request_id: int):
+    """Render view to mark a order request as completed."""
+    # Check Cooldown
+    cooldown = get_apr_cooldown(request, request_id, "completed")
+    if cooldown:
+        return redirect("assets:index")
+
+    user_request = get_object_or_404(Request, pk=request_id)
+    is_completed = user_request.mark_request(
+        user=request.user,
+        status=Request.STATUS_COMPLETED,
+        closed=True,
+        can_requestor_edit=False,
+    )
+
+    if is_completed:
+        # Set Cooldown
+        set_apr_cooldown(request.user, request_id, "completed")
+        msg = _(
+            "The request for Order {user_request_pk} from {user_request_requesting_user} has been closed as completed."
+        ).format(
+            user_request_pk=user_request.pk,
+            user_request_requesting_user=user_request.requesting_user,
+        )
+        user_request.notify_request_completed()
+        messages.info(
+            request,
+            msg,
+        )
+        return redirect("assets:index")
+    msg = _(
+        "The request for Order {user_request_pk} from {user_request_requesting_user} has failed."
+    ).format(
+        user_request_pk=user_request.pk,
+        user_request_requesting_user=user_request.requesting_user,
+    )
+
+    messages.error(
+        request,
+        msg,
+    )
+    return redirect("assets:index")
+
+
+@login_required
+@permission_required("assets.manage_requests")
+@require_POST
+def mark_request_open(request, request_id: int):
+    """Render view to mark a order request as open."""
+    # Check Cooldown
+    cooldown = get_apr_cooldown(request, request_id, "open")
+    if cooldown:
+        return redirect("assets:index")
+
+    user_request = get_object_or_404(Request, pk=request_id)
+    is_completed = user_request.mark_request(
+        user=request.user,
+        status=Request.STATUS_OPEN,
+        closed=False,
+    )
+
+    if is_completed:
+        # Set Cooldown
+        set_apr_cooldown(request.user, request_id, "open")
+        msg = _(
+            "The request for Order {user_request_pk} from {user_request_requesting_user} has been reopened."
+        ).format(
+            user_request_pk=user_request.pk,
+            user_request_requesting_user=user_request.requesting_user,
+        )
+        user_request.notify_request_open(request)
         messages.info(
             request,
             msg,

@@ -24,18 +24,17 @@
 {% block extra_javascript %}
 <script type="application/javascript">
 	let requestSettings = {
-		inProgressRequest: '{% url "assets:request_in_progress" request_id=1337 %}',
 		cancelRequestUrl: '{% url "assets:request_canceled" request_id=1337 %}',
-		inProgressRequestUrl: '{% url "assets:request_in_progress" request_id=1337 %}',
-		openRequestUrl: '{% url "assets:request_in_progress" request_id=1337 %}',
-		completeRequestUrl: '{% url "assets:request_in_progress" request_id=1337 %}',
+		completeRequestUrl: '{% url "assets:request_completed" request_id=1337 %}',
+        openRequestUrl: '{% url "assets:request_open" request_id=1337 %}',
+
+        manage_requests: '{% if perms.assets.manage_requests %}true{% else %}false{% endif %}',
 
 		csrfToken: '{% csrf_token %}',
 
 		markRequestCancelledText: '{% translate "Mark Request as Cancelled" %}',
-		markRequestCompletedText: '{% translate "Mark Request as Complete" %}',
-		markRequestInProgressText: '{% translate "Mark Request as In Progress" %}',
-		markRequestOpenText: '{% translate "Mark Request as Open" %}',
+		markRequestCompletedText: '{% translate "Mark Request as Completed" %}',
+        markRequestOpenText: '{% translate "Mark Request as Open" %}',
 	};
 </script>
 

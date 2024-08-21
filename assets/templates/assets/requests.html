@@ -26,22 +26,68 @@
             </table>
         </div>
     </div>
+{% endif %}
 
-    <!-- Add this modal structure to your HTML file -->
-    <div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
-        <div class="modal-dialog modal-dialog-centered">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="orderModalLabel">Order Details</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="orderModalBody">
-                    <!-- Order details will be populated here -->
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-                </div>
+<div role="tabpanel" class="tab-pane fade" id="tab-my-requests">
+    <div class="table-responsive">
+        <table class="table table-striped table-hover requests" id="my-requests" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th class="col-order" style="width: 10%;">{% translate "Order List" %}</th>
+                    <th class="col-requester" style="width: 20%;">{% translate "Requestor" %}</th>
+                    <th class="col-status" style="width: 5%;">{% translate "Status" %}</th>
+                    <th class="col-date" style="width: 20%;">{% translate "Created" %}</th>
+                    <th class="col-action" style="width: 20%;">{% translate "Action" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="col-order"></td>
+                    <td class="col-requester"></td>
+                    <td class="col-status"></td>
+                    <td class="col-date"></td>
+                    <td class="col-action"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+
+<!-- Order Details Modal -->
+<div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="orderModalLabel">Order Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body" id="orderModalBody">
+                <!-- Order details will be populated here -->
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
             </div>
         </div>
     </div>
-{% endif %}
+</div>
+
+<!-- Confirmation Modal -->
+<div class="modal fade" id="confirmRequestModal" tabindex="-1" role="dialog" aria-labelledby="confirmRequestModalLabel" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="confirmRequestModalLabel">{% translate "Confirm Action" %}</h5>
+                <button type="button" class="btn-close py-3 px-3" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <span id="confirm-request">
+                <!-- Confirmation message will be populated here -->
+                </span>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Cancel" %}</button>
+                <button type="button" class="btn btn-primary" id="finalizeActionButton">{% translate "Confirm" %}</button>
+            </div>
+        </div>
+    </div>
+</div>

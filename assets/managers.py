@@ -243,12 +243,12 @@ class RequestQuerySet(models.QuerySet):
         )
         return request_query
 
-    def requests_inprogress(self, user: User) -> models.QuerySet:
-        """Add filter to only include requests with in progress status."""
+    def my_requests_open(self, user) -> models.QuerySet:
+        """Add filter to only include requests with open status."""
         request_query = self.filter(
             Q(closed_at=None)
-            & Q(status=self.model.STATUS_IN_PROGRESS)
-            & Q(approver_user=user)
+            & Q(status=self.model.STATUS_OPEN)
+            & Q(requesting_user=user)
         )
         return request_query
 
@@ -260,12 +260,13 @@ class RequestManagerBase(models.Manager):
             "requesting_user__profile__main_character",
         )
 
-    def open_requests_total_count(self, user: User) -> int:
+    def open_requests_total_count(self) -> int:
         """Return total count of open requests for user"""
-        return (
-            self.all().requests_inprogress(user).count()
-            + self.all().requests_open().count()
-        )
+        return self.all().requests_open().count()
+
+    def my_requests_total_count(self, user: User) -> int:
+        """Return total count of open requests for user"""
+        return self.all().my_requests_open(user).count()
 
 
 RequestManager = RequestManagerBase.from_queryset(RequestQuerySet)

@@ -25,7 +25,7 @@ class AssetsMenuItem(MenuItemHook):
     def render(self, request):
         if request.user.has_perm("assets.basic_access"):
             if request.user.has_perm("assets.manage_requests"):
-                app_count = Request.objects.open_requests_total_count(request.user)
+                app_count = Request.objects.open_requests_total_count()
             else:
                 app_count = None
             self.count = app_count if app_count and app_count > 0 else None

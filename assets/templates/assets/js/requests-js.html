@@ -5,29 +5,45 @@
 <script type="application/javascript">
 var markRequestCancelledText = requestSettings.markRequestCancelledText;
 var markRequestCompletedText = requestSettings.markRequestCompletedText;
-var markRequestInProgressText = requestSettings.markRequestInProgressText;
 var markRequestOpenText = requestSettings.markRequestOpenText;
+var manage_requests = requestSettings.manage_requests;
 
 var csrfToken = requestSettings.csrfToken;
-var orderData;
+var urlRequests, urlMyRequests;
 
 document.addEventListener('DOMContentLoaded', function () {
     urlRequests = '/assets/api/requests/';
+    urlMyRequests = '/assets/api/requests/myrequests/';
     // Initialisieren Sie die DataTable für assets
-    assets = initializeRequests('#requests', urlRequests);
+    requests = initializeRequests('#requests', urlRequests);
+    myrequests = initializeRequests('#my-requests', urlMyRequests);
+    var confirmModal = document.getElementById('confirmRequestModal');
+    var confirmRequest = document.getElementById('confirm-request');
+    var finalizeActionButton = document.getElementById('finalizeActionButton');
+
+    confirmModal.addEventListener('show.bs.modal', function (event) {
+        var button = event.relatedTarget;
+        var confirmText = button.getAttribute('data-confirm-text');
+        var formId = button.getAttribute('data-form-id');
+
+        confirmRequest.textContent = confirmText;
+
+        finalizeActionButton.onclick = function () {
+            document.getElementById(formId).submit();
+            var modal = bootstrap.Modal.getInstance(confirmModal);
+            modal.hide();
+        };
+    });
 });
 
-function openRequestUrl(id) {
-    return requestSettings.openRequestUrl.replace("1337", id);
-}
 function cancelRequestUrl(id) {
     return requestSettings.cancelRequestUrl.replace("1337", id);
 }
 function completeRequestUrl(id) {
     return requestSettings.completeRequestUrl.replace("1337", id);
 }
-function inProgressRequestUrl(id) {
-    return requestSettings.inProgressRequestUrl.replace("1337", id);
+function openRequestUrl(id) {
+    return requestSettings.openRequestUrl.replace("1337", id);
 }
 
 function initializeRequests(tableId, url) {
@@ -36,7 +52,6 @@ function initializeRequests(tableId, url) {
             'url': url,
             'dataSrc': function(json) {
                 // Store the data in a global variable
-                orderData = json;
                 return json;
             }
         },
@@ -44,7 +59,7 @@ function initializeRequests(tableId, url) {
             {
                 'data': 'order',
                 'render': function(data, type, row) {
-                    return '<button type="button" class="btn btn-info" onclick=\'showOrderDetails(`' + data + '`)\'><span class="fas fa-info"></span></button>';
+                    return '<button type="button" class="btn btn-info btn-sm btn-square" onclick=\'showOrderDetails(`' + data + '`)\'><span class="fas fa-info"></span></button>';
                 }
             },
             {
@@ -66,7 +81,7 @@ function initializeRequests(tableId, url) {
                 }
             },
             {
-                className: "d-flex",
+                className: "text-end",
                 'data': 'id',
             },
         ],
@@ -76,35 +91,26 @@ function initializeRequests(tableId, url) {
         'columnDefs': [
             { 'sortable': false, 'targets': [0, 4] },
             {
-                // The `data` parameter refers to the data for the cell (defined by the
-                // `data` option, which defaults to the column being worked with, in
-                // this case `data: 0`.
                 render: function (data, type, row) {
                 if (type === "display") {
                     var buttons = '';
                     if (row.action === "OP") {
                         buttons +=
-                            '<form class="inline" method="post" action="' + cancelRequestUrl(data) + '">' +
+                            '<form class="d-inline" method="post" action="' + cancelRequestUrl(data) + '" id="cancelForm' + data.id + '">' +
                             csrfToken +
-                            '<button type="submit" class="btn btn-danger btn-sm btn-square" aria-label="' + markRequestCancelledText + '" title="' + markRequestCancelledText + '"><span class="fas fa-trash"></span></button></form>';
-                        buttons +=
-                            '<form class="inline" method="post" action="' + inProgressRequestUrl(data) + '">' +
-                            csrfToken +
-                            '<button type="submit" class="btn btn-primary btn-sm btn-square" aria-label="' + markRequestInProgressText + '" title="' + markRequestInProgressText + '"><span class="fas fa-clipboard-check"></span></button></form>';
+                            '<button type="button" class="btn btn-danger btn-sm btn-square" aria-label="' + markRequestCancelledText + '" title="' + markRequestCancelledText + '" data-bs-toggle="modal" data-bs-target="#confirmRequestModal" data-confirm-text="' + markRequestCancelledText + '" data-form-id="cancelForm' + data.id + '"><span class="fas fa-trash"></span></button></form>';
+                        if (manage_requests === "true") {
+                            buttons +=
+                                '<form class="d-inline" method="post" action="' + completeRequestUrl(data) + '" id="completeForm' + data.id + '">' +
+                                csrfToken +
+                                '<button type="button" class="btn btn-success btn-sm btn-square" aria-label="' + markRequestCompletedText + '" title="' + markRequestCompletedText + '" data-bs-toggle="modal" data-bs-target="#confirmRequestModal" data-confirm-text="' + markRequestCompletedText + '" data-form-id="completeForm' + data.id + '"><span class="fas fa-clipboard-check"></span></button></form>';
+                        }
                         return buttons;
-                    } else if (row.action === "IP") {
+                    } else if (row.action === "CL") {
                         buttons +=
-                            '<form class="inline" method="post" action="' + openRequestUrl(data) + '">' +
+                            '<form class="d-inline" method="post" action="' + openRequestUrl(data) + '" id="openForm' + data.id + '">' +
                             csrfToken +
-                            '<button type="submit" class="btn btn-warning btn-sm btn-square" aria-label="' + markRequestOpenText + '" title="' + markRequestOpenText + '"><span class="fas fa-undo"></span></button></form>';
-                        buttons +=
-                            '<form class="inline" method="post" action="' + cancelRequestUrl(data) + '">' +
-                            csrfToken +
-                            '<button type="submit" class="btn btn-danger btn-sm btn-square" aria-label="' + markRequestCancelledText + '" title="' + markRequestCancelledText + '"><span class="fas fa-trash"></span></button></form>';
-                        buttons +=
-                            '<form class="inline" method="post" action="' + completeRequestUrl(data) +'">' +
-                            csrfToken +
-                            '<button type="submit" class="btn btn-success btn-sm btn-square"  aria-label="' + markRequestCompletedText + '" title="' + markRequestCompletedText + '"><span class="fas fa-clipboard-check"></span></button></form>';
+                            '<button type="button" class="btn btn-warning btn-sm btn-square" aria-label="' + markRequestOpenText + '" title="' + markRequestOpenText + '" data-bs-toggle="modal" data-bs-target="#confirmRequestModal" data-confirm-text="' + markRequestOpenText + '" data-form-id="openForm' + data.id + '"><span class="fas fa-undo"></span></button></form>';
                         return buttons;
                     } else {
                         return "";
@@ -147,4 +153,5 @@ function showOrderDetails(data) {
     var orderModal = new bootstrap.Modal(document.getElementById('orderModal'));
     orderModal.show();
 }
+
 </script>

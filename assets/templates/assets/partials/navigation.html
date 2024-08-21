@@ -8,7 +8,14 @@
             {% translate "Corp Assets" %}
         </a>
     </li>
-{% endif %}
+    <li class="nav-item" role="presentation">
+        <a class="nav-link" href="#tab-my-requests" data-bs-toggle="tab" data-bs-target="#tab-my-requests" >
+            {% translate "My Requests" %}
+            {% if my_requests_count %}
+                &nbsp;<span class="badge bg-secondary">{{ my_requests_count }}</span>
+            {% endif %}
+        </a>
+    </li>
 {% if perms.assets.manage_requests %}
     <li class="nav-item" role="presentation">
         <a class="nav-link" href="#tab-open-requests" data-bs-toggle="tab" data-bs-target="#tab-open-requests" >
@@ -18,5 +25,6 @@
             {% endif %}
         </a>
     </li>
+{% endif %}
 </div>
 {% endif %}

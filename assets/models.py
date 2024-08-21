@@ -549,13 +549,11 @@ class Request(models.Model):
         help_text="The user that manage the request",
     )
     STATUS_OPEN = "OP"
-    STATUS_IN_PROGRESS = "IP"
     STATUS_COMPLETED = "CD"
     STATUS_CANCELLED = "CL"
 
     STATUS_CHOICES = [
         (STATUS_OPEN, "Open"),
-        (STATUS_IN_PROGRESS, "In Progress"),
         (STATUS_COMPLETED, "Completed"),
         (STATUS_CANCELLED, "Cancelled"),
     ]
@@ -606,7 +604,6 @@ class Request(models.Model):
     ) -> bool:
         """Change the status of a order request."""
         admin = user.has_perm("assets.manage_requests")
-        logger.debug(admin)
 
         if admin or (can_requestor_edit and self.requesting_user == user):
             logger.debug("Success to mark request")
@@ -615,7 +612,7 @@ class Request(models.Model):
             else:
                 self.closed_at = None
 
-            if status in {Request.STATUS_COMPLETED, Request.STATUS_IN_PROGRESS}:
+            if status in {Request.STATUS_COMPLETED}:
                 approver_user = user
             else:
                 approver_user = None
@@ -624,7 +621,8 @@ class Request(models.Model):
             self.status = status
             self.save()
             return True
-        logger.debug("Failed to mark request")
+
+        logger.debug("Failed to mark")
         return False
 
     def notify_new_request(self) -> None:
@@ -644,47 +642,65 @@ class Request(models.Model):
                 level="info",
             )
 
-    def notify_request_in_progress(self) -> None:
-        """Notify approvers that a Order marked as in progress."""
-        users = list(self.approvers())
-        # Notifiy Requester
-        users += [self.requesting_user]
-        for approver in users:
-            notify(
-                title=(
-                    f"{self.approver_user} begins to prepare the Order for {self.requesting_user} ID: {self.pk}."
-                ),
-                message=(
-                    format_html(
-                        "{} begins to prepare the following items:{}\n",
-                        self.approver_user,
-                        self.convert_order_to_notifiy(),
-                    )
-                ),
-                user=approver,
-                level="info",
-            )
-
     def notify_request_completed(self) -> None:
         """Notify approvers that a Order marked as completed."""
+        notify(
+            title=(
+                f"{self.approver_user} has completed the Order for {self.requesting_user} ID: {self.pk}."
+            ),
+            message=(
+                format_html(
+                    "{} has completed the following items:{}\n",
+                    self.approver_user,
+                    self.convert_order_to_notifiy(),
+                )
+            ),
+            user=self.requesting_user,
+            level="success",
+        )
+
+    def notify_request_canceled(self, requestor=None) -> None:
+        """Notify approvers that a Order marked as canceled."""
         users = list(self.approvers())
-        # Notifiy Requester
-        users += [self.requesting_user]
+        canceler = self.requesting_user
+
+        # Evaluate if requestor has canceled the order
+        if not requestor:
+            canceler = self.approver_user
+            users += [self.requesting_user]
+
         for approver in users:
             notify(
                 title=(
-                    f"{self.approver_user} has completed the Order for {self.requesting_user} ID: {self.pk}."
+                    f"{canceler} has canceled the Order for {self.requesting_user} ID: {self.pk}."
                 ),
                 message=(
                     format_html(
-                        "{} has completed the following items:{}\n",
-                        self.approver_user,
+                        "{} has canceled the following items:{}\n",
+                        canceler,
                         self.convert_order_to_notifiy(),
                     )
                 ),
                 user=approver,
-                level="info",
+                level="danger",
             )
+
+    def notify_request_open(self, request) -> None:
+        """Notify approvers that a Order marked as reopened."""
+        notify(
+            title=(
+                f"{request.user} has reopened the Order for {self.requesting_user} ID: {self.pk}."
+            ),
+            message=(
+                format_html(
+                    "{} has reopened the following items:{}\n",
+                    request.user,
+                    self.convert_order_to_notifiy(),
+                )
+            ),
+            user=self.requesting_user,
+            level="warning",
+        )
 
     @classmethod
     def approvers(cls) -> models.QuerySet[User]:
