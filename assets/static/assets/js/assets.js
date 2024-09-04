@@ -1,6 +1,6 @@
 var urlAssets;
 var assets;
-var action;
+var action
 
 function initializeDataTable(tableId, url) {
     return $(tableId).DataTable({

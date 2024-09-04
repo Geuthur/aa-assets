@@ -48,7 +48,7 @@
 	// Bootstrap Nav Active System
 	// Save the latest tab and load it on page load
     document.addEventListener('DOMContentLoaded', function () {
-        var activeTab = localStorage.getItem('activeTab');
+        var activeTab = localStorage.getItem('assets-activeTab');
         if (activeTab) {
             var storedTab = document.querySelector('a[href="' + activeTab + '"]');
             if (storedTab) {
@@ -67,7 +67,7 @@
             tabLink.addEventListener('click', function (e) {
                 e.preventDefault();
                 var tabName = this.getAttribute('href');
-                localStorage.setItem('activeTab', tabName);
+                localStorage.setItem('assets-activeTab', tabName);
                 if (history.pushState) {
                     history.pushState(null, null, tabName);
                 }
