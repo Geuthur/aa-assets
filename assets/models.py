@@ -659,14 +659,15 @@ class Request(models.Model):
             level="success",
         )
 
-    def notify_request_canceled(self, requestor=None) -> None:
+    def notify_request_canceled(self, user=None) -> None:
         """Notify approvers that a Order marked as canceled."""
         users = list(self.approvers())
-        canceler = self.requesting_user
 
-        # Evaluate if requestor has canceled the order
-        if not requestor:
-            canceler = self.approver_user
+        if self.requesting_user == user:
+            canceler = self.requesting_user
+
+        else:
+            canceler = user
             users += [self.requesting_user]
 
         for approver in users:

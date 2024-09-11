@@ -175,10 +175,9 @@ def mark_request_canceled(request, request_id: int):
             user_request_pk=user_request.pk,
             user_request_requesting_user=user_request.requesting_user,
         )
-        if request.user == user_request.requesting_user:
-            user_request.notify_request_canceled(requestor=True)
-        else:
-            user_request.notify_request_canceled()
+
+        user_request.notify_request_canceled(user=request.user)
+
         messages.info(
             request,
             msg,

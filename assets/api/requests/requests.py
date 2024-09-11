@@ -2,6 +2,8 @@ from typing import List
 
 from ninja import NinjaAPI
 
+from django.utils import timezone
+
 from assets.api import schema
 from assets.hooks import get_extension_logger
 from assets.models import Request
@@ -25,6 +27,14 @@ class RequestsApiEndpoints:
                 return 403, "Permission Denied"
 
             requests_data = Request.objects.all()
+
+            skip_old_entrys = timezone.now() - timezone.timedelta(days=3)
+
+            # Skip old entries older then 3 days
+            requests_data = requests_data.exclude(
+                status=Request.STATUS_CANCELLED, closed_at__lt=skip_old_entrys
+            )
+            # Skip completed entries
             requests_data = requests_data.exclude(status=Request.STATUS_COMPLETED)
 
             output = []
@@ -59,6 +69,14 @@ class RequestsApiEndpoints:
                 return 403, "Permission Denied"
 
             requests_data = Request.objects.filter(requesting_user=request.user)
+
+            skip_old_entrys = timezone.now() - timezone.timedelta(days=3)
+
+            # Skip old entries older then 3 days
+            requests_data = requests_data.exclude(
+                status=Request.STATUS_CANCELLED, closed_at__lt=skip_old_entrys
+            )
+
             requests_data = requests_data.exclude(status__in=[Request.STATUS_COMPLETED])
 
             output = []

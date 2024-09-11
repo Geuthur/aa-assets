@@ -17,8 +17,8 @@ from assets.decorators import when_esi_is_available
 from assets.hooks import get_extension_logger
 from assets.models import Assets, Location, Owner
 from assets.providers import esi
+from assets.task_helpers.etag_helpers import NotModifiedError, etag_results
 from assets.task_helpers.location_helpers import fetch_location, fetch_parent_location
-from assets.task_helpers.etag_helpers import etag_results, NotModifiedError
 
 TZ_STRING = "%Y-%m-%dT%H:%M:%SZ"
 logger = get_extension_logger(__name__)
@@ -248,12 +248,12 @@ def update_all_parent_locations(self, force_refresh=False):
                 "esi-assets.read_assets.v1",
             ]
             token = Token.get_token(owner_id, req_scopes)
-            
+
             assets_esi = esi.client.Assets.get_characters_character_id_assets(
                 character_id=owner.character.character.character_id,
                 token=token.valid_access_token(),
             )
-            
+
             assets = etag_results(assets_esi, token, force_refresh=force_refresh)
         else:
             req_scopes = [
@@ -261,12 +261,12 @@ def update_all_parent_locations(self, force_refresh=False):
                 "esi-assets.read_corporation_assets.v1",
             ]
             token = Token.get_token(owner_id, req_scopes)
-            
+
             assets_esi = esi.client.Assets.get_corporations_corporation_id_assets(
                 corporation_id=owner.corporation.corporation_id,
                 token=token.valid_access_token(),
             )
-            
+
             assets = etag_results(assets_esi, token, force_refresh=force_refresh)
 
         try:
@@ -289,8 +289,8 @@ def update_all_parent_locations(self, force_refresh=False):
                 count = count + 1
         except NotModifiedError:
             logger.debug("No Updates for Parent Locations")
-            return f"No Updates for Parent Locations"
-        
+            return "No Updates for Parent Locations"
+
     logger.debug("Queued %s Parent Locations Updated Tasks", count)
     return f"Queued {count} Parent Locations Updated Tasks"
 

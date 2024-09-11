@@ -1,6 +1,18 @@
 # Changelog
 
-## \[0.1.0\] - 2024-08-xx
+## \[0.1.1\] - 2024-09-11
+
+### Added
+
+- Canceled Requests disappear after 3 days.
+- Request Information at Conformation Modal
+
+### Fixed
+
+- DJANGO Static error
+- Translation not showing correctly
+
+## \[0.1.0\] - 2024-08-28
 
 ### Added
 

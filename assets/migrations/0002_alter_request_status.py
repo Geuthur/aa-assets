@@ -6,13 +6,18 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ('assets', '0001_initial'),
+        ("assets", "0001_initial"),
     ]
 
     operations = [
         migrations.AlterField(
-            model_name='request',
-            name='status',
-            field=models.CharField(choices=[('OP', 'Open'), ('CD', 'Completed'), ('CL', 'Cancelled')], db_index=True, help_text='Status of the Order request', max_length=2),
+            model_name="request",
+            name="status",
+            field=models.CharField(
+                choices=[("OP", "Open"), ("CD", "Completed"), ("CL", "Cancelled")],
+                db_index=True,
+                help_text="Status of the Order request",
+                max_length=2,
+            ),
         ),
     ]

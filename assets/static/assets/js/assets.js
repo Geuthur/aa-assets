@@ -1,6 +1,11 @@
+/* global requestSettings */
 var urlAssets;
 var assets;
-var action
+var action;
+
+var buyText = requestSettings.buyText;
+var quantityText = requestSettings.validQuantityText;
+var quantityTextSingle = requestSettings.validQuantityTextSingle;
 
 function initializeDataTable(tableId, url) {
     return $(tableId).DataTable({
@@ -50,7 +55,7 @@ function initializeDataTable(tableId, url) {
             {
                 'data': null,
                 'render': function(data, type, row) {
-                    return '<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyModal" data-action="single" data-item-id="' + row.item_id + '" data-item-name="' + row.name + '" data-item-quantity="' + row.quantity + '">{% translate "Buy" %}</button>';
+                    return '<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyModal" data-action="single" data-item-id="' + row.item_id + '" data-item-name="' + row.name + '" data-item-quantity="' + row.quantity + '">'+ buyText +'</button>';
                 }
             }
         ],
@@ -95,14 +100,13 @@ $('#buyModal').on('show.bs.modal', function (event) {
         var itemId = button.data('item-id');
         var itemName = button.data('item-name');
         var itemQuantity = button.data('item-quantity');
-        console.log(itemId, itemName, itemQuantity);
         var itemHtml = `
             <div class="form-group">
                 <label>${itemName}</label>
                 <input type="hidden" name="item_id[]" value="${itemId}">
                 <input type="hidden" name="item_name[]" value="${itemName}">
                 <input type="number" class="form-control" name="quantity[]" placeholder="Enter quantity" max="${itemQuantity}" oninput="validateQuantity(this)" required>
-                <div class="invalid-feedback">{% translate "Please enter a valid quantity." %}</div>
+                <div class="invalid-feedback">${quantityTextSingle}</div>
             </div>
         `;
         itemsList.append(itemHtml);
@@ -119,7 +123,7 @@ $('#buyModal').on('show.bs.modal', function (event) {
             `;
             itemsList.append(itemHtml);
         });
-        itemsList.append('<div class="text-danger d-none" id="buy-all-warning">{% translate "Please enter a valid quantity for at least one items." %}</div>');
+        itemsList.append('<div class="text-danger d-none" id="buy-all-warning">'+ quantityText +'</div>');
     }
 });
 

@@ -1,7 +1,9 @@
+/* global requestSettings, moment, bootstrap */
 var markRequestCancelledText = requestSettings.markRequestCancelledText;
 var markRequestCompletedText = requestSettings.markRequestCompletedText;
 var markRequestOpenText = requestSettings.markRequestOpenText;
 var manage_requests = requestSettings.manage_requests;
+var pieces = requestSettings.piecesText;
 
 var csrfToken = requestSettings.csrfToken;
 var urlRequests, urlMyRequests;
@@ -10,8 +12,8 @@ document.addEventListener('DOMContentLoaded', function () {
     urlRequests = '/assets/api/requests/';
     urlMyRequests = '/assets/api/requests/myrequests/';
     // Initialisieren Sie die DataTable für assets
-    requests = initializeRequests('#requests', urlRequests);
-    myrequests = initializeRequests('#my-requests', urlMyRequests);
+    var requests = initializeRequests('#requests', urlRequests);
+    var myrequests = initializeRequests('#my-requests', urlMyRequests);
     var confirmModal = document.getElementById('confirmRequestModal');
     var confirmRequest = document.getElementById('confirm-request');
     var finalizeActionButton = document.getElementById('finalizeActionButton');
@@ -32,13 +34,13 @@ document.addEventListener('DOMContentLoaded', function () {
 });
 
 function cancelRequestUrl(id) {
-    return requestSettings.cancelRequestUrl.replace("1337", id);
+    return requestSettings.cancelRequestUrl.replace('1337', id);
 }
 function completeRequestUrl(id) {
-    return requestSettings.completeRequestUrl.replace("1337", id);
+    return requestSettings.completeRequestUrl.replace('1337', id);
 }
 function openRequestUrl(id) {
-    return requestSettings.openRequestUrl.replace("1337", id);
+    return requestSettings.openRequestUrl.replace('1337', id);
 }
 
 function initializeRequests(tableId, url) {
@@ -51,6 +53,12 @@ function initializeRequests(tableId, url) {
             }
         },
         'columns': [
+            {
+                'data': 'id',
+                'render': function(data, type, row) {
+                    return data;
+                }
+            },
             {
                 'data': 'order',
                 'render': function(data, type, row) {
@@ -76,7 +84,7 @@ function initializeRequests(tableId, url) {
                 }
             },
             {
-                className: "text-end",
+                className: 'text-end',
                 'data': 'id',
             },
         ],
@@ -84,38 +92,38 @@ function initializeRequests(tableId, url) {
         'pageLength': 25,
         'autoWidth': false,
         'columnDefs': [
-            { 'sortable': false, 'targets': [0, 4] },
+            { 'sortable': false, 'targets': [1, 5] },
             {
                 render: function (data, type, row) {
-                if (type === "display") {
-                    var buttons = '';
-                    if (row.action === "OP") {
-                        buttons +=
-                            '<form class="d-inline" method="post" action="' + cancelRequestUrl(data) + '" id="cancelForm' + data.id + '">' +
-                            csrfToken +
-                            '<button type="button" class="btn btn-danger btn-sm btn-square" aria-label="' + markRequestCancelledText + '" title="' + markRequestCancelledText + '" data-bs-toggle="modal" data-bs-target="#confirmRequestModal" data-confirm-text="' + markRequestCancelledText + '" data-form-id="cancelForm' + data.id + '"><span class="fas fa-trash"></span></button></form>';
-                        if (manage_requests === "true") {
+                    if (type === 'display') {
+                        var buttons = '';
+                        if (row.action === 'OP') {
                             buttons +=
-                                '<form class="d-inline" method="post" action="' + completeRequestUrl(data) + '" id="completeForm' + data.id + '">' +
-                                csrfToken +
-                                '<button type="button" class="btn btn-success btn-sm btn-square" aria-label="' + markRequestCompletedText + '" title="' + markRequestCompletedText + '" data-bs-toggle="modal" data-bs-target="#confirmRequestModal" data-confirm-text="' + markRequestCompletedText + '" data-form-id="completeForm' + data.id + '"><span class="fas fa-clipboard-check"></span></button></form>';
-                        }
-                        return buttons;
-                    } else if (row.action === "CL") {
-                        buttons +=
-                            '<form class="d-inline" method="post" action="' + openRequestUrl(data) + '" id="openForm' + data.id + '">' +
+                            '<form class="d-inline" method="post" action="' + cancelRequestUrl(data) + '" id="cancelForm' + data + '">' +
                             csrfToken +
-                            '<button type="button" class="btn btn-warning btn-sm btn-square" aria-label="' + markRequestOpenText + '" title="' + markRequestOpenText + '" data-bs-toggle="modal" data-bs-target="#confirmRequestModal" data-confirm-text="' + markRequestOpenText + '" data-form-id="openForm' + data.id + '"><span class="fas fa-undo"></span></button></form>';
-                        return buttons;
-                    } else {
-                        return "";
+                            '<button type="button" class="btn btn-danger btn-sm btn-square" aria-label="' + markRequestCancelledText + '" title="' + markRequestCancelledText + '" data-bs-toggle="modal" data-bs-target="#confirmRequestModal" data-confirm-text="ID: '+ row.id + ' - '+ row.requestor + ' - ' + markRequestCancelledText +'" data-form-id="cancelForm' + data + '"><span class="fas fa-trash"></span></button></form>';
+                            if (manage_requests === 'true') {
+                                buttons +=
+                                '<form class="d-inline" method="post" action="' + completeRequestUrl(data) + '" id="completeForm' + data + '">' +
+                                csrfToken +
+                                '<button type="button" class="btn btn-success btn-sm btn-square" aria-label="' + markRequestCompletedText + '" title="' + markRequestCompletedText + '" data-bs-toggle="modal" data-bs-target="#confirmRequestModal" data-confirm-text="ID: '+ row.id + ' - '+ row.requestor + ' - ' + markRequestCompletedText +'" data-form-id="completeForm' + data + '"><span class="fas fa-clipboard-check"></span></button></form>';
+                            }
+                            return buttons;
+                        } else if (row.action === 'CL') {
+                            buttons +=
+                            '<form class="d-inline" method="post" action="' + openRequestUrl(data) + '" id="openForm' + data + '">' +
+                            csrfToken +
+                            '<button type="button" class="btn btn-warning btn-sm btn-square" aria-label="' + markRequestOpenText + '" title="' + markRequestOpenText + '" data-bs-toggle="modal" data-bs-target="#confirmRequestModal" data-confirm-text="ID: '+ row.id + ' - '+ row.requestor + ' - ' + markRequestOpenText +'" data-form-id="openForm' + data + '"><span class="fas fa-undo"></span></button></form>';
+                            return buttons;
+                        } else {
+                            return '';
+                        }
                     }
-                }
 
-                return data;
+                    return data;
+                },
+                targets: [5],
             },
-            targets: [4],
-        },
         ],
     });
 }
@@ -137,7 +145,7 @@ function showOrderDetails(data) {
         // Append the formatted data to the HTML string
         html += '<div class="d-flex justify-content-between align-items-center">';
         html += '<img class="card-img-zoom" src="https://imageserver.eveonline.com/types/' + item_id + '/icon/?size=32" height="32" width="32"/>';
-        html += '<span>' + name + ':</span> <span class="text-end">' + quantity.toLocaleString() + ' {% translate "pieces" %}</span>';
+        html += '<span>' + name + ':</span> <span class="text-end">' + quantity.toLocaleString() + ' '+ pieces +'</span>';
         html += '</div><br>';
     });
 
