@@ -1,4 +1,9 @@
 # Changelog
+## \[0.1.2\] - 2024-09-23
+
+### Fixed
+
+- PyPi Pakage was wrong
 
 ## \[0.1.1\] - 2024-09-11
 
