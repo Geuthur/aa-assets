@@ -295,6 +295,7 @@ def update_all_parent_locations(self, force_refresh=False):
     return f"Queued {count} Parent Locations Updated Tasks"
 
 
+# pylint: disable=too-many-positional-arguments
 @shared_task(bind=True, base=QueueOnce, max_retries=None)
 def update_parent_location(
     self, location_id, parent_id, character_id, eve_type_id, force_refresh=False
