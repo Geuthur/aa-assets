@@ -37,7 +37,7 @@ Assets System with Ordering Feature
 
 ## Installation<a name="installation"></a>
 
-> \[!NOTE\]
+> [!NOTE]
 > AA Assets needs at least Alliance Auth v4.0.0
 > Please make sure to update your Alliance Auth before you install this APP
 
@@ -97,9 +97,9 @@ With the Following IDs you can set up the permissions for the Assets
 
 The Following Settings can be setting up in the `local.py`
 
-- ASSETS_APP_NAME:          `"YOURNAME"`     - Set the name of the APP
+- ASSETS_APP_NAME: `"YOURNAME"` - Set the name of the APP
 
-- ASSETS_LOGGER_USE:        `True / False`   - Set to use own Logger File
+- ASSETS_LOGGER_USE: `True / False` - Set to use own Logger File
 
 If you set up ASSETS_LOGGER_USE to `True` you need to add the following code below:
 
@@ -128,7 +128,7 @@ LOGGING["loggers"].update(LOGGING_ASSETS["loggers"])
 
 ## Highlights<a name="highlights"></a>
 
-> \[!NOTE\]
+> [!NOTE]
 > Contributing
 > You want to improve the project?
 > Just Make a [Pull Request](https://github.com/Geuthur/aa-assets/pulls) with the Guidelines.
