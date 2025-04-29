@@ -6,12 +6,14 @@
 
 - Cache Busting by [@ppfeufer](https://github.com/ppfeufer)
 - Modal System
+- Request Statistic API
 
 ### Changed
 
 - Assets System
 - Refactor Modal System
--
+- Handle Button HTML in Python
+- Fetch Menu Request Count from API
 
 ## [0.1.2] - 2024-09-23
 

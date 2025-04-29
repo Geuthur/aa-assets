@@ -47,18 +47,9 @@ def add_info_to_context(request, context: dict) -> dict:
     except UserProfile.DoesNotExist:
         pass
 
-    if request.user.has_perm("assets.manage_requests"):
-        requests_count = Request.objects.open_requests_total_count()
-    else:
-        requests_count = None
-
-    my_requests_count = Request.objects.my_requests_total_count(request.user)
-
     new_context = {
         **{
             "theme": theme,
-            "requests_count": requests_count,
-            "my_requests_count": my_requests_count,
         },
         **context,
     }

@@ -1,17 +1,16 @@
 """PvE Views"""
 
 import datetime
-import json
+from http import HTTPStatus
 
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.cache import cache
 
 # Django
-from django.http import HttpResponse
+from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.utils.html import format_html
 from django.utils.translation import gettext as _
 from django.views.decorators.http import require_POST
 from esi.decorators import token_required
@@ -19,9 +18,11 @@ from esi.decorators import token_required
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCorporationInfo
 
+from eveuniverse.models import EveType
+
 from assets import forms
 from assets.hooks import add_info_to_context, get_extension_logger
-from assets.models import Owner, Request, RequestAssets
+from assets.models import Owner, Request, RequestAssets, Location
 from assets.tasks import update_assets_for_owner
 
 logger = get_extension_logger(__name__)
@@ -124,38 +125,65 @@ def add_char(request, token) -> HttpResponse:
 @permission_required("assets.basic_access")
 @require_POST
 def create_order(request):
-    quantities = request.POST.getlist("quantity[]")
-    item_names = request.POST.getlist("item_name[]")
-    item_ids = request.POST.getlist("item_id[]")
-
-    items = []
-
-    # Convert the items list to a JSON string
-    items_json = json.dumps(items)
-
-    user = request.user
-    user_request = Request.objects.create(
-        order=items_json,
-        requesting_user=user,
-        status=Request.STATUS_OPEN,
-    )
-
-    user_request.notify_new_request()
-
-    for item_id, __, quantity in zip(item_ids, item_names, quantities):
-        if quantity:
-            RequestAssets.objects.create(
-                name=user_request.requesting_user.username,
-                request=user_request,
-                eve_type=item_id,
-                quantity=quantity,
+    """Render view to create a new order request."""
+    # Check Permission
+    form = forms.RequestOrder(request.POST)
+    
+    if form.is_valid():
+        amount = int(form.cleaned_data["amount"])
+        item_id = request.POST.get("item_id")
+        location_id = request.POST.get("location_id")
+        user = request.user
+        
+        try:       
+            location = Location.objects.get(id=location_id)
+        except Location.DoesNotExist:
+            msg = "Location not found."
+            return JsonResponse(
+                {"success": False, "message": msg},
+                status=HTTPStatus.NOT_FOUND,
+                safe=False,
             )
-    messages.success(
-        request,
-        format_html("Your Order has been Requested."),
+            
+        try:       
+            eve_type = EveType.objects.get(id=item_id)
+        except EveType.DoesNotExist:
+            msg = "EveType not found."
+            return JsonResponse(
+                {"success": False, "message": msg},
+                status=HTTPStatus.NOT_FOUND,
+                safe=False,
+            )
+            
+        user_request = Request.objects.create(
+            requesting_user=user,
+            status=Request.STATUS_OPEN,
+        )
+       
+        RequestAssets.objects.create(
+            name=user_request.requesting_user.username,
+            requestor=user_request,
+            eve_type=eve_type,
+            quantity=amount,
+            location=location,
+        )
+        
+        user_request.notify_new_request()
+        msg = "The request for Order {user_name} has been created.".format(
+            user_name=user_request.requesting_user.username,
+        )
+        return JsonResponse(
+            {"success": True, "message": msg},
+            status=HTTPStatus.OK,
+            safe=False,
+        )
+        
+    msg = "Invalid Form"
+    return JsonResponse(
+        {"success": True, "message": msg},
+        status=HTTPStatus.NOT_FOUND,
+        safe=False,
     )
-
-    return redirect("assets:index")
 
 
 @login_required

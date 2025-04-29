@@ -11,18 +11,14 @@
     <li class="nav-item" role="presentation">
         <a class="nav-link" href="#tab-my-requests" data-bs-toggle="tab" data-bs-target="#tab-my-requests" >
             {% translate "My Requests" %}
-            {% if my_requests_count %}
-                &nbsp;<span class="badge bg-secondary">{{ my_requests_count }}</span>
-            {% endif %}
+            <span class="badge bg-secondary d-none" id="my-request-count"></span>
         </a>
     </li>
 {% if perms.assets.manage_requests %}
     <li class="nav-item" role="presentation">
         <a class="nav-link" href="#tab-open-requests" data-bs-toggle="tab" data-bs-target="#tab-open-requests" >
             {% translate "Requests" %}
-            {% if requests_count %}
-                &nbsp;<span class="badge bg-secondary">{{ requests_count }}</span>
-            {% endif %}
+            <span class="badge bg-secondary d-none" id="request-count"></span>
         </a>
     </li>
 {% endif %}

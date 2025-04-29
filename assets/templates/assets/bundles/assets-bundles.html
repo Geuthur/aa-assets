@@ -8,10 +8,7 @@
 {% endcomment %}
 
 <script>
-/* global requestSettings */
-var urlAssets;
-var assets;
-var action;
+/* global assetsSettings */
 
 document.addEventListener('DOMContentLoaded', function () {
     const AssetsTableVar = $('#assets');
@@ -65,12 +62,13 @@ document.addEventListener('DOMContentLoaded', function () {
                 data: null,
                 render: function(data, type, row) {
                     return `
-                        <button type="button"
-                        class="btn btn-primary"
-                        data-bs-toggle="modal"
-                        data-bs-target="#assets-single-request"
+                        <button type="button" 
+                        class="btn btn-primary" 
+                        data-bs-toggle="modal" 
+                        data-bs-target="#assets-single-request" 
                         data-action="{% url 'assets:create_order' %}" aria-label="Request Order"
-                        data-item-id="${row.item_id}"
+                        data-location-id="${row.location_id}"
+                        data-item-id="${row.item_id}" 
                         data-item-name="${row.name}"
                         data-item-quantity="${row.quantity}"
                         data-title="${row.name}"

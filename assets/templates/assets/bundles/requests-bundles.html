@@ -19,20 +19,7 @@ document.addEventListener('DOMContentLoaded', function () {
     // Initialisieren Sie die DataTable für assets
     var requests = initializeRequests('#requests', urlRequests);
     var myrequests = initializeRequests('#my-requests', urlMyRequests);
-    var confirmModal = document.getElementById('confirmRequestModal');
-    var confirmRequest = document.getElementById('confirm-request');
-    var finalizeActionButton = document.getElementById('finalizeActionButton');
 });
-
-function cancelRequestUrl(id) {
-    return assetsSettings.cancelRequestUrl.replace('1337', id);
-}
-function completeRequestUrl(id) {
-    return assetsSettings.completeRequestUrl.replace('1337', id);
-}
-function openRequestUrl(id) {
-    return assetsSettings.openRequestUrl.replace('1337', id);
-}
 
 function initializeRequests(tableId, url) {
     return $(tableId).DataTable({
@@ -45,77 +32,85 @@ function initializeRequests(tableId, url) {
         },
         'columns': [
             {
-                'data': 'id',
-                'render': function(data, type, row) {
+                data: 'id',
+                render: function(data, type, row) {
                     return data;
                 }
             },
             {
-                'data': 'order',
-                'render': function(data, type, row) {
-                    return '<button type="button" class="btn btn-info btn-sm btn-square" onclick=\'showOrderDetails(`' + data + '`)\'><span class="fas fa-info"></span></button>';
-                }
-            },
-            {
-                'data': 'requestor',
-                'render': function(data, type, row) {
+                data: 'order',
+                render: function(data, type, row) {
                     return data;
                 }
             },
             {
-                'data': 'status',
-                'render': function(data, type, row) {
+                data: 'requestor',
+                render: function(data, type, row) {
                     return data;
                 }
             },
             {
-                'data': 'created',
-                'render': function(data, type, row) {
+                data: 'status',
+                render: function(data, type, row) {
+                    return data;
+                }
+            },
+            {
+                data: 'created',
+                render: function(data, type, row) {
                     return moment(data).format('L LT');
                 }
             },
             {
+                data: 'actions',
                 className: 'text-end',
-                'data': 'id',
+                render: function(data, type, row) {
+                    return data
+                }
             },
         ],
-        'order': [[3, 'desc']],
-        'pageLength': 25,
-        'autoWidth': false,
-        'columnDefs': [
+        order: [[3, 'desc']],
+        pageLength: 25,
+        autoWidth: false,
+        columnDefs: [
             { 'sortable': false, 'targets': [1, 5] },
-            {
-                render: function (data, type, row) {
-                    if (type === 'display') {
-                        var buttons = '';
-                        if (row.action === 'OP') {
-                            buttons +=
-                            '<form class="d-inline" method="post" action="' + cancelRequestUrl(data) + '" id="cancelForm' + data + '">' +
-                            csrfToken +
-                            '<button type="button" class="btn btn-danger btn-sm btn-square" aria-label="' + translation.markRequestCancelledText + '" title="' + translation.markRequestCancelledText + '" data-bs-toggle="modal" data-bs-target="#confirmRequestModal" data-confirm-text="ID: '+ row.id + ' - '+ row.requestor + ' - ' + translation.markRequestCancelledText +'" data-form-id="cancelForm' + data + '"><span class="fas fa-trash"></span></button></form>';
-                            if (manage_requests === 'true') {
-                                buttons +=
-                                '<form class="d-inline" method="post" action="' + completeRequestUrl(data) + '" id="completeForm' + data + '">' +
-                                csrfToken +
-                                '<button type="button" class="btn btn-success btn-sm btn-square" aria-label="' + translation.markRequestCompletedText + '" title="' + translation.markRequestCompletedText + '" data-bs-toggle="modal" data-bs-target="#confirmRequestModal" data-confirm-text="ID: '+ row.id + ' - '+ row.requestor + ' - ' + translation.markRequestCompletedText +'" data-form-id="completeForm' + data + '"><span class="fas fa-clipboard-check"></span></button></form>';
-                            }
-                            return buttons;
-                        } else if (row.action === 'CL') {
-                            buttons +=
-                            '<form class="d-inline" method="post" action="' + openRequestUrl(data) + '" id="openForm' + data + '">' +
-                            csrfToken +
-                            '<button type="button" class="btn btn-warning btn-sm btn-square" aria-label="' + translation.markRequestOpenText + '" title="' + translation.markRequestOpenText + '" data-bs-toggle="modal" data-bs-target="#confirmRequestModal" data-confirm-text="ID: '+ row.id + ' - '+ row.requestor + ' - ' + translation.markRequestOpenText +'" data-form-id="openForm' + data + '"><span class="fas fa-undo"></span></button></form>';
-                            return buttons;
-                        } else {
-                            return '';
-                        }
-                    }
-
-                    return data;
-                },
-                targets: [5],
-            },
         ],
     });
 }
+</script>
+
+<script>
+/* global assetsSettings */
+
+document.addEventListener('DOMContentLoaded', function () {
+    const RequestStatistics = $.ajax({
+        url: assetsSettings.statisticsUrl, // URL für die Statistikdaten
+        type: 'GET',
+        dataType: 'json',
+        success: function (data) {
+            // Erfolgreiche Antwort: Aktualisiere den Inhalt des request-count-Elements
+            const requestCountElement = document.getElementById('request-count');
+            const myRequestCountElement = document.getElementById('my-request-count');
+            
+            if (requestCountElement) {
+                const requestCount = data.requestCount || 0;
+                if (requestCount > 0) {
+                    requestCountElement.textContent = requestCount; // Setze den Wert
+                    requestCountElement.classList.remove('d-none'); // Entferne die Klasse 'd-none', um das Element sichtbar zu machen
+                }
+            }
+            
+            if (myRequestCountElement) {
+                const myRequestCount = data.myRequestCount || 0;
+                if (myRequestCount > 0) {
+                    myRequestCountElement.textContent = myRequestCount; // Setze den Wert
+                    myRequestCountElement.classList.remove('d-none'); // Entferne die Klasse 'd-none', um das Element sichtbar zu machen
+                }
+            }
+        },
+        error: function (xhr, status, error) {
+            console.error('Fehler beim Abrufen der Statistikdaten:', error);
+        }
+    });
+})
 </script>

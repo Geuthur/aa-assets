@@ -5,10 +5,12 @@
 {% block extra_css %}
 {% endblock extra_css %}
 
-{% block page_title %} {% translate "Assets System" %} {% endblock %}
+{% block page_title %}
+    {% translate "Assets System" %} 
+{% endblock %}
 
 {% block header_nav_brand %}
-    {% translate "Assets System" %}
+    <a class="nav-link text-white link-light link-underline link-underline-opacity-0" href="{% url 'assets:index' %}">Assets</a>
 {% endblock header_nav_brand %}
 
 {% block header_nav_collapse_left %}

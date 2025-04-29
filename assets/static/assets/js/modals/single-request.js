@@ -1,11 +1,9 @@
 $(document).ready(() => {
-    /* global tablePayments */
-    /* global taxsystemsettings */
-    const modalRequestOrder = $('single-request');
-    const modalRequestOrderError = modalRequestOrder.find('#modal-error-field');
-    //const previousUndoModal = $('#modalViewPaymentsContainer');
+    /* global tableAssets, RequestStatistics */
+    const modalRequestOrder = $('#assets-single-request');
+    const modalErrorMessage = $('#modal-error-message');
 
-    // Undo Request Modal
+    // Approve Request Modal
     modalRequestOrder.on('show.bs.modal', (event) => {
         const button = $(event.relatedTarget);
         const url = button.data('action');
@@ -20,53 +18,56 @@ $(document).ready(() => {
         const modalDiv = modalRequestOrder.find('#modal-request-text');
         modalDiv.html(modalText);
 
-        $('#modal-button-cancel-single-request').on('click', () => {
+        $('#modal-button-confirm-single-request').on('click', () => {
             const form = modalRequestOrder.find('form');
             const amountField = form.find('input[name="amount"]');
             const amount = amountField.val();
             const csrfMiddlewareToken = form.find('input[name="csrfmiddlewaretoken"]').val();
 
-            if (amount === '') {
-                modalRequestOrderError.removeClass('d-none');
+            if (!amount) {
+                modalErrorMessage.removeClass('d-none');
                 amountField.addClass('is-invalid');
 
                 // Add shake class to the error field
-                modalRequestOrderError.addClass('ts-shake');
+                modalErrorMessage.addClass('ts-shake');
 
                 // Remove the shake class after 3 seconds
                 setTimeout(() => {
-                    modalRequestOrderError.removeClass('ts-shake');
+                    modalErrorMessage.removeClass('ts-shake');
                 }, 2000);
             } else {
                 const posting = $.post(
                     url,
                     {
                         amount: amount,
+                        item_id: button.data('item-id'),
+                        location_id: button.data('location-id'),
                         csrfmiddlewaretoken: csrfMiddlewareToken
                     }
                 );
 
-                posting.done((data) => {
-                    if (data.success === true) {
-                        modalRequestOrder.modal('hide');
-                    } else {
-                        console.log(data.message);
-                        // Show the error message
-                        const errorMessage = data.message;
-                        $(errorMessage).insertAfter(amountField);
-                    }
+                posting.done(() => {
+                    modalRequestOrder.modal('hide');
+                    RequestStatistics.ajax.reload(); // Reload the request statistics table
+                    tableAssets.ajax.reload(); // Reload the assets table
                 }).fail((xhr, _, __) => {
                     const response = JSON.parse(xhr.responseText);
-                    const errorMessage = $('<div class="alert alert-danger"></div>').text(response.message);
-                    form.append(errorMessage);
+                    modalErrorMessage.text(response.message).removeClass('d-none'); // Show the error message
+                    modalErrorMessage.addClass('l-shake'); // Add the shake class
+
+                    // Remove the shake class after 2 seconds
+                    setTimeout(() => {
+                        modalErrorMessage.removeClass('l-shake');
+                    }, 2000);
                 });
             }
         });
     }).on('hide.bs.modal', () => {
+        modalRequestOrder.find('.alert-danger').remove();
         modalRequestOrder.find('input[name="amount"]').val('');
         modalRequestOrder.find('input[name="amount"]').removeClass('is-invalid');
-        modalRequestOrder.find('.alert-danger').remove();
-        modalRequestOrderError.addClass('d-none');
-        $('#modal-button-cancel-single-request').unbind('click');
+        $('#modal-button-confirm-single-request').unbind('click');
+        modalErrorMessage.addClass('d-none');
+        modalErrorMessage.val('');
     });
 });

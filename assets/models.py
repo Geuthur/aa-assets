@@ -492,7 +492,7 @@ class Assets(models.Model):
         EveType, on_delete=models.CASCADE, related_name="+", help_text="asset type"
     )
     location = models.ForeignKey(
-        "Location",
+        Location,
         on_delete=models.CASCADE,
         related_name="assets",
         help_text="asset location",
@@ -531,9 +531,13 @@ class Assets(models.Model):
 class Request(models.Model):
     """A request system for Orders."""
 
-    order = models.JSONField(
-        help_text="Order details",
+    name = models.CharField(
+        max_length=100,
+        help_text="Name of the Requestor",
+        blank=True,
+        null=True,
     )
+
     requesting_user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -586,10 +590,10 @@ class Request(models.Model):
 
     def convert_order_to_notifiy(self) -> str:
         """Convert order to a string for notification."""
-        order = json.loads(self.order)
+        assets = RequestAssets.objects.filter(requestor=self)
         msg = ""
-        for item in order:
-            msg += f'\n- {item["quantity"]}x {item["name"]}'
+        for asset in assets:
+            msg += f"{asset.eve_type.name} x {asset.quantity}\n"
         return msg
 
     def requesting_character_name(self) -> str:

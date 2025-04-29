@@ -2,7 +2,7 @@
 
 from assets.app_settings import ASSETS_APP_NAME
 
-__version__ = "0.1.2"
+__version__ = "0.1.3a4"
 __title__ = "Assets"
 
 USER_AGENT_TEXT = f"{ASSETS_APP_NAME} v{__version__}"

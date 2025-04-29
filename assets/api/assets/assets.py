@@ -40,6 +40,7 @@ class AssetsApiEndpoints:
                         "item_id": asset.item_id,
                         "name": asset.eve_type.name,
                         "quantity": asset.quantity,
+                        "location_id": asset.location.id,
                         "location": (
                             asset.location.parent.name
                             if asset.location.parent
