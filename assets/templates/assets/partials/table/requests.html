@@ -1,6 +1,6 @@
 {% load i18n %}
 {% load humanize %}
-{% load static %}
+
 {% if perms.assets.manage_requests %}
     <div role="tabpanel" class="tab-pane fade" id="tab-open-requests">
         <div class="table-responsive">
@@ -54,44 +54,5 @@
                 </tr>
             </tbody>
         </table>
-    </div>
-</div>
-
-<!-- Order Details Modal -->
-<div class="modal fade" id="orderModal" tabindex="-1" aria-labelledby="orderModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="orderModalLabel">Order Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body" id="orderModalBody">
-                <!-- Order details will be populated here -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-            </div>
-        </div>
-    </div>
-</div>
-
-<!-- Confirmation Modal -->
-<div class="modal fade" id="confirmRequestModal" tabindex="-1" role="dialog" aria-labelledby="confirmRequestModalLabel" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered" role="document">
-        <div class="modal-content">
-            <div class="modal-header">
-                <h5 class="modal-title" id="confirmRequestModalLabel">{% translate "Confirm Action" %}</h5>
-                <button type="button" class="btn-close py-3 px-3" data-bs-dismiss="modal" aria-label="Close"></button>
-            </div>
-            <div class="modal-body">
-                <span id="confirm-request">
-                <!-- Confirmation message will be populated here -->
-                </span>
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">{% translate "Cancel" %}</button>
-                <button type="button" class="btn btn-primary" id="finalizeActionButton">{% translate "Confirm" %}</button>
-            </div>
-        </div>
     </div>
 </div>

@@ -1,0 +1,32 @@
+{% load i18n %}
+{% load static %}
+{% load bootstrap %}
+{% load assets %}
+
+{% assets_static 'css/assets.css' %}
+
+<script type="application/javascript">
+	let assetsSettings = {
+        assetsUrl: '{% url "assets:api:get_assets" location="corpsag5" %}',
+		cancelRequestUrl: '{% url "assets:request_canceled" request_id=1337 %}',
+		completeRequestUrl: '{% url "assets:request_completed" request_id=1337 %}',
+        openRequestUrl: '{% url "assets:request_open" request_id=1337 %}',
+
+        manage_requests: '{% if perms.assets.manage_requests %}true{% else %}false{% endif %}',
+
+		csrfToken: '{% csrf_token %}',
+	};
+
+    window.translations = {
+        markRequestCancelledText: '{% translate "Mark Request as Cancelled" %}',
+        markRequestCompletedText: '{% translate "Mark Request as Completed" %}',
+        markRequestOpenText: '{% translate "Mark Request as Open" %}',
+
+        validQuantityText: '{% translate "Please enter a valid quantity for at least one items." %}',
+        validQuantityTextSingle: '{% translate "Please enter a valid quantity." %}',
+        buyText: '{% translate "Buy" %}',
+        piecesText: '{% translate "pieces" %}',
+    }
+
+    const translation = window.translations;
+</script>

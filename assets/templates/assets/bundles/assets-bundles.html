@@ -1,0 +1,93 @@
+{% load i18n %}
+{% load humanize %}
+{% load static %}
+{% load assets %}
+
+{% comment %}
+<script type="application/javascript" src="{% static 'assets/js/assets.js' %}"></script>
+{% endcomment %}
+
+<script>
+/* global requestSettings */
+var urlAssets;
+var assets;
+var action;
+
+document.addEventListener('DOMContentLoaded', function () {
+    const AssetsTableVar = $('#assets');
+
+    const tableAssets = AssetsTableVar.DataTable({
+        ajax: {
+            url: assetsSettings.assetsUrl,
+            type: 'GET',
+            dataSrc: function(data) {
+                return data;
+            }
+        },
+        columns: [
+            {
+                data: 'item_id',
+                render: function(data, type, row) {
+                    return '<img class="card-img-zoom" src="https://imageserver.eveonline.com/types/' + data + '/icon/?size=64" height="64" width="64"/>';
+                }
+            },
+            {
+                data: 'name',
+                render: function(data, type, row) {
+                    return data;
+                }
+            },
+            {
+                data: 'quantity',
+                render: function (data, type, row) {
+                    return data;
+                }
+            },
+            {
+                data: 'location',
+                render: function (data, type, row) {
+                    return data;
+                }
+            },
+            {
+                data: 'price',
+                render: function (data, type, row) {
+                    // Rückgabe des formatierten Strings mit Farbe und Einheit
+                    if (type === 'display') {
+                        if (!isNaN(data) && typeof data === 'number') {
+                            return data.toLocaleString() + ' ISK';
+                        }
+                    }
+                    return data;
+                }
+            },
+            {
+                data: null,
+                render: function(data, type, row) {
+                    return `
+                        <button type="button"
+                        class="btn btn-primary"
+                        data-bs-toggle="modal"
+                        data-bs-target="#assets-single-request"
+                        data-action="{% url 'assets:create_order' %}" aria-label="Request Order"
+                        data-item-id="${row.item_id}"
+                        data-item-name="${row.name}"
+                        data-item-quantity="${row.quantity}"
+                        data-title="${row.name}"
+                        >
+                            ${translation.buyText}
+                        </button>
+                    `
+                }
+            }
+        ],
+        order: [[4, 'desc']],
+        pageLength: 25,
+        autoWidth: false,
+        columnDefs: [
+            { 'sortable': false, 'targets': [0, 5] },
+        ],
+    });
+
+})
+</script>

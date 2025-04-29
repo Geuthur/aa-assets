@@ -1,5 +1,18 @@
 # Changelog
 
+## [0.1.x] - IN DEVELOPMENT
+
+### Added
+
+- Cache Busting by [@ppfeufer](https://github.com/ppfeufer)
+- Modal System
+
+### Changed
+
+- Assets System
+- Refactor Modal System
+-
+
 ## [0.1.2] - 2024-09-23
 
 ### Fixed

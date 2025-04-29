@@ -710,3 +710,41 @@ class Request(models.Model):
             content_type__app_label=cls._meta.app_label, codename="manage_requests"
         )
         return users_with_permission(permission)
+
+
+class RequestAssets(models.Model):
+    """A Request Assets Information Model."""
+
+    name = models.CharField(
+        max_length=100,
+        help_text="Name of the Requestor",
+    )
+
+    requestor = models.ForeignKey(
+        Request,
+        on_delete=models.CASCADE,
+        related_name="+",
+        help_text="The request this asset belongs to",
+    )
+
+    eve_type = models.ForeignKey(
+        EveType,
+        on_delete=models.CASCADE,
+        related_name="+",
+        help_text="asset type",
+    )
+
+    quantity = models.PositiveIntegerField(
+        help_text="Quantity of assets",
+        default=1,
+    )
+
+    location = models.ForeignKey(
+        Location,
+        on_delete=models.CASCADE,
+        related_name="+",
+        help_text="asset location",
+    )
+
+    class Meta:
+        default_permissions = ()

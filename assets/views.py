@@ -19,8 +19,9 @@ from esi.decorators import token_required
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCorporationInfo
 
+from assets import forms
 from assets.hooks import add_info_to_context, get_extension_logger
-from assets.models import Owner, Request
+from assets.models import Owner, Request, RequestAssets
 from assets.tasks import update_assets_for_owner
 
 logger = get_extension_logger(__name__)
@@ -49,7 +50,13 @@ def set_apr_cooldown(user, request_id, mode):
 @login_required
 @permission_required("assets.basic_access")
 def index(request):
-    context = {}
+    context = {
+        "corporation_id": request.user.profile.main_character.corporation_id,
+        "title": _("Assets"),
+        "forms": {
+            "single_request": forms.RequestOrder(),
+        },
+    }
     context = add_info_to_context(request, context)
 
     return render(request, "assets/index.html", context=context)
@@ -122,12 +129,6 @@ def create_order(request):
     item_ids = request.POST.getlist("item_id[]")
 
     items = []
-    msg = ""
-    for item_id, name, quantity in zip(item_ids, item_names, quantities):
-        if quantity:
-            msg += f"{name} - {quantity} Stück\n"
-            item_info = {"item_id": item_id, "name": name, "quantity": quantity}
-            items.append(item_info)
 
     # Convert the items list to a JSON string
     items_json = json.dumps(items)
@@ -140,6 +141,15 @@ def create_order(request):
     )
 
     user_request.notify_new_request()
+
+    for item_id, __, quantity in zip(item_ids, item_names, quantities):
+        if quantity:
+            RequestAssets.objects.create(
+                name=user_request.requesting_user.username,
+                request=user_request,
+                eve_type=item_id,
+                quantity=quantity,
+            )
     messages.success(
         request,
         format_html("Your Order has been Requested."),

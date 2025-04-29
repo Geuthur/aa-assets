@@ -19,7 +19,7 @@ class AssetsApiEndpoints:
             tags=self.tags,
             auth=None,
         )
-        def get_assets_filter(request, location: str):
+        def get_assets(request, location: str):
             perms = request.user.has_perm("assets.basic_access")
 
             if not perms:

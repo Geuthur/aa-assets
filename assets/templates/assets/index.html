@@ -2,6 +2,7 @@
 {% load i18n %}
 {% load humanize %}
 {% load static %}
+{% load assets %}
 
 {% block extra_css %}
 {% endblock extra_css %}
@@ -12,8 +13,8 @@
 			<div class="panel panel-default panel-tabs">
 				<div class="panel-body">
 					<div class="card-body bg-secondary tab-content rounded-bottom">
-						{% include 'assets/assets.html' %}
-						{% include 'assets/requests.html' %}
+						{% include 'assets/partials/table/assets.html' %}
+						{% include 'assets/partials/table/requests.html' %}
 					</div>
 				</div>
 			</div>
@@ -22,66 +23,131 @@
 {% endblock %}
 
 {% block extra_javascript %}
-<script type="application/javascript">
-	let requestSettings = {
-		cancelRequestUrl: '{% url "assets:request_canceled" request_id=1337 %}',
-		completeRequestUrl: '{% url "assets:request_completed" request_id=1337 %}',
-        openRequestUrl: '{% url "assets:request_open" request_id=1337 %}',
+    {% assets_static 'js/modal-system.js' %}
 
-        manage_requests: '{% if perms.assets.manage_requests %}true{% else %}false{% endif %}',
+    {% include 'assets/partials/modals/single-order.html' %}
 
-		csrfToken: '{% csrf_token %}',
+    {% include 'bundles/datatables-js-bs5.html' %}
+    {% include "bundles/moment-js.html" with locale=True %}
+    {% include "bundles/filterdropdown-js.html" %}
 
-		markRequestCancelledText: '{% translate "Mark Request as Cancelled" %}',
-		markRequestCompletedText: '{% translate "Mark Request as Completed" %}',
-        markRequestOpenText: '{% translate "Mark Request as Open" %}',
+    {% include 'assets/bundles/settings-bundles.html' %}
 
-        // Translates
-        validQuantityText: '{% translate "Please enter a valid quantity for at least one items." %}',
-        validQuantityTextSingle: '{% translate "Please enter a valid quantity." %}',
-        buyText: '{% translate "Buy" %}',
-        piecesText: '{% translate "pieces" %}',
+    {% include 'assets/bundles/assets-bundles.html' %}
+    {% include 'assets/bundles/requests-bundles.html' %}
 
-	};
-</script>
+    <script>
+    $(document).ready(() => {
+        /* global assetsmsettings */
+        const modalRequestOrder = $('assets-single-request');
+        const modalRequestOrderError = modalRequestOrder.find('#modal-error-field');
+        //const previousUndoModal = $('#modalViewPaymentsContainer');
 
-{% include 'bundles/datatables-js-bs5.html' %}
-{% include "bundles/moment-js.html" with locale=True %}
-{% include "bundles/filterdropdown-js.html" %}
+        // Undo Request Modal
+        modalRequestOrder.on('show.bs.modal', (event) => {
+            console.log('test')
+            const button = $(event.relatedTarget);
+            const url = button.data('action');
 
-{% include 'assets/js/assets-js.html' %}
-{% include 'assets/js/requests-js.html' %}
-<script type="application/javascript">
-	// Bootstrap Nav Active System
-	// Save the latest tab and load it on page load
-    document.addEventListener('DOMContentLoaded', function () {
-        var activeTab = localStorage.getItem('assets-activeTab');
-        if (activeTab) {
-            var storedTab = document.querySelector('a[href="' + activeTab + '"]');
-            if (storedTab) {
-                var tab = new bootstrap.Tab(storedTab);
-                tab.show();
-            }
-        } else {
-            var firstTab = document.querySelector('#aa-assets-tabs a[data-bs-toggle="tab"]');
-            if (firstTab) {
-                var tab = new bootstrap.Tab(firstTab);
-                tab.show();
-            }
-        }
+            console.log(url);
+            console.log(button.data('item-id'));
+            console.log(button.data('item-name'));
+            console.log(button.data('item-quantity'));
+            console.log(button.data('title'));
 
-        document.querySelectorAll('#aa-assets-tabs a[data-bs-toggle="tab"]').forEach(function (tabLink) {
-            tabLink.addEventListener('click', function (e) {
-                e.preventDefault();
-                var tabName = this.getAttribute('href');
-                localStorage.setItem('assets-activeTab', tabName);
-                if (history.pushState) {
-                    history.pushState(null, null, tabName);
+            // Extract the title from the button
+            const modalTitle = button.data('title');
+            const modalTitleDiv = modalRequestOrder.find('#modal-title');
+            modalTitleDiv.html(modalTitle);
+
+            // Extract the text from the button
+            const modalText = button.data('text');
+            const modalDiv = modalRequestOrder.find('#modal-request-text');
+            modalDiv.html(modalText);
+
+            $('#modal-button-confirm-assets-single-request').on('click', () => {
+                const form = modalRequestOrder.find('form');
+                const amountField = form.find('input[name="amount"]');
+                const amount = amountField.val();
+                const csrfMiddlewareToken = form.find('input[name="csrfmiddlewaretoken"]').val();
+
+                if (amount === '') {
+                    modalRequestOrderError.removeClass('d-none');
+                    amountField.addClass('is-invalid');
+
+                    // Add shake class to the error field
+                    modalRequestOrderError.addClass('ts-shake');
+
+                    // Remove the shake class after 3 seconds
+                    setTimeout(() => {
+                        modalRequestOrderError.removeClass('ts-shake');
+                    }, 2000);
+                } else {
+                    const posting = $.post(
+                        url,
+                        {
+                            amount: amount,
+                            csrfmiddlewaretoken: csrfMiddlewareToken
+                        }
+                    );
+
+                    posting.done((data) => {
+                        if (data.success === true) {
+                            modalRequestOrder.modal('hide');
+                        } else {
+                            console.log(data.message);
+                            // Show the error message
+                            const errorMessage = data.message;
+                            $(errorMessage).insertAfter(amountField);
+                        }
+                    }).fail((xhr, _, __) => {
+                        const response = JSON.parse(xhr.responseText);
+                        const errorMessage = $('<div class="alert alert-danger"></div>').text(response.message);
+                        form.append(errorMessage);
+                    });
                 }
             });
+        }).on('hide.bs.modal', () => {
+            modalRequestOrder.find('input[name="amount"]').val('');
+            modalRequestOrder.find('input[name="amount"]').removeClass('is-invalid');
+            modalRequestOrder.find('.alert-danger').remove();
+            modalRequestOrderError.addClass('d-none');
+            $('#modal-button-confirm-assets-single-request').unbind('click');
         });
     });
-</script>
+    </script>
+
+    <script type="application/javascript">
+        // Bootstrap Nav Active System
+        // Save the latest tab and load it on page load
+        document.addEventListener('DOMContentLoaded', function () {
+            var activeTab = localStorage.getItem('assets-activeTab');
+            if (activeTab) {
+                var storedTab = document.querySelector('a[href="' + activeTab + '"]');
+                if (storedTab) {
+                    var tab = new bootstrap.Tab(storedTab);
+                    tab.show();
+                }
+            } else {
+                var firstTab = document.querySelector('#aa-assets-tabs a[data-bs-toggle="tab"]');
+                if (firstTab) {
+                    var tab = new bootstrap.Tab(firstTab);
+                    tab.show();
+                }
+            }
+
+            document.querySelectorAll('#aa-assets-tabs a[data-bs-toggle="tab"]').forEach(function (tabLink) {
+                tabLink.addEventListener('click', function (e) {
+                    e.preventDefault();
+                    var tabName = this.getAttribute('href');
+                    localStorage.setItem('assets-activeTab', tabName);
+                    if (history.pushState) {
+                        history.pushState(null, null, tabName);
+                    }
+                });
+            });
+        });
+    </script>
 {% endblock %}
 
 {% block extra_script %}
