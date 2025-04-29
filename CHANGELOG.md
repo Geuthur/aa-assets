@@ -6,6 +6,8 @@
 
 - Cache Busting by [@ppfeufer](https://github.com/ppfeufer)
 - Modal System
+- Confirm Modal
+- Single Request Modal
 - Request Statistic API
 
 ### Changed
