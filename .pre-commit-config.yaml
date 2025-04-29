@@ -309,7 +309,7 @@ repos:
         name: Pylint
         description: Check for errors and code smells in Python code.
         args:
-          - --py-version=3.8  # Minimum required Python version for AA. Update as needed.
+          - --py-version=3.10  # Minimum required Python version for AA. Update as needed.
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.32.1
