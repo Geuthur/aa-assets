@@ -13,12 +13,12 @@ var manage_requests = assetsSettings.manage_requests;
 var csrfToken = assetsSettings.csrfToken;
 var urlRequests, urlMyRequests;
 
-document.addEventListener('DOMContentLoaded', function () {
+$(document).ready(() => {
     urlRequests = '/assets/api/requests/';
     urlMyRequests = '/assets/api/requests/myrequests/';
     // Initialisieren Sie die DataTable für assets
-    var requests = initializeRequests('#requests', urlRequests);
-    var myrequests = initializeRequests('#my-requests', urlMyRequests);
+    const RequestTable = initializeRequests('#requests', urlRequests);
+    const MyRequestTable = initializeRequests('#my-requests', urlMyRequests);
 });
 
 function initializeRequests(tableId, url) {
@@ -82,35 +82,33 @@ function initializeRequests(tableId, url) {
 <script>
 /* global assetsSettings */
 
-document.addEventListener('DOMContentLoaded', function () {
-    const RequestStatistics = $.ajax({
-        url: assetsSettings.statisticsUrl, // URL für die Statistikdaten
-        type: 'GET',
-        dataType: 'json',
-        success: function (data) {
-            // Erfolgreiche Antwort: Aktualisiere den Inhalt des request-count-Elements
-            const requestCountElement = document.getElementById('request-count');
-            const myRequestCountElement = document.getElementById('my-request-count');
-            
-            if (requestCountElement) {
-                const requestCount = data.requestCount || 0;
-                if (requestCount > 0) {
-                    requestCountElement.textContent = requestCount; // Setze den Wert
-                    requestCountElement.classList.remove('d-none'); // Entferne die Klasse 'd-none', um das Element sichtbar zu machen
+$(document).ready(() => {
+    window.loadRequestStatistics = function () {
+        $.ajax({
+            url: assetsSettings.statisticsUrl, // URL für die Statistikdaten
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const requestCountElement = document.getElementById('request-count');
+                const myRequestCountElement = document.getElementById('my-request-count');
+
+                if (requestCountElement) {
+                    const requestCount = data.requestCount || 0;
+                    requestCountElement.textContent = requestCount;
+                    requestCountElement.classList.toggle('d-none', requestCount === 0);
                 }
-            }
-            
-            if (myRequestCountElement) {
-                const myRequestCount = data.myRequestCount || 0;
-                if (myRequestCount > 0) {
-                    myRequestCountElement.textContent = myRequestCount; // Setze den Wert
-                    myRequestCountElement.classList.remove('d-none'); // Entferne die Klasse 'd-none', um das Element sichtbar zu machen
+
+                if (myRequestCountElement) {
+                    const myRequestCount = data.myRequestCount || 0;
+                    myRequestCountElement.textContent = myRequestCount;
+                    myRequestCountElement.classList.toggle('d-none', myRequestCount === 0);
                 }
+            },
+            error: function (xhr, status, error) {
+                console.error('Fehler beim Abrufen der Statistikdaten:', error);
             }
-        },
-        error: function (xhr, status, error) {
-            console.error('Fehler beim Abrufen der Statistikdaten:', error);
-        }
-    });
+        });
+    };
+    loadRequestStatistics(); // Initialer Aufruf der Funktion
 })
 </script>

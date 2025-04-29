@@ -1,5 +1,5 @@
 $(document).ready(() => {
-    /* global tableAssets, RequestStatistics */
+    /* global tableAssets, loadRequestStatistics */
     const modalRequestOrder = $('#assets-single-request');
     const modalErrorMessage = $('#modal-error-message');
 
@@ -48,7 +48,8 @@ $(document).ready(() => {
 
                 posting.done(() => {
                     modalRequestOrder.modal('hide');
-                    RequestStatistics.ajax.reload(); // Reload the request statistics table
+                    loadRequestStatistics(); // Reload the request statistics
+                    const tableAssets = $('#assets').DataTable();
                     tableAssets.ajax.reload(); // Reload the assets table
                 }).fail((xhr, _, __) => {
                     const response = JSON.parse(xhr.responseText);

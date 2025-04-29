@@ -1,25 +1,25 @@
 $(document).ready(() => {
     /* global PlanetaryTable */
-    const modalRequestOrder = $('#assets-confirm-request');
-    const modalErrorMessage = $('#modal-error-message');
+    const modalRequestConfirm = $('#assets-confirm-request');
+    const modalConfirmErrorMessage = $('#modal-error-message');
 
     // Approve Request Modal
-    modalRequestOrder.on('show.bs.modal', (event) => {
+    modalRequestConfirm.on('show.bs.modal', (event) => {
         const button = $(event.relatedTarget);
         const url = button.data('action');
 
         // Extract the title from the button
         const modalTitle = button.data('title');
-        const modalTitleDiv = modalRequestOrder.find('#modal-title');
+        const modalTitleDiv = modalRequestConfirm.find('#modal-title');
         modalTitleDiv.html(modalTitle);
 
         // Extract the text from the button
         const modalText = button.data('text');
-        const modalDiv = modalRequestOrder.find('#modal-request-text');
+        const modalDiv = modalRequestConfirm.find('#modal-request-text');
         modalDiv.html(modalText);
 
         $('#modal-button-confirm-request').on('click', () => {
-            const form = modalRequestOrder.find('form');
+            const form = modalRequestConfirm.find('form');
             const csrfMiddlewareToken = form.find('input[name="csrfmiddlewaretoken"]').val();
             const posting = $.post(
                 url,
@@ -30,24 +30,24 @@ $(document).ready(() => {
             );
 
             posting.done(() => {
-                modalRequestOrder.modal('hide');
+                modalRequestConfirm.modal('hide');
             }).fail((xhr, _, __) => {
                 const response = JSON.parse(xhr.responseText);
-                modalErrorMessage.text(response.message).removeClass('d-none'); // Show the error message
-                modalErrorMessage.addClass('l-shake'); // Add the shake class
+                modalConfirmErrorMessage.text(response.message).removeClass('d-none'); // Show the error message
+                modalConfirmErrorMessage.addClass('l-shake'); // Add the shake class
 
                 // Remove the shake class after 2 seconds
                 setTimeout(() => {
-                    modalErrorMessage.removeClass('l-shake');
+                    modalConfirmErrorMessage.removeClass('l-shake');
                 }, 2000);
             });
         });
     }).on('hide.bs.modal', () => {
-        modalRequestOrder.find('.alert-danger').remove();
-        modalRequestOrder.find('input[name="amount"]').val('');
-        modalRequestOrder.find('input[name="amount"]').removeClass('is-invalid');
+        modalRequestConfirm.find('.alert-danger').remove();
+        modalRequestConfirm.find('input[name="amount"]').val('');
+        modalRequestConfirm.find('input[name="amount"]').removeClass('is-invalid');
         $('#modal-button-confirm-request').unbind('click');
-        modalErrorMessage.addClass('d-none');
-        modalErrorMessage.val('');
+        modalConfirmErrorMessage.addClass('d-none');
+        modalConfirmErrorMessage.val('');
     });
 });
