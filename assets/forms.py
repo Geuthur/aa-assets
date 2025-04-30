@@ -4,6 +4,7 @@ from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
+from assets.api.assets.helper import update_asset_object
 from assets.models import Assets
 
 
@@ -36,8 +37,12 @@ class RequestMultiOrder(forms.Form):
             # Dynamisch Felder für jedes Asset mit der gegebenen location_id hinzufügen
             for asset in Assets.objects.filter(
                 location_flag=location_flag, location_id=location_id
-            ):
-                field_name = f"amount_{asset.eve_type.id}"
+            ).order_by("eve_type__name"):
+                asset = update_asset_object(asset)
+                if asset is False:
+                    continue
+
+                field_name = f"item_id_{asset.pk}"
                 self.fields[field_name] = forms.IntegerField(
                     label=_("Amount for ") + asset.eve_type.name,
                     min_value=1,

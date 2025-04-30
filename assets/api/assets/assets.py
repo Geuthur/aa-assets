@@ -1,10 +1,9 @@
 from ninja import NinjaAPI
 
-from django.db.models import Sum
-
 from assets.api import schema
+from assets.api.assets.helper import update_asset_object
 from assets.hooks import get_extension_logger
-from assets.models import Assets, Request, RequestAssets
+from assets.models import Assets
 
 logger = get_extension_logger(__name__)
 
@@ -33,15 +32,10 @@ class AssetsApiEndpoints:
             assets = []
 
             for asset in assets_qs:
-                ordered_quantity = RequestAssets.objects.filter(
-                    asset=asset,
-                    requestor__status=Request.STATUS_OPEN,
-                ).aggregate(total_quantity=Sum("quantity"))["total_quantity"]
+                asset = update_asset_object(asset)
 
-                if ordered_quantity:
-                    if ordered_quantity >= asset.quantity:
-                        continue
-                    asset.quantity -= ordered_quantity
+                if asset is False:
+                    continue
 
                 try:
                     price = asset.price * asset.quantity

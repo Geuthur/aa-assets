@@ -11,7 +11,7 @@ from django.core.cache import cache
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils import timezone
-from django.utils.translation import gettext as _
+from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 from esi.decorators import token_required
 
@@ -39,6 +39,29 @@ def get_apr_cooldown(request, request_id, mode):
 def set_apr_cooldown(user, request_id, mode):
     """Set a 60 sec cooldown forthe Approver"""
     return cache.set(build_apr_cooldown_cache_tag(user, request_id, mode), True, (60))
+
+
+def validate_asset_quantity(asset: Assets, amount: int) -> tuple[bool, str]:
+    """Validates if the requested amount exceeds the available quantity."""
+    requests = RequestAssets.objects.filter(
+        asset=asset,
+        requestor__status=Request.STATUS_OPEN,
+    ).values_list("quantity", flat=True)
+    if requests and sum(requests) + amount > asset.quantity:
+        return False
+    return True
+
+
+def create_request_asset_object(
+    user_request: Request, asset: Assets, amount: int
+) -> RequestAssets:
+    """Create a RequestAssets Object."""
+    return RequestAssets(
+        name=user_request.requesting_user.username,
+        requestor=user_request,
+        asset=asset,
+        quantity=amount,
+    )
 
 
 @login_required
@@ -124,14 +147,11 @@ def create_order(request):
     """Render view to create a new order request."""
     # Check Permission
     form = forms.RequestOrder(request.POST)
-    form_multi = forms.RequestMultiOrder(request.POST)
-
-    logger.info(form_multi)
-
-    logger.info(request.POST)
+    form_multi = forms.RequestMultiOrder(
+        request.POST, location_flag="corpsag5", location_id=1042478386825
+    )
 
     if form.is_valid():
-        logger.info(form.cleaned_data)
         amount = int(form.cleaned_data["amount"])
         asset_pk = request.POST.get("asset_pk")
         user = request.user
@@ -139,56 +159,97 @@ def create_order(request):
         try:
             asset = Assets.objects.get(pk=asset_pk)
         except Assets.DoesNotExist:
-            msg = "The asset does not exist."
             return JsonResponse(
-                {"success": True, "message": msg},
+                {"success": False, "message": "The asset does not exist."},
                 status=HTTPStatus.NOT_FOUND,
                 safe=False,
             )
 
-        requests = RequestAssets.objects.filter(
-            asset=asset,
-            requestor__status=Request.STATUS_OPEN,
-        ).values_list("quantity", flat=True)
-
-        if requests and sum(requests) + amount > asset.quantity:
-            msg = "The requested amount exceeds the available quantity."
+        is_valid = validate_asset_quantity(asset, amount)
+        if not is_valid:
             return JsonResponse(
-                {"success": True, "message": msg},
+                {
+                    "success": False,
+                    "message": _("Requested amount exceeds available quantity."),
+                },
                 status=HTTPStatus.FORBIDDEN,
                 safe=False,
             )
 
-        user_request = Request.objects.create(
+        # Create Request object
+        user_request = Request(
             requesting_user=user,
             status=Request.STATUS_OPEN,
         )
 
-        RequestAssets.objects.create(
-            name=user_request.requesting_user.username,
-            requestor=user_request,
-            asset=asset,
-            quantity=amount,
-        )
+        # Create RequestAssets object
+        # and save it to the database
+        asset_request = create_request_asset_object(user_request, asset, amount)
+        user_request.save()
+        asset_request.save()
 
-        user_request.notify_new_request()
-        msg = f"The request for Order {user_request.requesting_user.username} has been created."
         return JsonResponse(
-            {"success": True, "message": msg},
+            {"success": True, "message": "Order created successfully."},
             status=HTTPStatus.OK,
             safe=False,
         )
     if form_multi.is_valid():
-        logger.info(form_multi.cleaned_data.get("items", None))
+        cleaned_data = form_multi.cleaned_data
+        asset_data = [
+            (int(key.split("_")[2]), cleaned_data[key])
+            for key in cleaned_data.keys()
+            if key.startswith("item_id_")
+        ]
+
+        user = request.user
+
+        # Create Request object
+        user_request = Request(
+            requesting_user=user,
+            status=Request.STATUS_OPEN,
+        )
+
+        exceeds_items = []
+        assets = []
+        for asset_pk, amount in asset_data:
+            if amount is None:
+                continue
+
+            try:
+                asset = Assets.objects.get(pk=asset_pk)
+            except Assets.DoesNotExist:
+                return JsonResponse(
+                    {"success": False, "message": "The asset does not exist."},
+                    status=HTTPStatus.NOT_FOUND,
+                    safe=False,
+                )
+
+            is_valid = validate_asset_quantity(asset, amount)
+            if is_valid:
+                assets.append(create_request_asset_object(user_request, asset, amount))
+            else:
+                exceeds_items.append(asset.eve_type.name)
+
+        if assets:
+            user_request.save()
+            for asset_request in assets:
+                asset_request.save()
+
+        if exceeds_items:
+            error_message = f"The following items exceeds the available quantity {', '.join(exceeds_items)} and are not included in your order."
+            return JsonResponse(
+                {"success": False, "message": error_message},
+                status=HTTPStatus.CONFLICT,
+                safe=False,
+            )
         return JsonResponse(
             {"success": True, "message": "Order created successfully."},
             status=HTTPStatus.OK,
             safe=False,
         )
 
-    msg = "Invalid Form"
     return JsonResponse(
-        {"success": True, "message": msg},
+        {"success": True, "message": "Invalid Form"},
         status=HTTPStatus.NOT_FOUND,
         safe=False,
     )

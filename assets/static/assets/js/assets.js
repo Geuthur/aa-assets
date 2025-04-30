@@ -1,48 +1,51 @@
-/* global requestSettings */
-var urlAssets;
-var assets;
-var action;
+/* global assetsSettings, translations */
 
-var buyText = requestSettings.buyText;
-var quantityText = requestSettings.validQuantityText;
-var quantityTextSingle = requestSettings.validQuantityTextSingle;
+$(document).ready(() => {
+    const AssetsTableVar = $('#assets');
 
-function initializeDataTable(tableId, url) {
-    return $(tableId).DataTable({
-        'ajax': {
-            'url': url,
-            'dataSrc': function(json) {
-                return json;
+    let LocationID = null;
+    let LocationFLAG = null;
+
+    console.log(assetsSettings.createRequestUrl);
+
+    const tableAssets = AssetsTableVar.DataTable({
+        ajax: {
+            url: assetsSettings.assetsUrl,
+            type: 'GET',
+            dataSrc: function(data) {
+                LocationID = data.location_id;
+                LocationFLAG = data.location_flag;
+                return data.assets;
             }
         },
-        'columns': [
+        columns: [
             {
-                'data': 'item_id',
-                'render': function(data, type, row) {
+                data: 'item_id',
+                render: function(data, _, __) {
                     return '<img class="card-img-zoom" src="https://imageserver.eveonline.com/types/' + data + '/icon/?size=64" height="64" width="64"/>';
                 }
             },
             {
-                'data': 'name',
-                'render': function(data, type, row) {
+                data: 'name',
+                render: function(data, _, __) {
                     return data;
                 }
             },
             {
-                'data': 'quantity',
-                'render': function (data, type, row) {
+                data: 'quantity',
+                render: function (data, _, __) {
                     return data;
                 }
             },
             {
-                'data': 'location',
-                'render': function (data, type, row) {
+                data: 'location',
+                render: function (data, _, __) {
                     return data;
                 }
             },
             {
-                'data': 'price',
-                'render': function (data, type, row) {
+                data: 'price',
+                render: function (data, type, row) {
                     // Rückgabe des formatierten Strings mit Farbe und Einheit
                     if (type === 'display') {
                         if (!isNaN(data) && typeof data === 'number') {
@@ -53,112 +56,55 @@ function initializeDataTable(tableId, url) {
                 }
             },
             {
-                'data': null,
-                'render': function(data, type, row) {
-                    return '<button type="button" class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#buyModal" data-action="single" data-item-id="' + row.item_id + '" data-item-name="' + row.name + '" data-item-quantity="' + row.quantity + '">'+ buyText +'</button>';
+                data: null,
+                render: function(data, type, row) {
+                    return `
+                        <button type="button"
+                            class="btn btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#assets-single-request"
+                            data-action="${assetsSettings.createRequestUrl}"
+                            aria-label="Request Order"
+                            data-asset-pk="${row.asset_pk}"
+                            data-item-id="${row.item_id}"
+                            data-item-quantity="${row.quantity}"
+                            data-title="${row.name}"
+                        >
+                            ${translations.buy}
+                        </button>
+                    `;
                 }
             }
         ],
-        'order': [[4, 'desc']],
-        'pageLength': 25,
-        'autoWidth': false,
-        'columnDefs': [
+        order: [[4, 'desc']],
+        pageLength: 25,
+        autoWidth: false,
+        columnDefs: [
             { 'sortable': false, 'targets': [0, 5] },
         ],
-    });
-}
+        footerCallback: function (_, data, __, ___, ____) {
+            const api = this.api();
+            const footer = $(api.table().footer());
 
-document.addEventListener('DOMContentLoaded', function () {
-    urlAssets = '/assets/api/assets/filter/corpsag5/';
-    // Initialisieren Sie die DataTable für assets
-    assets = initializeDataTable('#assets', urlAssets);
-
-    // Add event listener to the Buy button in the buy modal
-    document.getElementById('confirmBuyButton').addEventListener('click', function(event) {
-        event.preventDefault();
-        if (validateForm()) {
-            $('#buyModal').modal('hide');
-            $('#confirmModal').modal('show');
-        }
-    });
-
-    // Add event listener to the Confirm button in the confirmation modal
-    document.getElementById('finalizeBuyButton').addEventListener('click', function(event) {
-        event.preventDefault();
-        document.getElementById('buyForm').submit();
-    });
-});
-
-// Set the item data when the modal is shown
-$('#buyModal').on('show.bs.modal', function (event) {
-    var button = $(event.relatedTarget); // Button that triggered the modal
-    action = button.data('action'); // Extract info from data-* attributes
-    var itemsList = $('#itemsList');
-    itemsList.empty(); // Clear previous data
-
-    if (action === 'single') {
-        var itemId = button.data('item-id');
-        var itemName = button.data('item-name');
-        var itemQuantity = button.data('item-quantity');
-        var itemHtml = `
-            <div class="form-group">
-                <label>${itemName}</label>
-                <input type="hidden" name="item_id[]" value="${itemId}">
-                <input type="hidden" name="item_name[]" value="${itemName}">
-                <input type="number" class="form-control" name="quantity[]" placeholder="Enter quantity" max="${itemQuantity}" oninput="validateQuantity(this)" required>
-                <div class="invalid-feedback">${quantityTextSingle}</div>
-            </div>
-        `;
-        itemsList.append(itemHtml);
-    } else if (action === 'all') {
-        var tableData = assets.rows().data();
-        tableData.each(function (row) {
-            var itemHtml = `
-                <div class="form-group">
-                    <label>${row.name}</label>
-                    <input type="hidden" name="item_id[]" value="${row.item_id}">
-                    <input type="hidden" name="item_name[]" value="${row.name}">
-                    <input type="number" class="form-control" name="quantity[]" placeholder="Enter quantity" max="${row.quantity}" oninput="validateQuantity(this)" required>
-                </div>
-            `;
-            itemsList.append(itemHtml);
-        });
-        itemsList.append('<div class="text-danger d-none" id="buy-all-warning">'+ quantityText +'</div>');
-    }
-});
-
-function setMaxQuantities() {
-    $('#itemsList input[type="number"]').each(function () {
-        $(this).val($(this).attr('max'));
-    });
-}
-
-function validateQuantity(input) {
-    var max = parseInt(input.getAttribute('max'));
-    var value = parseInt(input.value);
-    if (value > max) {
-        input.value = max;
-    }
-}
-
-function validateForm() {
-    var isValid = false;
-    $('#itemsList input[type="number"]').each(function () {
-        var value = $(this).val();
-        if (value !== '' && parseInt(value) > 0) {
-            isValid = true;
-            if (action === 'single') {
-                $(this).removeClass('is-invalid');
-                $('#buy-all-warning').addClass('d-none');
-            }
-        } else {
-            if (action === 'single') {
-                $(this).addClass('is-invalid');
+            // Überprüfen, ob Daten vorhanden sind
+            if (data.length > 0) {
+                footer.html(`
+                    <button type="button"
+                        class="btn btn-primary text-nowrap" data-bs-toggle="modal"
+                        data-bs-target="#assets-multi-request"
+                        data-title="${translations.multiBuy}"
+                        data-location-id="${LocationID}"
+                        data-location-flag="${LocationFLAG}"
+                        data-action="${assetsSettings.createRequestUrl}"
+                        aria-label="Request Order"
+                    >
+                        ${translations.multiBuy}
+                    </button>
+                `);
             } else {
-                $('#buy-all-warning').removeClass('d-none');
+                footer.empty(); // Leeren des Footers, wenn keine Daten vorhanden sind
             }
         }
     });
 
-    return isValid;
-}
+});

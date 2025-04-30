@@ -1,16 +1,60 @@
 $(document).ready(() => {
+    function handleError(xhr) {
+        const response = JSON.parse(xhr.responseText);
+        modalErrorMessage.text(response.message).removeClass('d-none'); // Show the error message
+        modalErrorMessage.addClass('ts-shake'); // Add shake class to the error field
+
+        // Remove the shake class after 3 seconds
+        setTimeout(() => {
+            modalErrorMessage.removeClass('ts-shake');
+        }, 2000);
+
+        if (xhr.status === 409) {
+            modalErrorMessage.removeClass('bg-danger').addClass('bg-warning'); // Change to warning color
+            setTimeout(() => {
+                modalErrorMessage.removeClass('bg-warning').addClass('bg-danger'); // Change back to danger color
+                modalRequestOrder.modal('hide');
+                reloadTables(); // Tabellen neu laden
+            }, 5000);
+        }
+    }
+
+    // Funktion zum Neuladen der Tabellen
+    function reloadTables() {
+        loadRequestStatistics(); // Reload the request statistics
+        const tableAssets = $('#assets').DataTable();
+        const tableMyRequest = $('#my-requests').DataTable();
+        const tableRequest = $('#requests').DataTable();
+        tableAssets.ajax.reload(); // Reload the assets table
+        tableMyRequest.ajax.reload(); // Reload the my requests table
+        tableRequest.ajax.reload(); // Reload the requests table
+    }
+
     /* global tableAssets, loadRequestStatistics */
     const modalRequestOrder = $('#assets-multi-request');
     const modalErrorMessage = modalRequestOrder.find('#modal-error-message');
     const modalErrorRequiredText = modalErrorMessage.text();
+    const modalForm = modalRequestOrder.find('form');
+
+    // Input Fields
+    const inputFields = {};
+    modalForm.find('input[name^="item_id_"]').each(function () {
+        const fieldName = $(this).attr('name');
+        inputFields[fieldName] = $(this);
+    });
 
     // Approve Request Modal
     modalRequestOrder.on('show.bs.modal', (event) => {
         const button = $(event.relatedTarget);
-        const url = button.data('action');
 
+        // Form Data
+        const url = button.data('action');
+        // Extract the CSRF token from the form
+        const csrfMiddlewareToken = modalForm.find('input[name="csrfmiddlewaretoken"]').val();
         // Extract the title from the button
         const modalTitle = button.data('title');
+
+        // Set the title in the modal
         const modalTitleDiv = modalRequestOrder.find('#modal-title');
         modalTitleDiv.html(modalTitle);
 
@@ -19,61 +63,30 @@ $(document).ready(() => {
         const modalDiv = modalRequestOrder.find('#modal-request-text');
         modalDiv.html(modalText);
 
-        const form = modalRequestOrder.find('form');
-        const amountField = form.find('input[name="amount"]');
-        const itemQuantity = button.data('item-quantity');
-
-        $('#modal-button-buy-multi-request').on('click', () => {
-            amountField.val(itemQuantity); // Set the amount to the maximum quantity
+        // Limit the input to max quantity
+        Object.entries(inputFields).forEach(([fieldName, inputField]) => {
+            const maxQuantity = parseInt(inputField.data('quantity'), 10); // Maximalwert des Feldes
+            inputField.on('input', () => {
+                const currentValue = parseInt(inputField.val(), 10);
+                if (currentValue > maxQuantity) {
+                    inputField.val(maxQuantity); // Auf Maximalwert setzen
+                }
+            });
         });
 
         $('#modal-button-confirm-multi-request').on('click', () => {
-            const form = modalRequestOrder.find('form');
-            const csrfMiddlewareToken = form.find('input[name="csrfmiddlewaretoken"]').val();
+            let cleaned_data = {};
 
-            // Sammle alle Felder mit Namen, die mit "amount_" beginnen
-            const formData = {};
-            form.find('input[name^="amount_"]').each((_, input) => {
-                const itemQuantity = $(input).data('quantity');
-
-                // Automatically correct the input value if it exceeds the max value
-                $(input).on('input', () => {
-                    const currentValue = parseInt($(input).val(), 10);
-                    if (currentValue > itemQuantity) {
-                        amountField.val(itemQuantity); // Set to max value
-                    }
-                });
-
-                const fieldName = $(input).attr('name');
-                const fieldValue = $(input).val();
-
-                // Nur Felder mit einem Wert hinzufügen
-                if (fieldValue && parseInt(fieldValue, 10) > 0) {
-                    formData[fieldName] = fieldValue;
+            // Set Form Data
+            Object.entries(inputFields).forEach(([fieldName, inputField]) => {
+                const value = parseInt(inputField.val(), 10);
+                if (!isNaN(value) && value > 0) {
+                    cleaned_data[fieldName] = value;
                 }
             });
 
-            // Füge das CSRF-Token zur Anfrage hinzu
-            formData['csrfmiddlewaretoken'] = csrfMiddlewareToken;
-
-            // Asset-PK aus dem Button-Data-Attribut hinzufügen
-            formData['asset_pk'] = button.data('asset-pk');
-
-            // Sende die Daten per POST
-            const posting = $.post(url, formData);
-
-            posting.done(() => {
-                modalRequestOrder.modal('hide');
-                loadRequestStatistics(); // Reload the request statistics
-                const tableAssets = $('#assets').DataTable();
-                const tableMyRequest = $('#my-requests').DataTable();
-                const tableRequest = $('#requests').DataTable();
-                tableAssets.ajax.reload(); // Reload the assets table
-                tableMyRequest.ajax.reload(); // Reload the my requests table
-                tableRequest.ajax.reload(); // Reload the requests table
-            }).fail((xhr, _, __) => {
-                const response = JSON.parse(xhr.responseText);
-                modalErrorMessage.text(response.message).removeClass('d-none'); // Show the error message
+            if (Object.keys(cleaned_data).length === 0) {
+                modalErrorMessage.text(modalErrorRequiredText).removeClass('d-none'); // Show the error message
                 // Add shake class to the error field
                 modalErrorMessage.addClass('ts-shake');
 
@@ -81,12 +94,43 @@ $(document).ready(() => {
                 setTimeout(() => {
                     modalErrorMessage.removeClass('ts-shake');
                 }, 2000);
-            });
+            } else {
+                cleaned_data['csrfmiddlewaretoken'] = csrfMiddlewareToken; // Füge das CSRF-Token hinzu
+                const posting = $.post(
+                    url,
+                    cleaned_data,
+                );
+
+                posting.done(() => {
+                    modalRequestOrder.modal('hide');
+                    reloadTables(); // Tabellen neu laden
+
+                    // Update maxQuantity and hide inputs if necessary
+                    Object.entries(inputFields).forEach(([fieldName, inputField]) => {
+                        const maxQuantity = parseInt(inputField.data('quantity'), 10); // Maximalwert des Feldes
+                        const currentValue = cleaned_data[fieldName] || 0; // Aktueller Wert des Feldes
+
+                        if (currentValue >= maxQuantity) {
+                            // Hide the input field if the current value is greater than or equal to max quantity
+                            inputField.closest('.form-group').addClass('d-none');
+                        }
+                        // Update the data-quantity attribute for remaining quantity
+                        const remainingQuantity = maxQuantity - currentValue;
+                        // Update the data-quantity attribute
+                        inputField.data('quantity', remainingQuantity);
+                        // Reset the input field value
+                        inputField.val();
+                    });
+                }).fail((xhr, _, __) => {
+                    handleError(xhr); // Fehlerbehandlung
+                });
+            }
         });
     }).on('hide.bs.modal', () => {
         modalRequestOrder.find('.alert-danger').remove();
-        modalRequestOrder.find('input[name="amount"]').val('');
-        modalRequestOrder.find('input[name="amount"]').removeClass('is-invalid');
+        Object.entries(inputFields).forEach(([fieldName, inputField]) => {
+            inputField.val('');
+        });
         $('#modal-button-confirm-multi-request').unbind('click');
         modalErrorMessage.addClass('d-none');
         modalErrorMessage.val('');

@@ -9,10 +9,11 @@
 	let assetsSettings = {
         assetsUrl: '{% url "assets:api:get_assets" location_id=1042478386825 location_flag="corpsag5" %}',
         statisticsUrl: '{% url "assets:api:get_requests_statistics" %}',
-		cancelRequestUrl: '{% url "assets:request_canceled" request_id=1337 %}',
-		completeRequestUrl: '{% url "assets:request_completed" request_id=1337 %}',
-        openRequestUrl: '{% url "assets:request_open" request_id=1337 %}',
 
+        requestUrl: '{% url "assets:api:get_requests" %}',
+        myRequestUrl: '{% url "assets:api:get_my_requests" %}',
+
+        createRequestUrl: '{% url "assets:create_order" %}',
         manage_requests: '{% if perms.assets.manage_requests %}true{% else %}false{% endif %}',
 
 		csrfToken: '{% csrf_token %}',

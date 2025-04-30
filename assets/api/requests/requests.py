@@ -24,7 +24,7 @@ class RequestsApiEndpoints:
             response={200: List[schema.Requests], 403: str},
             tags=self.tags,
         )
-        def get_open_requests(request: WSGIRequest):
+        def get_requests(request: WSGIRequest):
             perms = request.user.has_perm("assets.manage_requests")
 
             if not perms:

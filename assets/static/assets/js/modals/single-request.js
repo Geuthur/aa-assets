@@ -72,6 +72,17 @@ $(document).ready(() => {
                     tableAssets.ajax.reload(); // Reload the assets table
                     tableMyRequest.ajax.reload(); // Reload the my requests table
                     tableRequest.ajax.reload(); // Reload the requests table
+
+                    // Update the multi-request modal
+                    const multiRequestModal = $('#assets-multi-request');
+                    const multiRequestInput = multiRequestModal.find(`input[name="item_id_${button.data('asset-pk')}"]`);
+                    const maxQuantity = parseInt(multiRequestInput.data('quantity'), 10);
+                    const remainingQuantity = maxQuantity - amount; // Calculate the remaining quantity
+
+                    if (remainingQuantity <= 0) {
+                        multiRequestInput.closest('.form-group').addClass('d-none'); // Hide the input field
+                    }
+                    multiRequestInput.data('quantity', remainingQuantity); // Update the data-quantity attribute
                 }).fail((xhr, _, __) => {
                     const response = JSON.parse(xhr.responseText);
                     modalErrorMessage.text(response.message).removeClass('d-none'); // Show the error message

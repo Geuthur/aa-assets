@@ -38,8 +38,6 @@ def get_extension_logger(name):
 def add_info_to_context(request, context: dict) -> dict:
     """Add additional information to the context for the view."""
     # pylint: disable=import-outside-toplevel, cyclic-import
-    from assets.models import Request
-
     theme = None
     try:
         user = UserProfile.objects.get(id=request.user.id)
