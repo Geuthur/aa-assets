@@ -90,7 +90,7 @@ $(document).ready(() => {
             if (data.length > 0) {
                 footer.html(`
                     <button type="button"
-                        class="btn btn-primary text-nowrap" data-bs-toggle="modal"
+                        class="btn btn-primary text-nowrap mt-4" data-bs-toggle="modal"
                         data-bs-target="#assets-multi-request"
                         data-title="${translations.multiBuy}"
                         data-location-id="${LocationID}"
