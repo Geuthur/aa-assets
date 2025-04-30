@@ -58,7 +58,10 @@ function initializeRequests(tableId, url) {
             {
                 data: 'created',
                 render: function(data, type, row) {
-                    return moment(data).format('L LT');
+                    if (type === 'display') {
+                        return moment(data).format('L LT');
+                    }
+                    return data;
                 }
             },
             {

@@ -13,12 +13,17 @@
 document.addEventListener('DOMContentLoaded', function () {
     const AssetsTableVar = $('#assets');
 
+    let LocationID = null;
+    let LocationFLAG = null;
+
     const tableAssets = AssetsTableVar.DataTable({
         ajax: {
             url: assetsSettings.assetsUrl,
             type: 'GET',
             dataSrc: function(data) {
-                return data;
+                LocationID = data.location_id;
+                LocationFLAG = data.location_flag;
+                return data.assets;
             }
         },
         columns: [
@@ -62,18 +67,16 @@ document.addEventListener('DOMContentLoaded', function () {
                 data: null,
                 render: function(data, type, row) {
                     return `
-                        <button type="button" 
-                        class="btn btn-primary" 
-                        data-bs-toggle="modal" 
-                        data-bs-target="#assets-single-request" 
-                        data-action="{% url 'assets:create_order' %}" aria-label="Request Order"
-                        data-location-id="${row.location_id}"
-                        data-item-id="${row.item_id}" 
-                        data-item-name="${row.name}"
-                        data-item-quantity="${row.quantity}"
-                        data-title="${row.name}"
+                        <button type="button"
+                            class="btn btn-primary"
+                            data-bs-toggle="modal"
+                            data-bs-target="#assets-single-request"
+                            data-action="{% url 'assets:create_order' %}" aria-label="Request Order"
+                            data-asset-pk="${row.asset_pk}"
+                            data-item-quantity="${row.quantity}"
+                            data-title="${row.name}"
                         >
-                            ${translation.buyText}
+                            ${translation.buy}
                         </button>
                     `
                 }
@@ -85,6 +88,24 @@ document.addEventListener('DOMContentLoaded', function () {
         columnDefs: [
             { 'sortable': false, 'targets': [0, 5] },
         ],
+        footerCallback: function (row, data, start, end, display) {
+            const api = this.api();
+            const footer = $(api.table().footer());
+
+            footer.html(`
+                <button type="button"
+                    class="btn btn-primary text-nowrap" data-bs-toggle="modal"
+                    data-bs-target="#assets-multi-request"
+                    data-title="${translation.multiBuy}"
+                    data-location-id="${LocationID}"
+                    data-location-flag="${LocationFLAG}"
+                    data-action="{% url 'assets:create_order' %}"
+                    aria-label="Request Order"
+                >
+                    ${translations.multiBuy}
+                </button>
+            `);
+        }
     });
 
 })

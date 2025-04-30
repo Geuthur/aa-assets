@@ -1,7 +1,7 @@
 $(document).ready(() => {
-    /* global PlanetaryTable */
+    /* global tableAssets, loadRequestStatistics */
     const modalRequestConfirm = $('#assets-confirm-request');
-    const modalConfirmErrorMessage = $('#modal-error-message');
+    const modalConfirmErrorMessage = modalRequestConfirm.find('#modal-error-message');
 
     // Approve Request Modal
     modalRequestConfirm.on('show.bs.modal', (event) => {
@@ -31,14 +31,21 @@ $(document).ready(() => {
 
             posting.done(() => {
                 modalRequestConfirm.modal('hide');
+                loadRequestStatistics(); // Reload the request statistics
+                const tableAssets = $('#assets').DataTable();
+                const tableMyRequest = $('#my-requests').DataTable();
+                const tableRequest = $('#requests').DataTable();
+                tableAssets.ajax.reload(); // Reload the assets table
+                tableMyRequest.ajax.reload(); // Reload the my requests table
+                tableRequest.ajax.reload(); // Reload the requests table
             }).fail((xhr, _, __) => {
                 const response = JSON.parse(xhr.responseText);
                 modalConfirmErrorMessage.text(response.message).removeClass('d-none'); // Show the error message
-                modalConfirmErrorMessage.addClass('l-shake'); // Add the shake class
+                modalConfirmErrorMessage.addClass('ts-shake'); // Add the shake class
 
                 // Remove the shake class after 2 seconds
                 setTimeout(() => {
-                    modalConfirmErrorMessage.removeClass('l-shake');
+                    modalConfirmErrorMessage.removeClass('ts-shake');
                 }, 2000);
             });
         });

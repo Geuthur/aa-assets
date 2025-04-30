@@ -7,7 +7,7 @@
 
 <script type="application/javascript">
 	let assetsSettings = {
-        assetsUrl: '{% url "assets:api:get_assets" location="corpsag5" %}',
+        assetsUrl: '{% url "assets:api:get_assets" location_id=1042478386825 location_flag="corpsag5" %}',
         statisticsUrl: '{% url "assets:api:get_requests_statistics" %}',
 		cancelRequestUrl: '{% url "assets:request_canceled" request_id=1337 %}',
 		completeRequestUrl: '{% url "assets:request_completed" request_id=1337 %}',
@@ -19,14 +19,8 @@
 	};
 
     window.translations = {
-        markRequestCancelledText: '{% translate "Mark Request as Cancelled" %}',
-        markRequestCompletedText: '{% translate "Mark Request as Completed" %}',
-        markRequestOpenText: '{% translate "Mark Request as Open" %}',
-
-        validQuantityText: '{% translate "Please enter a valid quantity for at least one items." %}',
-        validQuantityTextSingle: '{% translate "Please enter a valid quantity." %}',
-        buyText: '{% translate "Buy" %}',
-        piecesText: '{% translate "pieces" %}',
+        buy: '{% translate "Buy" %}',
+        multiBuy: '{% translate "Multi Buy" %}',
     }
 
     const translation = window.translations;

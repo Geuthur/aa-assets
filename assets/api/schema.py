@@ -31,12 +31,9 @@ class EveName(Schema):
 
 
 class Assets(Schema):
-    item_id: int
-    name: str
-    quantity: int
     location_id: int
-    location: str
-    price: Any
+    location_flag: str
+    assets: list
 
 
 class Requests(Schema):

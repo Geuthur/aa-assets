@@ -18,11 +18,9 @@ from esi.decorators import token_required
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCorporationInfo
 
-from eveuniverse.models import EveType
-
 from assets import forms
 from assets.hooks import add_info_to_context, get_extension_logger
-from assets.models import Owner, Request, RequestAssets, Location
+from assets.models import Assets, Owner, Request, RequestAssets
 from assets.tasks import update_assets_for_owner
 
 logger = get_extension_logger(__name__)
@@ -34,11 +32,6 @@ def build_apr_cooldown_cache_tag(user, request_id, mode):
 
 def get_apr_cooldown(request, request_id, mode):
     if cache.get(build_apr_cooldown_cache_tag(request.user, request_id, mode), False):
-        msg = _("You are on cooldown. Please wait 60 seconds before trying again.")
-        messages.error(
-            request,
-            msg,
-        )
         return True
     return False
 
@@ -56,6 +49,9 @@ def index(request):
         "title": _("Assets"),
         "forms": {
             "single_request": forms.RequestOrder(),
+            "multi_request": forms.RequestMultiOrder(
+                location_flag="corpsag5", location_id=1042478386825
+            ),
         },
     }
     context = add_info_to_context(request, context)
@@ -128,56 +124,68 @@ def create_order(request):
     """Render view to create a new order request."""
     # Check Permission
     form = forms.RequestOrder(request.POST)
-    
+    form_multi = forms.RequestMultiOrder(request.POST)
+
+    logger.info(form_multi)
+
+    logger.info(request.POST)
+
     if form.is_valid():
+        logger.info(form.cleaned_data)
         amount = int(form.cleaned_data["amount"])
-        item_id = request.POST.get("item_id")
-        location_id = request.POST.get("location_id")
+        asset_pk = request.POST.get("asset_pk")
         user = request.user
-        
-        try:       
-            location = Location.objects.get(id=location_id)
-        except Location.DoesNotExist:
-            msg = "Location not found."
+
+        try:
+            asset = Assets.objects.get(pk=asset_pk)
+        except Assets.DoesNotExist:
+            msg = "The asset does not exist."
             return JsonResponse(
-                {"success": False, "message": msg},
+                {"success": True, "message": msg},
                 status=HTTPStatus.NOT_FOUND,
                 safe=False,
             )
-            
-        try:       
-            eve_type = EveType.objects.get(id=item_id)
-        except EveType.DoesNotExist:
-            msg = "EveType not found."
+
+        requests = RequestAssets.objects.filter(
+            asset=asset,
+            requestor__status=Request.STATUS_OPEN,
+        ).values_list("quantity", flat=True)
+
+        if requests and sum(requests) + amount > asset.quantity:
+            msg = "The requested amount exceeds the available quantity."
             return JsonResponse(
-                {"success": False, "message": msg},
-                status=HTTPStatus.NOT_FOUND,
+                {"success": True, "message": msg},
+                status=HTTPStatus.FORBIDDEN,
                 safe=False,
             )
-            
+
         user_request = Request.objects.create(
             requesting_user=user,
             status=Request.STATUS_OPEN,
         )
-       
+
         RequestAssets.objects.create(
             name=user_request.requesting_user.username,
             requestor=user_request,
-            eve_type=eve_type,
+            asset=asset,
             quantity=amount,
-            location=location,
         )
-        
+
         user_request.notify_new_request()
-        msg = "The request for Order {user_name} has been created.".format(
-            user_name=user_request.requesting_user.username,
-        )
+        msg = f"The request for Order {user_request.requesting_user.username} has been created."
         return JsonResponse(
             {"success": True, "message": msg},
             status=HTTPStatus.OK,
             safe=False,
         )
-        
+    if form_multi.is_valid():
+        logger.info(form_multi.cleaned_data.get("items", None))
+        return JsonResponse(
+            {"success": True, "message": "Order created successfully."},
+            status=HTTPStatus.OK,
+            safe=False,
+        )
+
     msg = "Invalid Form"
     return JsonResponse(
         {"success": True, "message": msg},
@@ -194,7 +202,12 @@ def mark_request_canceled(request, request_id: int):
     # Check Cooldown
     cooldown = get_apr_cooldown(request, request_id, "canceled")
     if cooldown:
-        return redirect("assets:index")
+        msg = _("You are on cooldown. Please wait 60 seconds before trying again.")
+        return JsonResponse(
+            {"success": True, "message": msg},
+            status=HTTPStatus.FORBIDDEN,
+            safe=False,
+        )
 
     user_request = get_object_or_404(Request, pk=request_id)
     is_completed = user_request.mark_request(
@@ -216,11 +229,11 @@ def mark_request_canceled(request, request_id: int):
 
         user_request.notify_request_canceled(user=request.user)
 
-        messages.info(
-            request,
-            msg,
+        return JsonResponse(
+            {"success": True, "message": msg},
+            status=HTTPStatus.OK,
+            safe=False,
         )
-        return redirect("assets:index")
     msg = _(
         "The request for Order {user_request_pk} from {user_request_requesting_user} has failed."
     ).format(
@@ -228,11 +241,11 @@ def mark_request_canceled(request, request_id: int):
         user_request_requesting_user=user_request.requesting_user,
     )
 
-    messages.error(
-        request,
-        msg,
+    return JsonResponse(
+        {"success": False, "message": msg},
+        status=HTTPStatus.BAD_REQUEST,
+        safe=False,
     )
-    return redirect("assets:index")
 
 
 @login_required
@@ -243,7 +256,16 @@ def mark_request_completed(request, request_id: int):
     # Check Cooldown
     cooldown = get_apr_cooldown(request, request_id, "completed")
     if cooldown:
-        return redirect("assets:index")
+        return JsonResponse(
+            {
+                "success": False,
+                "message": _(
+                    "You are on cooldown. Please wait 60 seconds before trying again."
+                ),
+            },
+            status=HTTPStatus.FORBIDDEN,
+            safe=False,
+        )
 
     user_request = get_object_or_404(Request, pk=request_id)
     is_completed = user_request.mark_request(
@@ -263,11 +285,11 @@ def mark_request_completed(request, request_id: int):
             user_request_requesting_user=user_request.requesting_user,
         )
         user_request.notify_request_completed()
-        messages.info(
-            request,
-            msg,
+        return JsonResponse(
+            {"success": True, "message": msg},
+            status=HTTPStatus.OK,
+            safe=False,
         )
-        return redirect("assets:index")
     msg = _(
         "The request for Order {user_request_pk} from {user_request_requesting_user} has failed."
     ).format(
@@ -275,11 +297,11 @@ def mark_request_completed(request, request_id: int):
         user_request_requesting_user=user_request.requesting_user,
     )
 
-    messages.error(
-        request,
-        msg,
+    return JsonResponse(
+        {"success": False, "message": msg},
+        status=HTTPStatus.BAD_REQUEST,
+        safe=False,
     )
-    return redirect("assets:index")
 
 
 @login_required
@@ -290,7 +312,12 @@ def mark_request_open(request, request_id: int):
     # Check Cooldown
     cooldown = get_apr_cooldown(request, request_id, "open")
     if cooldown:
-        return redirect("assets:index")
+        msg = _("You are on cooldown. Please wait 60 seconds before trying again.")
+        return JsonResponse(
+            {"success": True, "message": msg},
+            status=HTTPStatus.FORBIDDEN,
+            safe=False,
+        )
 
     user_request = get_object_or_404(Request, pk=request_id)
     is_completed = user_request.mark_request(
@@ -309,11 +336,11 @@ def mark_request_open(request, request_id: int):
             user_request_requesting_user=user_request.requesting_user,
         )
         user_request.notify_request_open(request)
-        messages.info(
-            request,
-            msg,
+        return JsonResponse(
+            {"success": True, "message": msg},
+            status=HTTPStatus.OK,
+            safe=False,
         )
-        return redirect("assets:index")
     msg = _(
         "The request for Order {user_request_pk} from {user_request_requesting_user} has failed."
     ).format(
@@ -321,8 +348,8 @@ def mark_request_open(request, request_id: int):
         user_request_requesting_user=user_request.requesting_user,
     )
 
-    messages.error(
-        request,
-        msg,
+    return JsonResponse(
+        {"success": False, "message": msg},
+        status=HTTPStatus.BAD_REQUEST,
+        safe=False,
     )
-    return redirect("assets:index")

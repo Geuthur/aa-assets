@@ -1,7 +1,5 @@
 """Models for assets."""
 
-import json
-
 from django.contrib.auth.models import Permission, User
 
 # Django
@@ -552,6 +550,7 @@ class Request(models.Model):
         related_name="+",
         help_text="The user that manage the request",
     )
+
     STATUS_OPEN = "OP"
     STATUS_COMPLETED = "CD"
     STATUS_CANCELLED = "CL"
@@ -590,10 +589,10 @@ class Request(models.Model):
 
     def convert_order_to_notifiy(self) -> str:
         """Convert order to a string for notification."""
-        assets = RequestAssets.objects.filter(requestor=self)
+        requests = RequestAssets.objects.filter(requestor=self)
         msg = ""
-        for asset in assets:
-            msg += f"{asset.eve_type.name} x {asset.quantity}\n"
+        for request in requests:
+            msg += f"{request.asset.eve_type.name} x {request.quantity}\n"
         return msg
 
     def requesting_character_name(self) -> str:
@@ -731,23 +730,16 @@ class RequestAssets(models.Model):
         help_text="The request this asset belongs to",
     )
 
-    eve_type = models.ForeignKey(
-        EveType,
+    asset = models.ForeignKey(
+        Assets,
         on_delete=models.CASCADE,
         related_name="+",
-        help_text="asset type",
+        help_text="The asset this request belongs to",
     )
 
     quantity = models.PositiveIntegerField(
         help_text="Quantity of assets",
         default=1,
-    )
-
-    location = models.ForeignKey(
-        Location,
-        on_delete=models.CASCADE,
-        related_name="+",
-        help_text="asset location",
     )
 
     class Meta:

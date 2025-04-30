@@ -1,0 +1,44 @@
+{% load i18n %}
+{% load static %}
+{% load humanize %}
+{% load evelinks %}
+{% load assets %}
+
+{% if orders %}
+    <div>
+        <h4 id="modal-title">
+            {{ title }}
+        </h4>
+    </div>
+    <div class="card bg-secondary rounded mb-3">
+        <header class="bg-primary rounded-top px-2 py-1">
+            <h3 class="me-3">{% trans "Order List" %}</h3>
+        </header>
+        <table class="table table-dark table-striped table-hover w-100 requests" id="order">
+            <thead>
+                <tr>
+                    <th class="col-icon"></th>
+                    <th class="col-item-name">{% translate "Order List" %}</th>
+                    <th class="col-amount">{% translate "Quantity" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    {% for order in orders %}
+                        <td class="col-icon">
+                            <img src="{{ order.item_id|type_icon_url:32 }}">
+                        </td>
+                        <td class="col-item-name">
+                            {{ order.name }}
+                        </td>
+                        <td class="col-amount">
+                            {{ order.quantity|intcomma }}
+                        </td>
+                    {% endfor %}
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% else %}
+    {% trans "No data found..." %}
+{% endif %}
