@@ -19,7 +19,6 @@ from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCorporationInfo
 
 from assets import forms
-from assets.api.helpers import get_manage_permission
 from assets.hooks import add_info_to_context, get_extension_logger
 from assets.models import Assets, Owner, Request, RequestAssets
 from assets.tasks import update_assets_for_owner
@@ -45,8 +44,9 @@ def set_apr_cooldown(user, request_id, mode):
 def validate_asset_quantity(asset: Assets, amount: int) -> tuple[bool, str]:
     """Validates if the requested amount exceeds the available quantity."""
     requests = RequestAssets.objects.filter(
-        asset=asset,
-        requestor__status=Request.STATUS_OPEN,
+        asset_pk=asset.pk,
+        eve_type=asset.eve_type,
+        request__status=Request.STATUS_OPEN,
     ).values_list("quantity", flat=True)
     if requests and sum(requests) + amount > asset.quantity:
         return False
@@ -58,9 +58,10 @@ def create_request_asset_object(
 ) -> RequestAssets:
     """Create a RequestAssets Object."""
     return RequestAssets(
-        name=user_request.requesting_user.username,
-        requestor=user_request,
-        asset=asset,
+        name=asset.eve_type.name,
+        request=user_request,
+        asset_pk=asset.pk,
+        eve_type=asset.eve_type,
         quantity=amount,
     )
 
@@ -71,10 +72,12 @@ def index(request):
     context = {
         "corporation_id": request.user.profile.main_character.corporation_id,
         "title": _("Assets"),
+        "location_id": 1049111087642,
+        "location_flag": "corpsag5",
         "forms": {
             "single_request": forms.RequestOrder(),
             "multi_request": forms.RequestMultiOrder(
-                location_flag="corpsag5", location_id=1042478386825
+                location_flag="corpsag5", location_id=1049111087642
             ),
         },
     }
@@ -149,7 +152,7 @@ def create_order(request):
     # Check Permission
     form = forms.RequestOrder(request.POST)
     form_multi = forms.RequestMultiOrder(
-        request.POST, location_flag="corpsag5", location_id=1042478386825
+        request.POST, location_flag="corpsag5", location_id=1049111087642
     )
 
     if form.is_valid():
@@ -261,16 +264,6 @@ def create_order(request):
 @require_POST
 def mark_request_canceled(request, request_id: int):
     """Render view to mark a order request as canceled."""
-    perm = get_manage_permission(request)
-    if not perm:
-        return JsonResponse(
-            {
-                "success": False,
-                "message": _("You do not have permission to manage this request."),
-            },
-            status=HTTPStatus.FORBIDDEN,
-            safe=False,
-        )
     # Check Cooldown
     cooldown = get_apr_cooldown(request, request_id, "canceled")
     if cooldown:
@@ -325,17 +318,6 @@ def mark_request_canceled(request, request_id: int):
 @require_POST
 def mark_request_completed(request, request_id: int):
     """Render view to mark a order request as completed."""
-    perm = get_manage_permission(request)
-    if not perm:
-        return JsonResponse(
-            {
-                "success": False,
-                "message": _("You do not have permission to manage this request."),
-            },
-            status=HTTPStatus.FORBIDDEN,
-            safe=False,
-        )
-
     # Check Cooldown
     cooldown = get_apr_cooldown(request, request_id, "completed")
     if cooldown:
@@ -392,17 +374,6 @@ def mark_request_completed(request, request_id: int):
 @require_POST
 def mark_request_open(request, request_id: int):
     """Render view to mark a order request as open."""
-    perm = get_manage_permission(request)
-    if not perm:
-        return JsonResponse(
-            {
-                "success": False,
-                "message": _("You do not have permission to manage this request."),
-            },
-            status=HTTPStatus.FORBIDDEN,
-            safe=False,
-        )
-
     # Check Cooldown
     cooldown = get_apr_cooldown(request, request_id, "open")
     if cooldown:

@@ -6,8 +6,6 @@ $(document).ready(() => {
     let LocationID = null;
     let LocationFLAG = null;
 
-    console.log(assetsSettings.createRequestUrl);
-
     const tableAssets = AssetsTableVar.DataTable({
         ajax: {
             url: assetsSettings.assetsUrl,
@@ -76,7 +74,7 @@ $(document).ready(() => {
                 }
             }
         ],
-        order: [[4, 'desc']],
+        order: [[1, 'asc']],
         pageLength: 25,
         autoWidth: false,
         columnDefs: [

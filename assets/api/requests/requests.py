@@ -175,8 +175,7 @@ class RequestsApiEndpoints:
                 return 403, "Request does not exist"
 
             orders = RequestAssets.objects.filter(
-                requestor__requesting_user=request.user,
-                requestor__pk=request_id,
+                request__pk=request_id,
             )
 
             output = []
@@ -184,8 +183,8 @@ class RequestsApiEndpoints:
             for order in orders:
                 output.append(
                     {
-                        "item_id": order.asset.eve_type.id,
-                        "name": order.asset.eve_type.name,
+                        "item_id": order.eve_type.id,
+                        "name": order.eve_type.name,
                         "quantity": order.quantity,
                     }
                 )

@@ -601,10 +601,10 @@ class Request(models.Model):
 
     def convert_order_to_notifiy(self) -> str:
         """Convert order to a string for notification."""
-        requests = RequestAssets.objects.filter(requestor=self)
+        requests = RequestAssets.objects.filter(request=self)
         msg = ""
         for request in requests:
-            msg += f"{request.asset.eve_type.name} x {request.quantity}\n"
+            msg += f"{request.eve_type.name} x {request.quantity}\n"
         return msg
 
     def requesting_character_name(self) -> str:
@@ -732,21 +732,25 @@ class RequestAssets(models.Model):
 
     name = models.CharField(
         max_length=100,
-        help_text="Name of the Requestor",
+        help_text="Name of the Asset",
     )
 
-    requestor = models.ForeignKey(
+    request = models.ForeignKey(
         Request,
         on_delete=models.CASCADE,
         related_name="+",
         help_text="The request this asset belongs to",
     )
 
-    asset = models.ForeignKey(
-        Assets,
+    asset_pk = models.PositiveBigIntegerField(
+        help_text="The asset this request belongs to",
+    )
+
+    eve_type = models.ForeignKey(
+        EveType,
         on_delete=models.CASCADE,
         related_name="+",
-        help_text="The asset this request belongs to",
+        help_text="The asset type this request belongs to",
     )
 
     quantity = models.PositiveIntegerField(
