@@ -4,8 +4,8 @@ from django.contrib.auth.models import Permission, User
 
 # Django
 from django.db import models
+from django.utils import timezone
 from django.utils.html import format_html
-from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from esi.errors import TokenError
 from esi.models import Token
@@ -29,7 +29,11 @@ from assets.managers import (
     get_market_price,
 )
 from assets.providers import esi
-from assets.task_helpers.etag_helpers import etag_results
+from assets.task_helpers.etag_helpers import (
+    HTTPGatewayTimeoutError,
+    NotModifiedError,
+    etag_results,
+)
 
 logger = get_extension_logger(__name__)
 
@@ -111,19 +115,28 @@ class Owner(models.Model):
         return self.character.character
 
     def update_assets_esi(self, force_refresh=False):
-        if self.corporation:
-            token = self.valid_token(
-                [
-                    "esi-universe.read_structures.v1",
-                    "esi-assets.read_corporation_assets.v1",
-                ]
-            )
-            assets = self._fetch_corporate_assets(token, force_refresh=force_refresh)
-        else:
-            token = self.valid_token(
-                ["esi-universe.read_structures.v1", "esi-assets.read_assets.v1"]
-            )
-            assets = self._fetch_personal_assets(token, force_refresh=force_refresh)
+        try:
+            if self.corporation:
+                token = self.valid_token(
+                    [
+                        "esi-universe.read_structures.v1",
+                        "esi-assets.read_corporation_assets.v1",
+                    ]
+                )
+                assets = self._fetch_corporate_assets(
+                    token, force_refresh=force_refresh
+                )
+            else:
+                token = self.valid_token(
+                    ["esi-universe.read_structures.v1", "esi-assets.read_assets.v1"]
+                )
+                assets = self._fetch_personal_assets(token, force_refresh=force_refresh)
+        except NotModifiedError:
+            logger.info("No new Assets for: %s", self.name)
+            return
+        except HTTPGatewayTimeoutError:
+            logger.info("Gateway Timeout for: %s", self.name)
+            return
 
         items = []
         item_ids = list(
@@ -159,7 +172,6 @@ class Owner(models.Model):
                 price=price,
             )
             items.append(asset_item)
-
         if items:
             # Delete all assets before adding new ones
             self.flush_assets()
@@ -168,6 +180,8 @@ class Owner(models.Model):
             logger.info("Updated %s assets for %s", len(assets), self.name)
         else:
             logger.info("No updates found for %s", self.name)
+        self.last_update = timezone.now()
+        self.save()
 
     def _fetch_corporate_assets(self, token, force_refresh=False) -> list:
         """Fetch all assets for this owner from ESI."""
@@ -529,6 +543,8 @@ class Assets(models.Model):
 class Request(models.Model):
     """A request system for Orders."""
 
+    objects = RequestManager()
+
     name = models.CharField(
         max_length=100,
         help_text="Name of the Requestor",
@@ -569,22 +585,18 @@ class Request(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     closed_at = models.DateTimeField(blank=True, null=True, db_index=True)
 
-    objects = RequestManager()
-
     class Meta:
         default_permissions = ()
 
     def __str__(self) -> str:
         character_name = self.requesting_character_name()
-        order = self.order
-        return f"{character_name}'s request for {order}"
+        return f"{character_name}'s request"
 
     def __repr__(self) -> str:
         character_name = self.requesting_character_name()
         return (
             f"{self.__class__.__name__}(id={self.pk}, "
             f"requesting_user='{character_name}', "
-            f"order='{self.order}')"
         )
 
     def convert_order_to_notifiy(self) -> str:
@@ -611,7 +623,7 @@ class Request(models.Model):
         if admin or (can_requestor_edit and self.requesting_user == user):
             logger.debug("Success to mark request")
             if closed:
-                self.closed_at = now()
+                self.closed_at = timezone.now()
             else:
                 self.closed_at = None
 

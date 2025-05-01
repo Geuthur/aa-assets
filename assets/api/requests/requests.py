@@ -8,7 +8,12 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 from assets.api import schema
-from assets.api.requests.helper import _request_actions, _request_list
+from assets.api.helpers import get_character_permission, get_manage_permission
+from assets.api.requests.helper import (
+    _my_request_actions,
+    _request_actions,
+    _request_list,
+)
 from assets.hooks import get_extension_logger
 from assets.models import Request, RequestAssets
 
@@ -25,12 +30,13 @@ class RequestsApiEndpoints:
             tags=self.tags,
         )
         def get_requests(request: WSGIRequest):
-            perms = request.user.has_perm("assets.manage_requests")
+            requests_data = Request.objects.visible_to(request.user)
 
-            if not perms:
+            if requests_data is None:
                 return 403, "Permission Denied"
 
-            requests_data = Request.objects.all()
+            perm = get_character_permission(request)
+            admin = get_manage_permission(request)
 
             skip_old_entrys = timezone.now() - timezone.timedelta(days=3)
 
@@ -52,7 +58,7 @@ class RequestsApiEndpoints:
                         "status": req.get_status_display(),
                         "order": _request_list(
                             req,
-                            perms,
+                            perm,
                             request,
                         ),
                         "action": req.status,
@@ -64,7 +70,7 @@ class RequestsApiEndpoints:
                         "requestor": req.requesting_user.username,
                         "actions": _request_actions(
                             req,
-                            perms,
+                            admin,
                             request,
                         ),
                     }
@@ -78,12 +84,15 @@ class RequestsApiEndpoints:
             tags=self.tags,
         )
         def get_my_requests(request):
-            perms = request.user.has_perm("assets.basic_access")
+            requests_data = Request.objects.visible_to(request.user)
 
-            if not perms:
+            if requests_data is None:
                 return 403, "Permission Denied"
 
-            requests_data = Request.objects.filter(requesting_user=request.user)
+            requests_data = requests_data.filter(requesting_user=request.user)
+
+            perm = get_character_permission(request)
+            admin = get_manage_permission(request)
 
             skip_old_entrys = timezone.now() - timezone.timedelta(days=3)
 
@@ -101,7 +110,7 @@ class RequestsApiEndpoints:
                         "status": req.get_status_display(),
                         "order": _request_list(
                             req,
-                            perms,
+                            perm,
                             request,
                         ),
                         "action": req.status,
@@ -111,9 +120,9 @@ class RequestsApiEndpoints:
                             req.approver_user.username if req.approver_user else None
                         ),
                         "requestor": req.requesting_user.username,
-                        "actions": _request_actions(
+                        "actions": _my_request_actions(
                             req,
-                            perms,
+                            admin,
                             request,
                         ),
                     }

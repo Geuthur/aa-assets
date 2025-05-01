@@ -19,6 +19,7 @@ from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCorporationInfo
 
 from assets import forms
+from assets.api.helpers import get_manage_permission
 from assets.hooks import add_info_to_context, get_extension_logger
 from assets.models import Assets, Owner, Request, RequestAssets
 from assets.tasks import update_assets_for_owner
@@ -260,6 +261,16 @@ def create_order(request):
 @require_POST
 def mark_request_canceled(request, request_id: int):
     """Render view to mark a order request as canceled."""
+    perm = get_manage_permission(request)
+    if not perm:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": _("You do not have permission to manage this request."),
+            },
+            status=HTTPStatus.FORBIDDEN,
+            safe=False,
+        )
     # Check Cooldown
     cooldown = get_apr_cooldown(request, request_id, "canceled")
     if cooldown:
@@ -314,6 +325,17 @@ def mark_request_canceled(request, request_id: int):
 @require_POST
 def mark_request_completed(request, request_id: int):
     """Render view to mark a order request as completed."""
+    perm = get_manage_permission(request)
+    if not perm:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": _("You do not have permission to manage this request."),
+            },
+            status=HTTPStatus.FORBIDDEN,
+            safe=False,
+        )
+
     # Check Cooldown
     cooldown = get_apr_cooldown(request, request_id, "completed")
     if cooldown:
@@ -370,6 +392,17 @@ def mark_request_completed(request, request_id: int):
 @require_POST
 def mark_request_open(request, request_id: int):
     """Render view to mark a order request as open."""
+    perm = get_manage_permission(request)
+    if not perm:
+        return JsonResponse(
+            {
+                "success": False,
+                "message": _("You do not have permission to manage this request."),
+            },
+            status=HTTPStatus.FORBIDDEN,
+            safe=False,
+        )
+
     # Check Cooldown
     cooldown = get_apr_cooldown(request, request_id, "open")
     if cooldown:

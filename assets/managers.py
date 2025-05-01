@@ -15,6 +15,8 @@ from django.utils.timezone import now
 # Alliance Auth
 from eveuniverse.models import EveEntity, EveSolarSystem, EveType
 
+from allianceauth.eveonline.models import EveCharacter
+
 # AA Voices of War
 from assets import __version__
 from assets.app_settings import ASSETS_LOCATION_STALE_HOURS, STORAGE_BASE_KEY
@@ -225,17 +227,153 @@ LocationManager = LocationManagerBase.from_queryset(LocationQuerySet)
 
 
 class OwnerQuerySet(models.QuerySet):
-    pass
+    def visible_to(self, user):
+        # superusers get all visible
+        if user.is_superuser:
+            logger.debug("Returning all for superuser %s.", user)
+            return self
+
+        if user.has_perm("assets.manage_requests"):
+            logger.debug("Returning all for %s.", user)
+            return self
+
+        try:
+            char = user.profile.main_character
+            assert char
+            queries = [models.Q(requesting_user=user)]
+
+            logger.debug(
+                "%s queries for user %s visible chracters.", len(queries), user
+            )
+
+            query = queries.pop()
+            for q in queries:
+                query |= q
+            return self.filter(query)
+        except AssertionError:
+            logger.debug("User %s has no main character. Nothing visible.", user)
+            return self.none()
+
+    def manage_to(self, user):
+        # superusers get all visible
+        if user.is_superuser:
+            logger.debug(
+                "Returning all for superuser %s.",
+                user,
+            )
+            return self
+
+        if user.has_perm("assets.manage_requests"):
+            logger.debug("Returning all for Assets Manager %s.", user)
+            return self
+
+        try:
+            char = user.profile.main_character
+            assert char
+            query = None
+
+            logger.debug("Returning own for User %s.", user)
+
+            if query is None:
+                return self.none()
+
+            return self.filter(query)
+        except AssertionError:
+            logger.debug("User %s has no main character. Nothing visible.", user)
+            return self.none()
 
 
 class OwnerManagerBase(models.Manager):
-    pass
+    def get_queryset(self):
+        return OwnerQuerySet(self.model, using=self._db)
+
+    @staticmethod
+    def visible_eve_characters(user):
+        qs = EveCharacter.objects.get_queryset()
+        if user.is_superuser:
+            logger.debug("Returning all for superuser %s.", user)
+            return qs.all()
+
+        if user.has_perm("assets.manage_requests"):
+            logger.debug("Returning all for Assets Manager %s.", user)
+            return qs.all()
+
+        try:
+            char = user.profile.main_character
+            assert char
+            queries = [models.Q(character_ownership__user=user)]
+
+            logger.debug("%s queries for user %s visible.", len(queries), user)
+
+            query = queries.pop()
+            for q in queries:
+                query |= q
+            return qs.filter(query)
+        except AssertionError:
+            logger.debug("User %s has no main character. Nothing visible.", user)
+            return qs.none()
+
+    def visible_to(self, user):
+        return self.get_queryset().visible_to(user)
 
 
 OwnerManager = OwnerManagerBase.from_queryset(OwnerQuerySet)
 
 
 class RequestQuerySet(models.QuerySet):
+    def visible_to(self, user):
+        # superusers get all visible
+        if user.is_superuser:
+            logger.debug("Returning all for superuser %s.", user)
+            return self
+
+        if user.has_perm("assets.manage_requests"):
+            logger.debug("Returning all for Assets Manager %s.", user)
+            return self
+
+        try:
+            char = user.profile.main_character
+            assert char
+            queries = [models.Q(requesting_user=user)]
+
+            logger.debug("%s queries for user %s visible.", len(queries), user)
+
+            query = queries.pop()
+            for q in queries:
+                query |= q
+            return self.filter(query)
+        except AssertionError:
+            logger.debug("User %s has no main character. Nothing visible.", user)
+            return self.none()
+
+    def manage_to(self, user):
+        # superusers get all visible
+        if user.is_superuser:
+            logger.debug(
+                "Returning all corps for superuser %s.",
+                user,
+            )
+            return self
+
+        if user.has_perm("assets.manage_requests"):
+            logger.debug("Returning all for Assets Manager %s.", user)
+            return self
+
+        try:
+            char = user.profile.main_character
+            assert char
+            query = None
+
+            logger.debug("Returning own for User %s.", user)
+
+            if query is None:
+                return self.none()
+
+            return self.filter(query)
+        except AssertionError:
+            logger.debug("User %s has no main character. Nothing visible.", user)
+            return self.none()
+
     def requests_open(self) -> models.QuerySet:
         """Add filter to only include requests with open status."""
         request_query = self.filter(
@@ -254,6 +392,64 @@ class RequestQuerySet(models.QuerySet):
 
 
 class RequestManagerBase(models.Manager):
+    def get_queryset(self):
+        return RequestQuerySet(self.model, using=self._db)
+
+    @staticmethod
+    def visible_eve_characters(user):
+        qs = EveCharacter.objects.get_queryset()
+        if user.is_superuser:
+            logger.debug("Returning all for superuser %s.", user)
+            return qs.all()
+
+        if user.has_perm("assets.manage_requests"):
+            logger.debug("Returning all for Assets Manager %s.", user)
+            return qs.all()
+
+        try:
+            char = user.profile.main_character
+            assert char
+            queries = [models.Q(character_ownership__user=user)]
+
+            logger.debug("%s queries for user %s visible.", len(queries), user)
+
+            query = queries.pop()
+            for q in queries:
+                query |= q
+            return qs.filter(query)
+        except AssertionError:
+            logger.debug("User %s has no main character. Nothing visible.", user)
+            return qs.none()
+
+    @staticmethod
+    def manage_eve_characters(user):
+        qs = EveCharacter.objects.get_queryset()
+        if user.is_superuser:
+            logger.debug("Returning all for superuser %s.", user)
+            return qs.all()
+
+        if user.has_perm("assets.manage_requests"):
+            logger.debug("Returning all for Assets Manager %s.", user)
+            return qs.all()
+
+        try:
+            char = user.profile.main_character
+            assert char
+            queries = [models.Q(character_ownership__user=user)]
+
+            logger.debug("%s queries for user %s visible.", len(queries), user)
+
+            query = queries.pop()
+            for q in queries:
+                query |= q
+            return qs.filter(query)
+        except AssertionError:
+            logger.debug("User %s has no main character. Nothing visible.", user)
+            return qs.none()
+
+    def visible_to(self, user):
+        return self.get_queryset().visible_to(user)
+
     def select_related_default(self) -> models.QuerySet:
         """Add default select related to this query."""
         return self.select_related(
