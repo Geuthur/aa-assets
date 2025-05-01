@@ -1,6 +1,5 @@
 """PvE Views"""
 
-import datetime
 from http import HTTPStatus
 
 from django.contrib import messages
@@ -10,7 +9,6 @@ from django.core.cache import cache
 # Django
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
-from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 from esi.decorators import token_required
@@ -105,17 +103,12 @@ def add_corp(request, token) -> HttpResponse:
     )
 
     owner, _ = Owner.objects.update_or_create(character=char, corporation=corp)
-    skip_date = timezone.now() - datetime.timedelta(hours=2)
 
-    if owner.last_update <= skip_date:
-        update_assets_for_owner.apply_async(
-            args=[owner.pk], kwargs={"force_refresh": True}, priority=6
-        )
-        msg = f"{owner.name} successfully added/updated to Assets"
-        messages.info(request, msg)
-        return redirect("assets:index")
-    msg = f"{owner.name} is already up to date"
-    messages.warning(request, msg)
+    update_assets_for_owner.apply_async(
+        args=[owner.pk], kwargs={"force_refresh": True}, priority=6
+    )
+    msg = f"{owner.name} successfully added/updated to Assets"
+    messages.info(request, msg)
     return redirect("assets:index")
 
 
@@ -130,17 +123,12 @@ def add_char(request, token) -> HttpResponse:
         corporation=None,
         character=char,
     )
-    skip_date = timezone.now() - datetime.timedelta(hours=2)
 
-    if owner.last_update <= skip_date:
-        update_assets_for_owner.apply_async(
-            args=[owner.pk], kwargs={"force_refresh": True}, priority=6
-        )
-        msg = f"{owner.name} successfully added/updated to Assets"
-        messages.info(request, msg)
-        return redirect("assets:index")
-    msg = f"{owner.name} is already up to date"
-    messages.warning(request, msg)
+    update_assets_for_owner.apply_async(
+        args=[owner.pk], kwargs={"force_refresh": True}, priority=6
+    )
+    msg = f"{owner.name} successfully added/updated to Assets"
+    messages.info(request, msg)
     return redirect("assets:index")
 
 
