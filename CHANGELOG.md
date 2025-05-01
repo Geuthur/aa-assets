@@ -13,6 +13,7 @@
 - Request Statistic API
 - Button System
 - RequestAssets Model
+- Permission System
 
 ### Changed
 
@@ -20,6 +21,7 @@
 - Refactor Modal System
 - Handle Button HTML in Python
 - Fetch Menu Request Count from API
+- Task Update Interval
 
 ## [0.1.2] - 2024-09-23
 
