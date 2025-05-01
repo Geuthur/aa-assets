@@ -59,6 +59,8 @@ def create_request_asset_object(
         name=asset.eve_type.name,
         request=user_request,
         asset_pk=asset.pk,
+        asset_location_id=asset.location.id,
+        asset_location_flag=asset.location_flag,
         eve_type=asset.eve_type,
         quantity=amount,
     )

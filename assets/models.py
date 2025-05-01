@@ -182,6 +182,30 @@ class Owner(models.Model):
             logger.info("No updates found for %s", self.name)
         self.last_update = timezone.now()
         self.save()
+        self.update_order_assets()
+
+    def update_order_assets(self):
+        # Filter offene Bestellungen
+        orders = RequestAssets.objects.filter(request__status=Request.STATUS_OPEN)
+
+        orders_to_update = []
+        for order in orders:
+            try:
+                asset = Assets.objects.get(
+                    eve_type=order.eve_type,
+                    location_id=order.asset_location_id,
+                    location_flag=order.asset_location_flag,
+                )
+            except Assets.DoesNotExist:
+                continue
+            if asset:
+                order.asset_pk = asset.pk
+                orders_to_update.append(order)
+
+        # Bulk-Update der Bestellungen
+        if orders_to_update:
+            logger.info("Updated %s orders for %s", len(orders_to_update), self.name)
+            RequestAssets.objects.bulk_update(orders_to_update, ["asset_pk"])
 
     def _fetch_corporate_assets(self, token, force_refresh=False) -> list:
         """Fetch all assets for this owner from ESI."""
@@ -744,6 +768,16 @@ class RequestAssets(models.Model):
 
     asset_pk = models.PositiveBigIntegerField(
         help_text="The asset this request belongs to",
+    )
+
+    asset_location_id = models.PositiveBigIntegerField(
+        help_text="The asset location this request belongs to",
+    )
+
+    asset_location_flag = models.CharField(
+        help_text="The asset location flag this request belongs to",
+        choices=Assets.LocationFlag.choices,
+        max_length=36,
     )
 
     eve_type = models.ForeignKey(
