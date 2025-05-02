@@ -17,9 +17,9 @@ from eveuniverse.models import EveEntity, EveSolarSystem, EveType
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.evelinks import dotlan
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
-from allianceauth.notifications import notify
 from app_utils.django import users_with_permission
 
+from assets.helpers.discord import send_user_notification
 from assets.hooks import get_extension_logger
 from assets.managers import (
     AssetsManager,
@@ -628,7 +628,7 @@ class Request(models.Model):
         requests = RequestAssets.objects.filter(request=self)
         msg = ""
         for request in requests:
-            msg += f"{request.eve_type.name} x {request.quantity}\n"
+            msg += f"\n{request.eve_type.name} x {request.quantity}"
         return msg
 
     def requesting_character_name(self) -> str:
@@ -666,79 +666,79 @@ class Request(models.Model):
 
     def notify_new_request(self) -> None:
         """Notify approvers that a Order request has been created."""
+        users = list(self.approvers())
 
-        for approver in self.approvers():
-            notify(
-                title=(f"{self.requesting_user} has Requested a Order"),
-                message=(
-                    format_html(
-                        "{} has requested the following items:{}\n",
-                        self.requesting_user,
-                        self.convert_order_to_notifiy(),
-                    )
-                ),
-                user=approver,
+        title = _(f"{self.requesting_user} has Requested a Order")
+        msg = _(
+            f"{self.requesting_user} has requested the following items:{self.convert_order_to_notifiy()}\n"
+        )
+
+        for approver in users:
+            send_user_notification.delay(
+                user_id=approver.pk,
+                title=title,
+                message=format_html(msg),
+                embed_message=True,
                 level="info",
             )
 
     def notify_request_completed(self) -> None:
-        """Notify approvers that a Order marked as completed."""
-        notify(
-            title=(
-                f"{self.approver_user} has completed the Order for {self.requesting_user} ID: {self.pk}."
-            ),
-            message=(
-                format_html(
-                    "{} has completed the following items:{}\n",
-                    self.approver_user,
-                    self.convert_order_to_notifiy(),
-                )
-            ),
-            user=self.requesting_user,
+        """Notify requestor that a Order marked as completed."""
+        title = _(
+            f"{self.approver_user} has completed the Order for {self.requesting_user} ID: {self.pk}."
+        )
+        msg = _(
+            f"{self.approver_user} has completed the following items:{self.convert_order_to_notifiy()}\n"
+        )
+
+        send_user_notification.delay(
+            user_id=self.requesting_user.pk,
+            title=title,
+            message=format_html(msg),
+            embed_message=True,
             level="success",
         )
 
     def notify_request_canceled(self, user=None) -> None:
-        """Notify approvers that a Order marked as canceled."""
+        """Notify approvers and requestor that a Order marked as canceled."""
         users = list(self.approvers())
 
         if self.requesting_user == user:
             canceler = self.requesting_user
-
         else:
             canceler = user
             users += [self.requesting_user]
 
+        title = _(
+            f"{canceler} has canceled the Order for {self.requesting_user} ID: {self.pk}."
+        )
+        msg = _(
+            f"{canceler} has canceled the following items:{self.convert_order_to_notifiy()}\n"
+        )
+
         for approver in users:
-            notify(
-                title=(
-                    f"{canceler} has canceled the Order for {self.requesting_user} ID: {self.pk}."
-                ),
-                message=(
-                    format_html(
-                        "{} has canceled the following items:{}\n",
-                        canceler,
-                        self.convert_order_to_notifiy(),
-                    )
-                ),
-                user=approver,
+            send_user_notification.delay(
+                user_id=approver.pk,
+                title=title,
+                message=format_html(msg),
+                embed_message=True,
                 level="danger",
             )
 
     def notify_request_open(self, request) -> None:
-        """Notify approvers that a Order marked as reopened."""
-        notify(
-            title=(
-                f"{request.user} has reopened the Order for {self.requesting_user} ID: {self.pk}."
-            ),
-            message=(
-                format_html(
-                    "{} has reopened the following items:{}\n",
-                    request.user,
-                    self.convert_order_to_notifiy(),
-                )
-            ),
-            user=self.requesting_user,
+        """Notify requestor that a Order marked as reopened."""
+        title = _(
+            f"{request.user} has reopened the Order for {self.requesting_user} ID: {self.pk}."
+        )
+        msg = _(
+            f"{request.user} has reopened the following items:{self.convert_order_to_notifiy()}\n"
+        )
+
+        send_user_notification.delay(
+            user_id=self.requesting_user.pk,
+            title=title,
+            message=format_html(msg),
+            embed_message=True,
             level="warning",
         )
 

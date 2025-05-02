@@ -16,11 +16,7 @@ def _request_list(assets_request: Request, perm: bool, request: WSGIRequest) -> 
         "assets/partials/buttons/confirm.html",
         assets_request,
         {
-            "title": _("Cancel Request"),
-            "text": _("Cancel Request for {requestor} - ID: {request_id}").format(
-                requestor=assets_request.requesting_user.username,
-                request_id=assets_request.pk,
-            ),
+            "title": _("Get Order Information"),
             "modal": "modalViewOrderContainer",
             "icon": "fas fa-info",
             "action": resolve_url("assets:api:get_request_order", assets_request.pk),
@@ -43,7 +39,7 @@ def _request_actions(assets_request: Request, perm: bool, request: WSGIRequest) 
             "assets/partials/buttons/confirm.html",
             assets_request,
             {
-                "title": _("Cancel Request"),
+                "title": _("Mark Request as Canceled"),
                 "text": _("Cancel Request for {requestor} - ID: {request_id}").format(
                     requestor=assets_request.requesting_user.username,
                     request_id=assets_request.pk,
@@ -62,8 +58,8 @@ def _request_actions(assets_request: Request, perm: bool, request: WSGIRequest) 
             "assets/partials/buttons/confirm.html",
             assets_request,
             {
-                "title": _("Confirm Request"),
-                "text": _("Confirm Request for {requestor} - ID: {request_id}").format(
+                "title": _("Mark Request as Completed"),
+                "text": _("Complete Request for {requestor} - ID: {request_id}").format(
                     requestor=assets_request.requesting_user.username,
                     request_id=assets_request.pk,
                 ),
@@ -81,7 +77,7 @@ def _request_actions(assets_request: Request, perm: bool, request: WSGIRequest) 
             "assets/partials/buttons/confirm.html",
             assets_request,
             {
-                "title": _("Reopen Request"),
+                "title": _("Mark Request as Open"),
                 "text": _("Reopen Request for {requestor} - ID: {request_id}").format(
                     requestor=assets_request.requesting_user.username,
                     request_id=assets_request.pk,
@@ -113,7 +109,7 @@ def _my_request_actions(
             "assets/partials/buttons/confirm.html",
             assets_request,
             {
-                "title": _("Cancel Request"),
+                "title": _("Mark Request as Canceled"),
                 "text": _("Cancel Request for {requestor} - ID: {request_id}").format(
                     requestor=assets_request.requesting_user.username,
                     request_id=assets_request.pk,
@@ -132,7 +128,7 @@ def _my_request_actions(
             "assets/partials/buttons/confirm.html",
             assets_request,
             {
-                "title": _("Reopen Request"),
+                "title": _("Mark Request as Open"),
                 "text": _("Reopen Request for {requestor} - ID: {request_id}").format(
                     requestor=assets_request.requesting_user.username,
                     request_id=assets_request.pk,

@@ -5,6 +5,7 @@ from http import HTTPStatus
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required, permission_required
 from django.core.cache import cache
+from django.db import transaction
 
 # Django
 from django.http import HttpResponse, JsonResponse
@@ -178,10 +179,11 @@ def create_order(request):
 
         # Create RequestAssets object
         # and save it to the database
-        asset_request = create_request_asset_object(user_request, asset, amount)
-        user_request.save()
-        asset_request.save()
-
+        with transaction.atomic():
+            asset_request = create_request_asset_object(user_request, asset, amount)
+            user_request.save()
+            asset_request.save()
+            user_request.notify_new_request()
         return JsonResponse(
             {"success": True, "message": "Order created successfully."},
             status=HTTPStatus.OK,
@@ -225,9 +227,11 @@ def create_order(request):
                 exceeds_items.append(asset.eve_type.name)
 
         if assets:
-            user_request.save()
-            for asset_request in assets:
-                asset_request.save()
+            with transaction.atomic():
+                user_request.save()
+                for asset_request in assets:
+                    asset_request.save()
+                user_request.notify_new_request()
 
         if exceeds_items:
             error_message = f"The following items exceeds the available quantity {', '.join(exceeds_items)} and are not included in your order."
