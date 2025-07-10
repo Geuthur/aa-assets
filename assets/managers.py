@@ -17,7 +17,7 @@ from eveuniverse.models import EveEntity, EveSolarSystem, EveType
 
 from allianceauth.eveonline.models import EveCharacter
 
-# AA Voices of War
+# AA Assets
 from assets import __version__
 from assets.app_settings import ASSETS_LOCATION_STALE_HOURS, STORAGE_BASE_KEY
 from assets.hooks import get_extension_logger
@@ -44,6 +44,76 @@ def get_market_price(item_id: int) -> float:
 
 
 class AssetsQuerySet(models.QuerySet):
+    def visible_to(self, user):
+        # superusers get all visible
+        if user.is_superuser:
+            logger.debug("Returning all for superuser %s.", user)
+            return self
+
+        if user.has_perm("assets.admin_Access"):
+            logger.debug("Returning all for Admin %s.", user)
+            return self
+
+        try:
+            char = user.profile.main_character
+            assert char
+            queries = [models.Q(owner__character__character_id=char.character_id)]
+            logger.debug(queries)
+
+            logger.debug(
+                "%s queries for user %s visible characters.", len(queries), user
+            )
+
+            if user.has_perm("assets.corporation_access"):
+                logger.debug(
+                    "Returning own corporation for Corporation Manager %s.", user
+                )
+                queries.append(
+                    models.Q(owner__corporation__corporation_id=char.corporation_id)
+                )
+
+            query = queries.pop()
+            for q in queries:
+                query |= q
+            return self.filter(query)
+        except AssertionError:
+            logger.debug("User %s has no main character. Nothing visible.", user)
+            return self.none()
+
+    def manage_to(self, user: User):
+        # superusers get all visible
+        if user.is_superuser:
+            logger.debug(
+                "Returning all for superuser %s.",
+                user,
+            )
+            return self
+
+        if user.has_perm("assets.admin_Access"):
+            logger.debug("Returning all for Admin %s.", user)
+            return self
+
+        if user.has_perm("assets.manage_requests"):
+            logger.debug("Returning all for request manager %s.", user)
+            return self
+
+        try:
+            char = user.profile.main_character
+            assert char
+            queries = [models.Q(owner__user=user)]
+
+            logger.debug(
+                "%s queries for user %s visible chracters.", len(queries), user
+            )
+
+            query = queries.pop()
+            for q in queries:
+                query |= q
+            return self.filter(query)
+        except AssertionError:
+            logger.debug("User %s has no main character. Nothing visible.", user)
+            return self.none()
+
     def annotate_owner_name(self) -> models.QuerySet:
         """Add owner_name Annotation to query."""
         return self.select_related(
@@ -127,18 +197,161 @@ class AssetsQuerySet(models.QuerySet):
 
 
 class AssetsManagerBase(models.Manager):
-    pass
+    """A manager for the Assets model."""
+
+    def get_queryset(self):
+        return AssetsQuerySet(self.model, using=self._db)
+
+    def visible_to(self, user):
+        return self.get_queryset().visible_to(user)
+
+    def manage_to(self, user: User):
+        return self.get_queryset().manage_to(user)
 
 
 AssetsManager = AssetsManagerBase.from_queryset(AssetsQuerySet)
 
 
 class LocationQuerySet(models.QuerySet):
-    pass
+    def visible_to(self, user):
+        # superusers get all visible
+        if user.is_superuser:
+            logger.debug("Returning all for superuser %s.", user)
+            return self
+
+        if user.has_perm("assets.admin_Access"):
+            logger.debug("Returning all for Admin %s.", user)
+            return self
+
+        try:
+            char = user.profile.main_character
+            assert char
+            queries = [models.Q(owner_id=char.character_id)]
+
+            logger.debug(
+                "%s queries for user %s visible characters.", len(queries), user
+            )
+
+            if user.has_perm("assets.corporation_access"):
+                logger.debug(
+                    "Returning own corporation for Corporation Manager %s.", user
+                )
+                queries.append(models.Q(owner_id=char.corporation_id))
+
+            query = queries.pop()
+            for q in queries:
+                query |= q
+            return self.filter(query)
+        except AssertionError:
+            logger.debug("User %s has no main character. Nothing visible.", user)
+            return self.none()
+
+    def manage_to(self, user: User):
+        # superusers get all visible
+        if user.is_superuser:
+            logger.debug(
+                "Returning all for superuser %s.",
+                user,
+            )
+            return self
+
+        if user.has_perm("assets.admin_Access"):
+            logger.debug("Returning all for Admin %s.", user)
+            return self
+
+        if user.has_perm("assets.manage_requests"):
+            logger.debug("Returning all for request manager %s.", user)
+            return self
+
+        try:
+            char = user.profile.main_character
+            assert char
+            queries = [models.Q(owner_id=user)]
+
+            logger.debug(
+                "%s queries for user %s visible chracters.", len(queries), user
+            )
+
+            query = queries.pop()
+            for q in queries:
+                query |= q
+            return self.filter(query)
+        except AssertionError:
+            logger.debug("User %s has no main character. Nothing visible.", user)
+            return self.none()
+
+    def annotate_location_name(self) -> models.QuerySet:
+        """Annotate calculated location name field
+        with parent locations up to 3 levels up.
+        """
+        return self.annotate(
+            location_name=Case(
+                When(~Q(name=""), then=F("name")),
+                When(
+                    ~Q(parent=None) & ~Q(parent__name=""),
+                    then=F("parent__name"),
+                ),
+                When(
+                    ~Q(parent=None)
+                    & ~Q(parent__parent=None)
+                    & ~Q(parent__parent__name=""),
+                    then=F("parent__parent__name"),
+                ),
+                When(
+                    ~Q(parent=None)
+                    & ~Q(parent__parent=None)
+                    & ~Q(parent__parent__parent=None)
+                    & ~Q(parent__parent__parent__name=""),
+                    then=F("parent__parent__parent__name"),
+                ),
+                default=Concat(
+                    Value("Location #"), "id", output_field=models.CharField()
+                ),
+                output_field=models.CharField(),
+            )
+        )
+
+    def annotate_system_name(self) -> models.QuerySet:
+        """Annotate calculated system name field
+        with parent locations up to 3 levels up.
+        """
+        return self.annotate(
+            system_name=Case(
+                When(~Q(eve_solar_system=None), then=F("eve_solar_system__name")),
+                When(
+                    ~Q(parent=None) & ~Q(parent__eve_solar_system=None),
+                    then=F("parent__eve_solar_system__name"),
+                ),
+                When(
+                    ~Q(parent=None)
+                    & ~Q(parent__parent=None)
+                    & ~Q(parent__parent__eve_solar_system=None),
+                    then=F("parent__parent__eve_solar_system__name"),
+                ),
+                When(
+                    ~Q(parent=None)
+                    & ~Q(parent__parent=None)
+                    & ~Q(parent__parent__parent=None)
+                    & ~Q(parent__parent__parent__eve_solar_system=None),
+                    then=F("parent__parent__parent__eve_solar_system__name"),
+                ),
+                default=Value("N/A"),
+                output_field=models.CharField(),
+            )
+        )
 
 
 class LocationManagerBase(models.Manager):
     """A manager for the Location model."""
+
+    def get_queryset(self):
+        return LocationQuerySet(self.model, using=self._db)
+
+    def visible_to(self, user):
+        return self.get_queryset().visible_to(user)
+
+    def manage_to(self, user: User):
+        return self.get_queryset().manage_to(user)
 
     _UPDATE_EMPTY_GRACE_MINUTES = 360
 
@@ -233,18 +446,26 @@ class OwnerQuerySet(models.QuerySet):
             logger.debug("Returning all for superuser %s.", user)
             return self
 
-        if user.has_perm("assets.manage_requests"):
-            logger.debug("Returning all for %s.", user)
+        if user.has_perm("assets.admin_Access"):
+            logger.debug("Returning all for Admin %s.", user)
             return self
 
         try:
             char = user.profile.main_character
             assert char
-            queries = [models.Q(requesting_user=user)]
+            queries = [models.Q(character__user=user)]
 
             logger.debug(
-                "%s queries for user %s visible chracters.", len(queries), user
+                "%s queries for user %s visible characters.", len(queries), user
             )
+
+            if user.has_perm("assets.corporation_access"):
+                logger.debug(
+                    "Returning own corporation for Corporation Manager %s.", user
+                )
+                queries.append(
+                    models.Q(corporation__corporation_id=char.corporation_id)
+                )
 
             query = queries.pop()
             for q in queries:
@@ -254,7 +475,7 @@ class OwnerQuerySet(models.QuerySet):
             logger.debug("User %s has no main character. Nothing visible.", user)
             return self.none()
 
-    def manage_to(self, user):
+    def manage_to(self, user: User):
         # superusers get all visible
         if user.is_superuser:
             logger.debug(
@@ -263,20 +484,26 @@ class OwnerQuerySet(models.QuerySet):
             )
             return self
 
+        if user.has_perm("assets.admin_Access"):
+            logger.debug("Returning all for Admin %s.", user)
+            return self
+
         if user.has_perm("assets.manage_requests"):
-            logger.debug("Returning all for Assets Manager %s.", user)
+            logger.debug("Returning all for request manager %s.", user)
             return self
 
         try:
             char = user.profile.main_character
             assert char
-            query = None
+            queries = [models.Q(character__user=user)]
 
-            logger.debug("Returning own for User %s.", user)
+            logger.debug(
+                "%s queries for user %s visible chracters.", len(queries), user
+            )
 
-            if query is None:
-                return self.none()
-
+            query = queries.pop()
+            for q in queries:
+                query |= q
             return self.filter(query)
         except AssertionError:
             logger.debug("User %s has no main character. Nothing visible.", user)
@@ -315,6 +542,9 @@ class OwnerManagerBase(models.Manager):
 
     def visible_to(self, user):
         return self.get_queryset().visible_to(user)
+
+    def manage_to(self, user):
+        return self.get_queryset().manage_to(user)
 
 
 OwnerManager = OwnerManagerBase.from_queryset(OwnerQuerySet)

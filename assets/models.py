@@ -3,7 +3,7 @@
 from django.contrib.auth.models import Permission, User
 
 # Django
-from django.db import models
+from django.db import models, transaction
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
@@ -51,8 +51,9 @@ class General(models.Model):
         managed = False
         permissions = (
             ("basic_access", "Can access this app"),
-            ("add_personal_owner", "Can add personal owners"),
-            ("add_corporate_owner", "Can add corporate owners"),
+            ("corporation_access", "Can access own corporation assets"),
+            ("admin_access", "Can access all assets."),
+            ("manage_corporation", "Can add corporation assets"),
             ("manage_requests", "Can manage requests"),
         )
         default_permissions = ()
@@ -172,14 +173,26 @@ class Owner(models.Model):
                 price=price,
             )
             items.append(asset_item)
-        if items:
-            # Delete all assets before adding new ones
-            self.flush_assets()
-            # Create Bulk
-            Assets.objects.bulk_create(items)
-            logger.info("Updated %s assets for %s", len(assets), self.name)
-        else:
-            logger.info("No updates found for %s", self.name)
+
+        try:
+            if items:
+                with transaction.atomic():
+                    # Delete all assets before adding new ones
+                    self.flush_assets()
+                    # Create Bulk
+                    Assets.objects.bulk_create(items)
+                    logger.info("Updated %s assets for %s", len(assets), self.name)
+
+            else:
+                logger.info("No updates found for %s", self.name)
+        # pylint: disable=broad-except
+        except Exception as e:
+            logger.error(
+                "Error while updating assets for %s: %s",
+                self.name,
+                e,
+            )
+
         self.last_update = timezone.now()
         self.save()
         self.update_order_assets()

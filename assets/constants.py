@@ -21,3 +21,14 @@ DISCORD_EMBED_COLOR_MAP = {
     "warning": DISCORD_EMBED_COLOR_WARNING,
     "danger": DISCORD_EMBED_COLOR_DANGER,
 }
+
+STANDARD_FLAG = [
+    "Hangar",
+    "CorpSAG1",
+    "CorpSAG2",
+    "CorpSAG3",
+    "CorpSAG4",
+    "CorpSAG5",
+    "CorpSAG6",
+    "CorpSAG7",
+]

@@ -1,6 +1,26 @@
 {% load i18n %}
-{% load humanize %}
 {% load static %}
-{% load assets %}
+{% load sri %}
 
-{% assets_static 'js/assets.js' %}
+<script type="application/javascript">
+    assetsSettings.assetsUrl = '{% url "assets:api:get_assets" location_id=location_id location_flag=location_flag %}';
+    assetsSettings.createRequestUrl = '{% url "assets:create_order" location_id=location_id location_flag=location_flag %}';
+</script>
+{% sri_static 'assets/js/requests.js' %}
+{% sri_static 'assets/js/my-requests.js' %}
+
+{% sri_static 'assets/js/modal-system.js' %}
+{% sri_static 'assets/js/modals/confirm-request.js' %}
+{% sri_static 'assets/js/modals/single-request.js' %}
+{% sri_static 'assets/js/modals/multi-request.js' %}
+{% sri_static 'assets/js/assets.js' %}
+
+{% include 'assets/partials/modal/single-order.html' %}
+{% include 'assets/partials/modal/multi-order.html' %}
+{% include 'assets/partials/modal/confirm.html' %}
+{% include 'assets/partials/modal/modal.html' with name="ViewOrder" %}
+
+
+<script type="application/javascript">
+    setupModal('#modalViewOrderContainer', 'ajax-order', '#modalViewOrderContent', '#modalViewOrderLoader');
+</script>

@@ -1,10 +1,9 @@
 # Changelog
 
-## [0.1.x] - IN DEVELOPMENT
+## [0.2.0] - IN DEVELOPMENT
 
 ### Added
 
-- Cache Busting by [@ppfeufer](https://github.com/ppfeufer)
 - Modal System
 - Confirm Modal
   - View Order Modal
@@ -12,9 +11,13 @@
   - Multi Request Modal
 - Request Statistic API
 - Button System
-- RequestAssets Model
+- Request Assets Model
 - Permission System
 - Notification Send System
+- Corporation Assets
+- Character Assets
+- Location Overview
+- System Name, Solar System Name Handler
 
 ### Changed
 

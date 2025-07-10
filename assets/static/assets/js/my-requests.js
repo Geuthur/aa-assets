@@ -1,11 +1,12 @@
 /* global assetsSettings, moment, bootstrap, loadRequestStatistics */
 $(document).ready(() => {
-    const urlRequests = assetsSettings.requestUrl;
+    const urlMyRequests = assetsSettings.myRequestUrl;
 
-    const tableRequestsVar = $('#requests');
-    const RequestTable = tableRequestsVar.DataTable({
+    const tableMyRequestsVar = $('#my-requests');
+
+    const MyRequestTable = tableMyRequestsVar.DataTable({
         ajax: {
-            url: urlRequests,
+            url: urlMyRequests,
             dataSrc: function(json) {
                 return json;
             }

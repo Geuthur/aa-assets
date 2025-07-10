@@ -637,6 +637,3 @@ msgstr "wurde geschlossen und ist abgeschlossen."
 #, python-brace-format
 msgid "has been reopened."
 msgstr "wurde wieder geöffnet"
-
-#~ msgid "Voices of War - Assets"
-#~ msgstr "Voices of War - Besitz"

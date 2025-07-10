@@ -1,0 +1,40 @@
+{% extends 'assets/base.html' %}
+{% load i18n %}
+{% load sri %}
+
+{% block page_template_title %}
+    {{ title }}
+{% endblock %}
+
+{% block header_nav_collapse_left %}
+    {% include 'assets/partials/menu/assets/navigation.html' %}
+{% endblock %}
+
+{% block assets_block %}
+	<div class="card">
+		<div id="card-assets">
+			<div class="panel panel-default panel-tabs">
+				<div class="panel-body">
+					<div class="card-body bg-secondary tab-content rounded-bottom">
+						{% include 'assets/partials/table/assets.html' %}
+                        <div role="tabpanel" class="tab-pane fade" id="tab-my-requests">
+                            {% include 'assets/partials/table/my-requests.html' %}
+                        </div>
+                        <div role="tabpanel" class="tab-pane fade" id="tab-open-requests">
+                            {% include 'assets/partials/table/requests.html' %}
+                        </div>
+					</div>
+				</div>
+			</div>
+    	</div>
+	</div>
+{% endblock %}
+
+{% block extra_javascript %}
+    {% include 'bundles/datatables-js-bs5.html' %}
+    {% include "bundles/moment-js.html" with locale=True %}
+    {% include "bundles/filterdropdown-js.html" %}
+
+    {% include 'assets/bundles/settings-bundles.html' %}
+    {% include 'assets/bundles/assets-bundles.html' %}
+{% endblock extra_javascript %}

@@ -3,17 +3,19 @@
 $(document).ready(() => {
     const AssetsTableVar = $('#assets');
 
-    let LocationID = null;
-    let LocationFLAG = null;
+    let LocationID = assetsSettings.locationId;
+    let LocationFLAG = assetsSettings.locationFlag;
 
     const tableAssets = AssetsTableVar.DataTable({
         ajax: {
             url: assetsSettings.assetsUrl,
             type: 'GET',
             dataSrc: function(data) {
-                LocationID = data.location_id;
-                LocationFLAG = data.location_flag;
                 return data.assets;
+            },
+            error: function (xhr, error, thrown) {
+                console.error('Error loading data:', error);
+                tableAssets.clear().draw();
             }
         },
         columns: [
@@ -37,6 +39,12 @@ $(document).ready(() => {
             },
             {
                 data: 'location',
+                render: function (data, _, __) {
+                    return data;
+                }
+            },
+            {
+                data: 'location_flag',
                 render: function (data, _, __) {
                     return data;
                 }

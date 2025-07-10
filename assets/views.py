@@ -3,7 +3,7 @@
 from http import HTTPStatus
 
 from django.contrib import messages
-from django.contrib.auth.decorators import login_required, permission_required
+from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.db import transaction
 
@@ -14,6 +14,7 @@ from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
 from esi.decorators import token_required
 
+from allianceauth.authentication.decorators import permissions_required
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCorporationInfo
 
@@ -42,12 +43,12 @@ def set_apr_cooldown(user, request_id, mode):
 
 def validate_asset_quantity(asset: Assets, amount: int) -> tuple[bool, str]:
     """Validates if the requested amount exceeds the available quantity."""
-    requests = RequestAssets.objects.filter(
+    requests_obj = RequestAssets.objects.filter(
         asset_pk=asset.pk,
         eve_type=asset.eve_type,
         request__status=Request.STATUS_OPEN,
     ).values_list("quantity", flat=True)
-    if requests and sum(requests) + amount > asset.quantity:
+    if requests_obj and sum(requests_obj) + amount > asset.quantity:
         return False
     return True
 
@@ -68,19 +69,11 @@ def create_request_asset_object(
 
 
 @login_required
-@permission_required("assets.basic_access")
+@permissions_required(["assets.basic_access"])
 def index(request):
     context = {
         "corporation_id": request.user.profile.main_character.corporation_id,
         "title": _("Assets"),
-        "location_id": 1049111087642,
-        "location_flag": "corpsag5",
-        "forms": {
-            "single_request": forms.RequestOrder(),
-            "multi_request": forms.RequestMultiOrder(
-                location_flag="corpsag5", location_id=1049111087642
-            ),
-        },
     }
     context = add_info_to_context(request, context)
 
@@ -88,10 +81,57 @@ def index(request):
 
 
 @login_required
+@permissions_required(["assets.basic_access"])
+def location(request):
+    context = {
+        "corporation_id": request.user.profile.main_character.corporation_id,
+        "character_id": request.user.profile.main_character.character_id,
+        "title": _("Locations"),
+    }
+    context = add_info_to_context(request, context)
+
+    return render(request, "assets/location.html", context=context)
+
+
+@login_required
+@permissions_required(["assets.basic_access"])
+def assets(request, location_id: int, location_flag: str):
+    context = {
+        "corporation_id": request.user.profile.main_character.corporation_id,
+        "character_id": request.user.profile.main_character.character_id,
+        "title": _("Assets"),
+        "location_id": location_id,
+        "location_flag": location_flag,
+        "forms": {
+            "single_request": forms.RequestOrder(),
+            "multi_request": forms.RequestMultiOrder(
+                location_flag=location_flag, location_id=location_id
+            ),
+        },
+    }
+    context = add_info_to_context(request, context)
+
+    return render(request, "assets/assets.html", context=context)
+
+
+@login_required
+@permissions_required(["assets.basic_access"])
+def requests(request):
+    context = {
+        "corporation_id": request.user.profile.main_character.corporation_id,
+        "character_id": request.user.profile.main_character.character_id,
+        "title": _("Manage Requests"),
+    }
+    context = add_info_to_context(request, context)
+
+    return render(request, "assets/requests.html", context=context)
+
+
+@login_required
 @token_required(
     scopes=["esi-universe.read_structures.v1", "esi-assets.read_corporation_assets.v1"]
 )
-@permission_required("assets.basic_access")
+@permissions_required(["assets.add_corporate_owner"])
 def add_corp(request, token) -> HttpResponse:
     char = get_object_or_404(
         CharacterOwnership, character__character_id=token.character_id
@@ -117,7 +157,7 @@ def add_corp(request, token) -> HttpResponse:
 
 @login_required
 @token_required(scopes=["esi-universe.read_structures.v1", "esi-assets.read_assets.v1"])
-@permission_required("assets.basic_access")
+@permissions_required(["assets.add_character_owner"])
 def add_char(request, token) -> HttpResponse:
     char = get_object_or_404(
         CharacterOwnership, character__character_id=token.character_id
@@ -136,14 +176,14 @@ def add_char(request, token) -> HttpResponse:
 
 
 @login_required
-@permission_required("assets.basic_access")
+@permissions_required(["assets.basic_access"])
 @require_POST
-def create_order(request):
+def create_order(request, location_id: int, location_flag: str):
     """Render view to create a new order request."""
     # Check Permission
     form = forms.RequestOrder(request.POST)
     form_multi = forms.RequestMultiOrder(
-        request.POST, location_flag="corpsag5", location_id=1049111087642
+        request.POST, location_flag=location_flag, location_id=location_id
     )
 
     if form.is_valid():
@@ -189,6 +229,7 @@ def create_order(request):
             status=HTTPStatus.OK,
             safe=False,
         )
+
     if form_multi.is_valid():
         cleaned_data = form_multi.cleaned_data
         asset_data = [
@@ -206,7 +247,7 @@ def create_order(request):
         )
 
         exceeds_items = []
-        assets = []
+        assets_items = []
         for asset_pk, amount in asset_data:
             if amount is None:
                 continue
@@ -222,14 +263,16 @@ def create_order(request):
 
             is_valid = validate_asset_quantity(asset, amount)
             if is_valid:
-                assets.append(create_request_asset_object(user_request, asset, amount))
+                assets_items.append(
+                    create_request_asset_object(user_request, asset, amount)
+                )
             else:
                 exceeds_items.append(asset.eve_type.name)
 
-        if assets:
+        if assets_items:
             with transaction.atomic():
                 user_request.save()
-                for asset_request in assets:
+                for asset_request in assets_items:
                     asset_request.save()
                 user_request.notify_new_request()
 
@@ -254,7 +297,7 @@ def create_order(request):
 
 
 @login_required
-@permission_required("assets.basic_access")
+@permissions_required(["assets.basic_access"])
 @require_POST
 def mark_request_canceled(request, request_id: int):
     """Render view to mark a order request as canceled."""
@@ -308,7 +351,7 @@ def mark_request_canceled(request, request_id: int):
 
 
 @login_required
-@permission_required("assets.manage_requests")
+@permissions_required(["assets.manage_requests"])
 @require_POST
 def mark_request_completed(request, request_id: int):
     """Render view to mark a order request as completed."""
@@ -364,7 +407,7 @@ def mark_request_completed(request, request_id: int):
 
 
 @login_required
-@permission_required("assets.manage_requests")
+@permissions_required(["assets.manage_requests"])
 @require_POST
 def mark_request_open(request, request_id: int):
     """Render view to mark a order request as open."""

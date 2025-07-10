@@ -117,11 +117,11 @@ STATICFILES_DIRS = []
 ANALYTICS_DISABLED = True
 
 
-CELERYBEAT_SCHEDULE["ledger_character_audit_update_all"] = {
-    "task": "ledger.tasks.update_all_characters",
+CELERYBEAT_SCHEDULE["assets_character_audit_update_all"] = {
+    "task": "assets.tasks.update_all_characters",
     "schedule": crontab(hour="*/1"),
 }
-CELERYBEAT_SCHEDULE["ledger_corporation_audit_update_all"] = {
-    "task": "ledger.tasks.update_all_corps",
+CELERYBEAT_SCHEDULE["assets_corporation_audit_update_all"] = {
+    "task": "assets.tasks.update_all_corps",
     "schedule": crontab(hour="*/1"),
 }

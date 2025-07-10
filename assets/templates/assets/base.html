@@ -6,7 +6,7 @@
 {% endblock extra_css %}
 
 {% block page_title %}
-    {% translate "Assets System" %}
+    {% block page_template_title %}{% endblock page_template_title %} ⋗ {% translate "Assets System" %}
 {% endblock %}
 
 {% block header_nav_brand %}
@@ -14,11 +14,11 @@
 {% endblock header_nav_brand %}
 
 {% block header_nav_collapse_left %}
-    {% include 'assets/partials/navigation.html' %}
+    {% include 'assets/partials/menu/navigation.html' %}
 {% endblock %}
 
 {% block header_nav_collapse_right %}
-    {% include 'assets/partials/administration.html' %}
+    {% include 'assets/partials/menu/administration.html' %}
 {% endblock %}
 
 {% block content %}

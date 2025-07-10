@@ -1,10 +1,11 @@
-"""Forms for the taxsystem app."""
+"""Forms for the Assets app."""
 
 from django import forms
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 from assets.api.assets.helper import update_asset_object
+from assets.constants import STANDARD_FLAG
 from assets.models import Assets
 
 
@@ -34,9 +35,15 @@ class RequestMultiOrder(forms.Form):
         super().__init__(*args, **kwargs)
         self.asset_fields = []  # Liste der dynamisch hinzugefügten Felder
         if location_id is not None:
+            # Wenn location_flag nicht angegeben ist, Standardwert verwenden
+            if location_flag == "all":
+                location_flag = STANDARD_FLAG
+            else:
+                location_flag = [location_flag]
+
             # Dynamisch Felder für jedes Asset mit der gegebenen location_id hinzufügen
             for asset in Assets.objects.filter(
-                location_flag=location_flag, location_id=location_id
+                location_flag__in=location_flag, location_id=location_id
             ).order_by("eve_type__name"):
                 asset = update_asset_object(asset)
                 if asset is False:

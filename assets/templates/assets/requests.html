@@ -1,9 +1,8 @@
 {% extends 'assets/base.html' %}
 {% load i18n %}
-{% load static %}
 {% load sri %}
 
-{% block page_title %}
+{% block page_template_title %}
     {{ title }}
 {% endblock %}
 
@@ -13,7 +12,7 @@
 			<div class="panel panel-default panel-tabs">
 				<div class="panel-body">
 					<div class="card-body bg-secondary tab-content rounded-bottom">
-                        Startseite
+						{% include 'assets/partials/table/requests.html' %}
 					</div>
 				</div>
 			</div>
@@ -27,4 +26,5 @@
     {% include "bundles/filterdropdown-js.html" %}
 
     {% include 'assets/bundles/settings-bundles.html' %}
+    {% include 'assets/bundles/requests-bundles.html' %}
 {% endblock extra_javascript %}

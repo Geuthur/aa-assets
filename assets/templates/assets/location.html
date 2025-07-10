@@ -1,9 +1,7 @@
 {% extends 'assets/base.html' %}
 {% load i18n %}
-{% load static %}
-{% load sri %}
 
-{% block page_title %}
+{% block page_template_title %}
     {{ title }}
 {% endblock %}
 
@@ -13,7 +11,7 @@
 			<div class="panel panel-default panel-tabs">
 				<div class="panel-body">
 					<div class="card-body bg-secondary tab-content rounded-bottom">
-                        Startseite
+						{% include 'assets/partials/table/location.html' %}
 					</div>
 				</div>
 			</div>
@@ -22,9 +20,6 @@
 {% endblock %}
 
 {% block extra_javascript %}
-    {% include 'bundles/datatables-js-bs5.html' %}
-    {% include "bundles/moment-js.html" with locale=True %}
-    {% include "bundles/filterdropdown-js.html" %}
-
     {% include 'assets/bundles/settings-bundles.html' %}
+    {% include 'assets/bundles/location-bundles.html' %}
 {% endblock extra_javascript %}

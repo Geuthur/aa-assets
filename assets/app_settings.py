@@ -33,5 +33,5 @@ ASSETS_LOGGER_USE = clean_setting("ASSETS_LOGGER_USE", False)
 # e.g. for name changes of structures
 ASSETS_LOCATION_STALE_HOURS = clean_setting("ASSETS_LOCATION_STALE_HOURS", 168)
 
-# Set the Stale Status for Ledger Updates in Minutes
+# Set the Stale Status for Assets Updates in Minutes
 ASSETS_UPDATE_PERIOD = clean_setting("ASSETS_UPDATE_PERIOD", 60)  # in minutes
