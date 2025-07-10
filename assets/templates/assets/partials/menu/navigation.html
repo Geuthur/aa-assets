@@ -1,0 +1,21 @@
+{% load i18n %}
+{% load navactive %}
+
+{% if perms.assets.basic_access %}
+    <div class="d-flex flex-row">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'assets:location' %}">{% translate "Locations" %}</a>
+        </li>
+    </div>
+{% endif %}
+
+{% if perms.assets.manage_requests %}
+    <div class="d-flex flex-row">
+        <li class="nav-item">
+            <a class="nav-link" href="{% url 'assets:requests' %}">
+                {% translate "Manage Requests" %}
+                <span class="badge bg-secondary d-none" id="request-count"></span>
+            </a>
+        </li>
+    </div>
+{% endif %}

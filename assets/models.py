@@ -1,13 +1,11 @@
 """Models for assets."""
 
-import json
-
 from django.contrib.auth.models import Permission, User
 
 # Django
-from django.db import models
+from django.db import models, transaction
+from django.utils import timezone
 from django.utils.html import format_html
-from django.utils.timezone import now
 from django.utils.translation import gettext_lazy as _
 from esi.errors import TokenError
 from esi.models import Token
@@ -19,9 +17,9 @@ from eveuniverse.models import EveEntity, EveSolarSystem, EveType
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.evelinks import dotlan
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
-from allianceauth.notifications import notify
 from app_utils.django import users_with_permission
 
+from assets.helpers.discord import send_user_notification
 from assets.hooks import get_extension_logger
 from assets.managers import (
     AssetsManager,
@@ -31,7 +29,11 @@ from assets.managers import (
     get_market_price,
 )
 from assets.providers import esi
-from assets.task_helpers.etag_helpers import etag_results
+from assets.task_helpers.etag_helpers import (
+    HTTPGatewayTimeoutError,
+    NotModifiedError,
+    etag_results,
+)
 
 logger = get_extension_logger(__name__)
 
@@ -49,8 +51,9 @@ class General(models.Model):
         managed = False
         permissions = (
             ("basic_access", "Can access this app"),
-            ("add_personal_owner", "Can add personal owners"),
-            ("add_corporate_owner", "Can add corporate owners"),
+            ("corporation_access", "Can access own corporation assets"),
+            ("admin_access", "Can access all assets."),
+            ("manage_corporation", "Can add corporation assets"),
             ("manage_requests", "Can manage requests"),
         )
         default_permissions = ()
@@ -113,19 +116,28 @@ class Owner(models.Model):
         return self.character.character
 
     def update_assets_esi(self, force_refresh=False):
-        if self.corporation:
-            token = self.valid_token(
-                [
-                    "esi-universe.read_structures.v1",
-                    "esi-assets.read_corporation_assets.v1",
-                ]
-            )
-            assets = self._fetch_corporate_assets(token, force_refresh=force_refresh)
-        else:
-            token = self.valid_token(
-                ["esi-universe.read_structures.v1", "esi-assets.read_assets.v1"]
-            )
-            assets = self._fetch_personal_assets(token, force_refresh=force_refresh)
+        try:
+            if self.corporation:
+                token = self.valid_token(
+                    [
+                        "esi-universe.read_structures.v1",
+                        "esi-assets.read_corporation_assets.v1",
+                    ]
+                )
+                assets = self._fetch_corporate_assets(
+                    token, force_refresh=force_refresh
+                )
+            else:
+                token = self.valid_token(
+                    ["esi-universe.read_structures.v1", "esi-assets.read_assets.v1"]
+                )
+                assets = self._fetch_personal_assets(token, force_refresh=force_refresh)
+        except NotModifiedError:
+            logger.info("No new Assets for: %s", self.name)
+            return
+        except HTTPGatewayTimeoutError:
+            logger.info("Gateway Timeout for: %s", self.name)
+            return
 
         items = []
         item_ids = list(
@@ -162,14 +174,51 @@ class Owner(models.Model):
             )
             items.append(asset_item)
 
-        if items:
-            # Delete all assets before adding new ones
-            self.flush_assets()
-            # Create Bulk
-            Assets.objects.bulk_create(items)
-            logger.info("Updated %s assets for %s", len(assets), self.name)
-        else:
-            logger.info("No updates found for %s", self.name)
+        try:
+            if items:
+                with transaction.atomic():
+                    # Delete all assets before adding new ones
+                    self.flush_assets()
+                    # Create Bulk
+                    Assets.objects.bulk_create(items)
+                    logger.info("Updated %s assets for %s", len(assets), self.name)
+
+            else:
+                logger.info("No updates found for %s", self.name)
+        # pylint: disable=broad-except
+        except Exception as e:
+            logger.error(
+                "Error while updating assets for %s: %s",
+                self.name,
+                e,
+            )
+
+        self.last_update = timezone.now()
+        self.save()
+        self.update_order_assets()
+
+    def update_order_assets(self):
+        # Filter offene Bestellungen
+        orders = RequestAssets.objects.filter(request__status=Request.STATUS_OPEN)
+
+        orders_to_update = []
+        for order in orders:
+            try:
+                asset = Assets.objects.get(
+                    eve_type=order.eve_type,
+                    location_id=order.asset_location_id,
+                    location_flag=order.asset_location_flag,
+                )
+            except Assets.DoesNotExist:
+                continue
+            if asset:
+                order.asset_pk = asset.pk
+                orders_to_update.append(order)
+
+        # Bulk-Update der Bestellungen
+        if orders_to_update:
+            logger.info("Updated %s orders for %s", len(orders_to_update), self.name)
+            RequestAssets.objects.bulk_update(orders_to_update, ["asset_pk"])
 
     def _fetch_corporate_assets(self, token, force_refresh=False) -> list:
         """Fetch all assets for this owner from ESI."""
@@ -492,7 +541,7 @@ class Assets(models.Model):
         EveType, on_delete=models.CASCADE, related_name="+", help_text="asset type"
     )
     location = models.ForeignKey(
-        "Location",
+        Location,
         on_delete=models.CASCADE,
         related_name="assets",
         help_text="asset location",
@@ -531,9 +580,15 @@ class Assets(models.Model):
 class Request(models.Model):
     """A request system for Orders."""
 
-    order = models.JSONField(
-        help_text="Order details",
+    objects = RequestManager()
+
+    name = models.CharField(
+        max_length=100,
+        help_text="Name of the Requestor",
+        blank=True,
+        null=True,
     )
+
     requesting_user = models.ForeignKey(
         User,
         on_delete=models.CASCADE,
@@ -548,6 +603,7 @@ class Request(models.Model):
         related_name="+",
         help_text="The user that manage the request",
     )
+
     STATUS_OPEN = "OP"
     STATUS_COMPLETED = "CD"
     STATUS_CANCELLED = "CL"
@@ -566,30 +622,26 @@ class Request(models.Model):
     created_at = models.DateTimeField(auto_now_add=True, db_index=True)
     closed_at = models.DateTimeField(blank=True, null=True, db_index=True)
 
-    objects = RequestManager()
-
     class Meta:
         default_permissions = ()
 
     def __str__(self) -> str:
         character_name = self.requesting_character_name()
-        order = self.order
-        return f"{character_name}'s request for {order}"
+        return f"{character_name}'s request"
 
     def __repr__(self) -> str:
         character_name = self.requesting_character_name()
         return (
             f"{self.__class__.__name__}(id={self.pk}, "
             f"requesting_user='{character_name}', "
-            f"order='{self.order}')"
         )
 
     def convert_order_to_notifiy(self) -> str:
         """Convert order to a string for notification."""
-        order = json.loads(self.order)
+        requests = RequestAssets.objects.filter(request=self)
         msg = ""
-        for item in order:
-            msg += f'\n- {item["quantity"]}x {item["name"]}'
+        for request in requests:
+            msg += f"\n{request.eve_type.name} x {request.quantity}"
         return msg
 
     def requesting_character_name(self) -> str:
@@ -608,7 +660,7 @@ class Request(models.Model):
         if admin or (can_requestor_edit and self.requesting_user == user):
             logger.debug("Success to mark request")
             if closed:
-                self.closed_at = now()
+                self.closed_at = timezone.now()
             else:
                 self.closed_at = None
 
@@ -627,79 +679,79 @@ class Request(models.Model):
 
     def notify_new_request(self) -> None:
         """Notify approvers that a Order request has been created."""
+        users = list(self.approvers())
 
-        for approver in self.approvers():
-            notify(
-                title=(f"{self.requesting_user} has Requested a Order"),
-                message=(
-                    format_html(
-                        "{} has requested the following items:{}\n",
-                        self.requesting_user,
-                        self.convert_order_to_notifiy(),
-                    )
-                ),
-                user=approver,
+        title = _(f"{self.requesting_user} has Requested a Order")
+        msg = _(
+            f"{self.requesting_user} has requested the following items:{self.convert_order_to_notifiy()}\n"
+        )
+
+        for approver in users:
+            send_user_notification.delay(
+                user_id=approver.pk,
+                title=title,
+                message=format_html(msg),
+                embed_message=True,
                 level="info",
             )
 
     def notify_request_completed(self) -> None:
-        """Notify approvers that a Order marked as completed."""
-        notify(
-            title=(
-                f"{self.approver_user} has completed the Order for {self.requesting_user} ID: {self.pk}."
-            ),
-            message=(
-                format_html(
-                    "{} has completed the following items:{}\n",
-                    self.approver_user,
-                    self.convert_order_to_notifiy(),
-                )
-            ),
-            user=self.requesting_user,
+        """Notify requestor that a Order marked as completed."""
+        title = _(
+            f"{self.approver_user} has completed the Order for {self.requesting_user} ID: {self.pk}."
+        )
+        msg = _(
+            f"{self.approver_user} has completed the following items:{self.convert_order_to_notifiy()}\n"
+        )
+
+        send_user_notification.delay(
+            user_id=self.requesting_user.pk,
+            title=title,
+            message=format_html(msg),
+            embed_message=True,
             level="success",
         )
 
     def notify_request_canceled(self, user=None) -> None:
-        """Notify approvers that a Order marked as canceled."""
+        """Notify approvers and requestor that a Order marked as canceled."""
         users = list(self.approvers())
 
         if self.requesting_user == user:
             canceler = self.requesting_user
-
         else:
             canceler = user
             users += [self.requesting_user]
 
+        title = _(
+            f"{canceler} has canceled the Order for {self.requesting_user} ID: {self.pk}."
+        )
+        msg = _(
+            f"{canceler} has canceled the following items:{self.convert_order_to_notifiy()}\n"
+        )
+
         for approver in users:
-            notify(
-                title=(
-                    f"{canceler} has canceled the Order for {self.requesting_user} ID: {self.pk}."
-                ),
-                message=(
-                    format_html(
-                        "{} has canceled the following items:{}\n",
-                        canceler,
-                        self.convert_order_to_notifiy(),
-                    )
-                ),
-                user=approver,
+            send_user_notification.delay(
+                user_id=approver.pk,
+                title=title,
+                message=format_html(msg),
+                embed_message=True,
                 level="danger",
             )
 
     def notify_request_open(self, request) -> None:
-        """Notify approvers that a Order marked as reopened."""
-        notify(
-            title=(
-                f"{request.user} has reopened the Order for {self.requesting_user} ID: {self.pk}."
-            ),
-            message=(
-                format_html(
-                    "{} has reopened the following items:{}\n",
-                    request.user,
-                    self.convert_order_to_notifiy(),
-                )
-            ),
-            user=self.requesting_user,
+        """Notify requestor that a Order marked as reopened."""
+        title = _(
+            f"{request.user} has reopened the Order for {self.requesting_user} ID: {self.pk}."
+        )
+        msg = _(
+            f"{request.user} has reopened the following items:{self.convert_order_to_notifiy()}\n"
+        )
+
+        send_user_notification.delay(
+            user_id=self.requesting_user.pk,
+            title=title,
+            message=format_html(msg),
+            embed_message=True,
             level="warning",
         )
 
@@ -710,3 +762,48 @@ class Request(models.Model):
             content_type__app_label=cls._meta.app_label, codename="manage_requests"
         )
         return users_with_permission(permission)
+
+
+class RequestAssets(models.Model):
+    """A Request Assets Information Model."""
+
+    name = models.CharField(
+        max_length=100,
+        help_text="Name of the Asset",
+    )
+
+    request = models.ForeignKey(
+        Request,
+        on_delete=models.CASCADE,
+        related_name="+",
+        help_text="The request this asset belongs to",
+    )
+
+    asset_pk = models.PositiveBigIntegerField(
+        help_text="The asset this request belongs to",
+    )
+
+    asset_location_id = models.PositiveBigIntegerField(
+        help_text="The asset location this request belongs to",
+    )
+
+    asset_location_flag = models.CharField(
+        help_text="The asset location flag this request belongs to",
+        choices=Assets.LocationFlag.choices,
+        max_length=36,
+    )
+
+    eve_type = models.ForeignKey(
+        EveType,
+        on_delete=models.CASCADE,
+        related_name="+",
+        help_text="The asset type this request belongs to",
+    )
+
+    quantity = models.PositiveIntegerField(
+        help_text="Quantity of assets",
+        default=1,
+    )
+
+    class Meta:
+        default_permissions = ()

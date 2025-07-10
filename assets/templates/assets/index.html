@@ -1,10 +1,11 @@
 {% extends 'assets/base.html' %}
 {% load i18n %}
-{% load humanize %}
 {% load static %}
+{% load sri %}
 
-{% block extra_css %}
-{% endblock extra_css %}
+{% block page_title %}
+    {{ title }}
+{% endblock %}
 
 {% block assets_block %}
 	<div class="card">
@@ -12,8 +13,7 @@
 			<div class="panel panel-default panel-tabs">
 				<div class="panel-body">
 					<div class="card-body bg-secondary tab-content rounded-bottom">
-						{% include 'assets/assets.html' %}
-						{% include 'assets/requests.html' %}
+                        Startseite
 					</div>
 				</div>
 			</div>
@@ -22,67 +22,9 @@
 {% endblock %}
 
 {% block extra_javascript %}
-<script type="application/javascript">
-	let requestSettings = {
-		cancelRequestUrl: '{% url "assets:request_canceled" request_id=1337 %}',
-		completeRequestUrl: '{% url "assets:request_completed" request_id=1337 %}',
-        openRequestUrl: '{% url "assets:request_open" request_id=1337 %}',
+    {% include 'bundles/datatables-js-bs5.html' %}
+    {% include "bundles/moment-js.html" with locale=True %}
+    {% include "bundles/filterdropdown-js.html" %}
 
-        manage_requests: '{% if perms.assets.manage_requests %}true{% else %}false{% endif %}',
-
-		csrfToken: '{% csrf_token %}',
-
-		markRequestCancelledText: '{% translate "Mark Request as Cancelled" %}',
-		markRequestCompletedText: '{% translate "Mark Request as Completed" %}',
-        markRequestOpenText: '{% translate "Mark Request as Open" %}',
-
-        // Translates
-        validQuantityText: '{% translate "Please enter a valid quantity for at least one items." %}',
-        validQuantityTextSingle: '{% translate "Please enter a valid quantity." %}',
-        buyText: '{% translate "Buy" %}',
-        piecesText: '{% translate "pieces" %}',
-
-	};
-</script>
-
-{% include 'bundles/datatables-js-bs5.html' %}
-{% include "bundles/moment-js.html" with locale=True %}
-{% include "bundles/filterdropdown-js.html" %}
-
-{% include 'assets/js/assets-js.html' %}
-{% include 'assets/js/requests-js.html' %}
-<script type="application/javascript">
-	// Bootstrap Nav Active System
-	// Save the latest tab and load it on page load
-    document.addEventListener('DOMContentLoaded', function () {
-        var activeTab = localStorage.getItem('assets-activeTab');
-        if (activeTab) {
-            var storedTab = document.querySelector('a[href="' + activeTab + '"]');
-            if (storedTab) {
-                var tab = new bootstrap.Tab(storedTab);
-                tab.show();
-            }
-        } else {
-            var firstTab = document.querySelector('#aa-assets-tabs a[data-bs-toggle="tab"]');
-            if (firstTab) {
-                var tab = new bootstrap.Tab(firstTab);
-                tab.show();
-            }
-        }
-
-        document.querySelectorAll('#aa-assets-tabs a[data-bs-toggle="tab"]').forEach(function (tabLink) {
-            tabLink.addEventListener('click', function (e) {
-                e.preventDefault();
-                var tabName = this.getAttribute('href');
-                localStorage.setItem('assets-activeTab', tabName);
-                if (history.pushState) {
-                    history.pushState(null, null, tabName);
-                }
-            });
-        });
-    });
-</script>
-{% endblock %}
-
-{% block extra_script %}
-{% endblock extra_script %}
+    {% include 'assets/bundles/settings-bundles.html' %}
+{% endblock extra_javascript %}

@@ -1,0 +1,8 @@
+{% load i18n %}
+{% load sri %}
+
+{% include 'bundles/datatables-js-bs5.html' %}
+{% include "bundles/moment-js.html" with locale=True %}
+{% include "bundles/filterdropdown-js.html" %}
+
+{% sri_static "assets/js/location.js" %}

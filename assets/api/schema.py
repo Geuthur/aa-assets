@@ -31,19 +31,18 @@ class EveName(Schema):
 
 
 class Assets(Schema):
-    item_id: int
-    name: str
-    quantity: int
-    location: str
-    price: Any
+    location_id: int
+    location_flag: str
+    assets: list
 
 
 class Requests(Schema):
     id: int
-    order: Any
     status: str
+    order: Any
     action: str
     created: datetime
     closed: Optional[datetime] = None
     approver: Optional[Any]
     requestor: Any
+    actions: Any

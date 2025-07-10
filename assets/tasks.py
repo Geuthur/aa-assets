@@ -13,6 +13,7 @@ from eveuniverse.models import EveType
 from allianceauth.eveonline.models import Token
 from allianceauth.services.tasks import QueueOnce
 
+from assets.app_settings import ASSETS_UPDATE_PERIOD
 from assets.decorators import when_esi_is_available
 from assets.hooks import get_extension_logger
 from assets.models import Assets, Location, Owner
@@ -89,9 +90,8 @@ def get_error_count_flag():
 def update_all_assets(self, runs: int = 0, force_refresh=False):
     """Update all assets."""
     owners = Owner.objects.filter(is_active=True)
-    skip_date = timezone.now() - datetime.timedelta(hours=2)
+    skip_date = timezone.now() - datetime.timedelta(minutes=ASSETS_UPDATE_PERIOD)
 
-    logger.info("Queued %s Assets Updates", len(owners))
     for owner in owners:
         if owner.last_update <= skip_date or force_refresh:
             update_assets_for_owner.apply_async(
@@ -99,7 +99,7 @@ def update_all_assets(self, runs: int = 0, force_refresh=False):
                 priority=6,
             )
             runs = runs + 1
-    logger.info("Queued %s/%s Assets Tasks", runs, len(owners))
+    logger.info("Queued %s Assets Updates", len(owners))
 
 
 @shared_task(bind=True, base=QueueOnce, max_retries=None)
@@ -108,8 +108,6 @@ def update_assets_for_owner(self, owner_pk: int, force_refresh=False):
     """Fetch all assets for an owner from ESI."""
     owner = Owner.objects.get(pk=owner_pk)
     owner.update_assets_esi(force_refresh=force_refresh)
-    owner.last_update = timezone.now()
-    owner.save()
 
 
 @shared_task(bind=True, base=QueueOnce, max_retries=None)

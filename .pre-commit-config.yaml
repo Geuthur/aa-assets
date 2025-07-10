@@ -133,8 +133,8 @@ repos:
             .min(.js|.js.map)|
             static/(.*)/libs/
           )
-        #args:
-        #  - --fix
+        args:
+          - --fix
 
   - repo: https://github.com/thibaudcolas/pre-commit-stylelint
     rev: v16.21.1
@@ -309,7 +309,7 @@ repos:
         name: Pylint
         description: Check for errors and code smells in Python code.
         args:
-          - --py-version=3.8  # Minimum required Python version for AA. Update as needed.
+          - --py-version=3.10  # Minimum required Python version for AA. Update as needed.
 
   - repo: https://github.com/python-jsonschema/check-jsonschema
     rev: 0.33.2

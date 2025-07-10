@@ -1,0 +1,89 @@
+{% load i18n %}
+{% load static %}
+{% load bootstrap %}
+{% load sri %}
+
+{% sri_static 'assets/css/assets.css' %}
+
+<script type="application/javascript">
+	let assetsSettings = {
+        locationUrl: '{% url "assets:api:get_locations" %}',
+        statisticsUrl: '{% url "assets:api:get_requests_statistics" %}',
+
+        requestUrl: '{% url "assets:api:get_requests" %}',
+        myRequestUrl: '{% url "assets:api:get_my_requests" %}',
+
+        manage_requests: '{% if perms.assets.manage_requests %}true{% else %}false{% endif %}',
+
+		csrfToken: '{% csrf_token %}',
+	};
+
+    window.translations = {
+        buy: '{% translate "Buy" %}',
+        multiBuy: '{% translate "Multi Buy" %}',
+    }
+
+    const translation = window.translations;
+</script>
+
+<script type="application/javascript">
+    // Bootstrap Nav Active System
+    // Save the latest tab and load it on page load
+    document.addEventListener('DOMContentLoaded', function () {
+        var activeTab = localStorage.getItem('assets-activeTab');
+        if (activeTab) {
+            var storedTab = document.querySelector('a[href="' + activeTab + '"]');
+            if (storedTab) {
+                var tab = new bootstrap.Tab(storedTab);
+                tab.show();
+            }
+        } else {
+            var firstTab = document.querySelector('#aa-assets-tabs a[data-bs-toggle="tab"]');
+            if (firstTab) {
+                var tab = new bootstrap.Tab(firstTab);
+                tab.show();
+            }
+        }
+
+        document.querySelectorAll('#aa-assets-tabs a[data-bs-toggle="tab"]').forEach(function (tabLink) {
+            tabLink.addEventListener('click', function (e) {
+                e.preventDefault();
+                var tabName = this.getAttribute('href');
+                localStorage.setItem('assets-activeTab', tabName);
+                if (history.pushState) {
+                    history.pushState(null, null, tabName);
+                }
+            });
+        });
+    });
+</script>
+
+<script type="application/javascript">
+    window.loadRequestStatistics = function () {
+        $.ajax({
+            url: assetsSettings.statisticsUrl, // URL für die Statistikdaten
+            type: 'GET',
+            dataType: 'json',
+            success: function (data) {
+                const requestCountElement = document.getElementById('request-count');
+                const myRequestCountElement = document.getElementById('my-request-count');
+
+                if (requestCountElement) {
+                    const requestCount = data.requestCount || 0;
+                    requestCountElement.textContent = requestCount;
+                    requestCountElement.classList.toggle('d-none', requestCount === 0);
+                }
+
+                if (myRequestCountElement) {
+                    const myRequestCount = data.myRequestCount || 0;
+                    myRequestCountElement.textContent = myRequestCount;
+                    myRequestCountElement.classList.toggle('d-none', myRequestCount === 0);
+                }
+            },
+            error: function (xhr, status, error) {
+                console.error('Fehler beim Abrufen der Statistikdaten:', error);
+            }
+        });
+    };
+    loadRequestStatistics(); // Initialer Aufruf der Funktion
+</script>

@@ -63,7 +63,7 @@ To set up the Scheduled Tasks add following code to your `local.py`
 ```python
 CELERYBEAT_SCHEDULE["assets_update_all_assets"] = {
     "task": "assets.tasks.update_all_assets",
-    "schedule": crontab(minute=0, hour="*/1"),
+    "schedule": crontab(minute="*/15"),
 }
 CELERYBEAT_SCHEDULE["assets_update_all_locations"] = {
     "task": "assets.tasks.update_all_locations",
@@ -86,12 +86,13 @@ python manage.py migrate
 
 With the Following IDs you can set up the permissions for the Assets
 
-| ID                    | Description                  |                                                        |
-| :-------------------- | :--------------------------- | :----------------------------------------------------- |
-| `basic_access`        | Can access the Assets module | All Members with the Permission can access the Assets. |
-| `add_personal_owner`  | Can add personal owners      |                                                        |
-| `add_corporate_owner` | Can add corporate owners     |                                                        |
-| `manage_requests`     | Can manage requests          | Get Notifications & Manage Requests                    |
+| ID                   | Description                       |                                                        |
+| :------------------- | :-------------------------------- | :----------------------------------------------------- |
+| `basic_access`       | Can access the Assets module      | All Members with the Permission can access the Assets. |
+| `corporation_access` | Can access own corporation assets | Can view Corporation Assets.                           |
+| `admin_access`       | Can access all assets.            | Has Full Access.                                       |
+| `manage_corporation` | Can add corporation assets        | Can Add Corporation Assets.                            |
+| `manage_requests`    | Can manage requests               | Get Notifications & Manage Requests                    |
 
 ### Step 6 - (Optional) Setting up Compatibilies<a name="step6"></a>
 
@@ -99,31 +100,22 @@ The Following Settings can be setting up in the `local.py`
 
 - ASSETS_APP_NAME: `"YOURNAME"` - Set the name of the APP
 
-- ASSETS_LOGGER_USE: `True / False` - Set to use own Logger File
-
-If you set up ASSETS_LOGGER_USE to `True` you need to add the following code below:
+To set up Own Logger add following code to your `local.py`
+Ensure that you have writing permission in logs folder.
 
 ```python
-LOGGING_ASSETS = {
-    "handlers": {
-        "assets_file": {
-            "level": "INFO",
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": os.path.join(BASE_DIR, "log/assets.log"),
-            "formatter": "verbose",
-            "maxBytes": 1024 * 1024 * 5,
-            "backupCount": 5,
-        },
-    },
-    "loggers": {
-        "assets": {
-            "handlers": ["assets_file", "console"],
-            "level": "INFO",
-        },
-    },
+LOGGING["handlers"]["assets_file"] = {
+    "level": "INFO",
+    "class": "logging.handlers.RotatingFileHandler",
+    "filename": os.path.join(BASE_DIR, "log/assets.log"),
+    "formatter": "verbose",
+    "maxBytes": 1024 * 1024 * 5,
+    "backupCount": 5,
 }
-LOGGING["handlers"].update(LOGGING_ASSETS["handlers"])
-LOGGING["loggers"].update(LOGGING_ASSETS["loggers"])
+LOGGING["loggers"]["extensions.assets"] = {
+    "handlers": ["assets_file", "console", "extension_file"],
+    "level": "DEBUG",
+}
 ```
 
 ## Highlights<a name="highlights"></a>

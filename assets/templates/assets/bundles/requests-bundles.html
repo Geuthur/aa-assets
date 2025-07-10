@@ -1,0 +1,16 @@
+{% load i18n %}
+{% load static %}
+{% load sri %}
+
+{% sri_static 'assets/js/requests.js' %}
+
+{% sri_static 'assets/js/modal-system.js' %}
+{% sri_static 'assets/js/modals/confirm-request.js' %}
+
+{% include 'assets/partials/modal/confirm.html' %}
+{% include 'assets/partials/modal/modal.html' with name="ViewOrder" %}
+
+
+<script type="application/javascript">
+    setupModal('#modalViewOrderContainer', 'ajax-order', '#modalViewOrderContent', '#modalViewOrderLoader');
+</script>

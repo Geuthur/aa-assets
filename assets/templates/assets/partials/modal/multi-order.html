@@ -1,0 +1,42 @@
+{% load i18n %}
+{% load static %}
+{% load bootstrap %}
+
+<!-- Approve Request Modal -->
+<div class="modal fade" id="assets-multi-request" tabindex="-1" role="dialog" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered" role="document">
+        <div class="modal-content">
+            <div class="modal-header">
+                <span id="modal-title" class="fs-5">
+                    <!-- Modal Title -->
+                </span>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <div class="py-2">
+                    <div id="modal-request-text">
+                        <!-- Modal Request Text -->
+                    </div>
+                    <form method="post">
+                        <div class="d-flex align-items-center gap-2">
+                            {% csrf_token %}
+                            <fieldset class="assets-multi-request-form flex-grow-1">
+                                {{ forms.multi_request|bootstrap }}
+                            </fieldset>
+                        </div>
+                    </form>
+                    {% include 'assets/partials/form/minimum-field.html' %}
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button id="modal-button-cancel-multi-request" type="button" class="btn btn-danger" data-bs-dismiss="modal">
+                    <i class="fa-solid fa-hand"></i> {% trans "Cancel" %}
+                </button>
+
+                <button id="modal-button-confirm-multi-request" type="button" class="btn btn-success">
+                    <i class="fa-solid fa-check"></i> {% trans "Confirm" %}
+                </button>
+            </div>
+        </div>
+    </div>
+</div>

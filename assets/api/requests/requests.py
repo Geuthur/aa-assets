@@ -1,12 +1,21 @@
-from typing import List
+from typing import Any, List
 
 from ninja import NinjaAPI
 
+from django.core.handlers.wsgi import WSGIRequest
+from django.shortcuts import render
 from django.utils import timezone
+from django.utils.translation import gettext_lazy as _
 
 from assets.api import schema
+from assets.api.helpers import get_character_permission, get_manage_permission
+from assets.api.requests.helper import (
+    _my_request_actions,
+    _request_actions,
+    _request_list,
+)
 from assets.hooks import get_extension_logger
-from assets.models import Request
+from assets.models import Request, RequestAssets
 
 logger = get_extension_logger(__name__)
 
@@ -20,13 +29,14 @@ class RequestsApiEndpoints:
             response={200: List[schema.Requests], 403: str},
             tags=self.tags,
         )
-        def get_open_requests(request):
-            perms = request.user.has_perm("assets.manage_requests")
+        def get_requests(request: WSGIRequest):
+            requests_data = Request.objects.visible_to(request.user)
 
-            if not perms:
+            if requests_data is None:
                 return 403, "Permission Denied"
 
-            requests_data = Request.objects.all()
+            perm = get_character_permission(request)
+            admin = get_manage_permission(request)
 
             skip_old_entrys = timezone.now() - timezone.timedelta(days=3)
 
@@ -34,8 +44,10 @@ class RequestsApiEndpoints:
             requests_data = requests_data.exclude(
                 status=Request.STATUS_CANCELLED, closed_at__lt=skip_old_entrys
             )
-            # Skip completed entries
-            requests_data = requests_data.exclude(status=Request.STATUS_COMPLETED)
+
+            requests_data = requests_data.exclude(
+                status=Request.STATUS_COMPLETED, closed_at__lt=skip_old_entrys
+            )
 
             output = []
 
@@ -43,8 +55,12 @@ class RequestsApiEndpoints:
                 output.append(
                     {
                         "id": req.pk,
-                        "order": req.order,
                         "status": req.get_status_display(),
+                        "order": _request_list(
+                            req,
+                            perm,
+                            request,
+                        ),
                         "action": req.status,
                         "created": req.created_at,
                         "closed": req.closed_at,
@@ -52,6 +68,11 @@ class RequestsApiEndpoints:
                             req.approver_user.username if req.approver_user else None
                         ),
                         "requestor": req.requesting_user.username,
+                        "actions": _request_actions(
+                            req,
+                            admin,
+                            request,
+                        ),
                     }
                 )
 
@@ -63,12 +84,15 @@ class RequestsApiEndpoints:
             tags=self.tags,
         )
         def get_my_requests(request):
-            perms = request.user.has_perm("assets.basic_access")
+            requests_data = Request.objects.visible_to(request.user)
 
-            if not perms:
+            if requests_data is None:
                 return 403, "Permission Denied"
 
-            requests_data = Request.objects.filter(requesting_user=request.user)
+            requests_data = requests_data.filter(requesting_user=request.user)
+
+            perm = get_character_permission(request)
+            admin = get_manage_permission(request)
 
             skip_old_entrys = timezone.now() - timezone.timedelta(days=3)
 
@@ -77,16 +101,18 @@ class RequestsApiEndpoints:
                 status=Request.STATUS_CANCELLED, closed_at__lt=skip_old_entrys
             )
 
-            requests_data = requests_data.exclude(status__in=[Request.STATUS_COMPLETED])
-
             output = []
 
             for req in requests_data:
                 output.append(
                     {
                         "id": req.pk,
-                        "order": req.order,
                         "status": req.get_status_display(),
+                        "order": _request_list(
+                            req,
+                            perm,
+                            request,
+                        ),
                         "action": req.status,
                         "created": req.created_at,
                         "closed": req.closed_at,
@@ -94,7 +120,82 @@ class RequestsApiEndpoints:
                             req.approver_user.username if req.approver_user else None
                         ),
                         "requestor": req.requesting_user.username,
+                        "actions": _my_request_actions(
+                            req,
+                            admin,
+                            request,
+                        ),
                     }
                 )
 
             return output
+
+        @api.get(
+            "requests/statistics/",
+            response={200: Any, 403: str},
+            tags=self.tags,
+        )
+        def get_requests_statistics(request: WSGIRequest):
+            perms = request.user.has_perm("assets.basic_access")
+
+            if not perms:
+                return 403, "Permission Denied"
+
+            if request.user.has_perm("assets.manage_requests"):
+                requests_count = Request.objects.open_requests_total_count()
+            else:
+                requests_count = None
+
+            my_requests_count = Request.objects.my_requests_total_count(request.user)
+
+            output = {
+                "requestCount": requests_count,
+                "myRequestCount": my_requests_count,
+            }
+
+            return output
+
+        @api.get(
+            "requests/order/{request_id}/",
+            response={200: Any, 403: str},
+            tags=self.tags,
+        )
+        def get_request_order(request: WSGIRequest, request_id: int):
+            """Get the order for a request"""
+            perms = request.user.has_perm("assets.basic_access")
+
+            if not perms:
+                return 403, "Permission Denied"
+
+            try:
+                request_user = Request.objects.get(
+                    pk=request_id,
+                )
+            except Request.DoesNotExist:
+                return 403, "Request does not exist"
+
+            orders = RequestAssets.objects.filter(
+                request__pk=request_id,
+            )
+
+            output = []
+
+            for order in orders:
+                output.append(
+                    {
+                        "item_id": order.eve_type.id,
+                        "name": order.eve_type.name,
+                        "quantity": order.quantity,
+                    }
+                )
+
+            context = {
+                "request_id": request_id,
+                "orders": output,
+                "title": _("Order for {requestor} - ID: {request_id}").format(
+                    requestor=request_user.requesting_user.username,
+                    request_id=request_id,
+                ),
+            }
+
+            return render(request, "assets/partials/modal/view-order.html", context)

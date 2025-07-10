@@ -9,9 +9,16 @@ app_name: str = "assets"
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("location/", views.location, name="location"),
+    path("<int:location_id>/flag/<str:location_flag>", views.assets, name="assets"),
     path("add_corp/", views.add_corp, name="add_corp"),
     path("add_char/", views.add_char, name="add_char"),
-    path("create_order", views.create_order, name="create_order"),
+    path(
+        "create_order/<int:location_id>/flag/<str:location_flag>",
+        views.create_order,
+        name="create_order",
+    ),
+    path("requests/manage/", views.requests, name="requests"),
     path(
         "requests/<int:request_id>/canceled",
         views.mark_request_canceled,

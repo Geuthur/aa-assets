@@ -1,0 +1,28 @@
+{% load i18n %}
+
+{% if perms.assets.manage_requests %}
+    <div class="table-responsive">
+        <table class="table table-striped table-hover requests" id="requests" style="width: 100%;">
+            <thead>
+                <tr>
+                    <th class="col-id" style="width: 10%;">ID</th>
+                    <th class="col-order" style="width: 10%;">{% translate "Order List" %}</th>
+                    <th class="col-requester" style="width: 20%;">{% translate "Requestor" %}</th>
+                    <th class="col-status" style="width: 5%;">{% translate "Status" %}</th>
+                    <th class="col-date" style="width: 20%;">{% translate "Created" %}</th>
+                    <th class="col-action" style="width: 20%;">{% translate "Action" %}</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr>
+                    <td class="col-id"></
+                    <td class="col-order"></td>
+                    <td class="col-requester"></td>
+                    <td class="col-status"></td>
+                    <td class="col-date"></td>
+                    <td class="col-action"></td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+{% endif %}
