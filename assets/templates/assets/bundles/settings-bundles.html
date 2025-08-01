@@ -27,38 +27,6 @@
 </script>
 
 <script type="application/javascript">
-    // Bootstrap Nav Active System
-    // Save the latest tab and load it on page load
-    document.addEventListener('DOMContentLoaded', function () {
-        var activeTab = localStorage.getItem('assets-activeTab');
-        if (activeTab) {
-            var storedTab = document.querySelector('a[href="' + activeTab + '"]');
-            if (storedTab) {
-                var tab = new bootstrap.Tab(storedTab);
-                tab.show();
-            }
-        } else {
-            var firstTab = document.querySelector('#aa-assets-tabs a[data-bs-toggle="tab"]');
-            if (firstTab) {
-                var tab = new bootstrap.Tab(firstTab);
-                tab.show();
-            }
-        }
-
-        document.querySelectorAll('#aa-assets-tabs a[data-bs-toggle="tab"]').forEach(function (tabLink) {
-            tabLink.addEventListener('click', function (e) {
-                e.preventDefault();
-                var tabName = this.getAttribute('href');
-                localStorage.setItem('assets-activeTab', tabName);
-                if (history.pushState) {
-                    history.pushState(null, null, tabName);
-                }
-            });
-        });
-    });
-</script>
-
-<script type="application/javascript">
     window.loadRequestStatistics = function () {
         $.ajax({
             url: assetsSettings.statisticsUrl, // URL für die Statistikdaten
