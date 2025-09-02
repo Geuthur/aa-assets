@@ -1,6 +1,6 @@
 # Standard Library
 import datetime as dt
-from typing import Any, List, Tuple
+from typing import Any
 
 import requests
 
@@ -160,7 +160,7 @@ class AssetsQuerySet(models.QuerySet):
             )
         )
 
-    def update_or_create_prices(self, item_ids: List[int]) -> dict:
+    def update_or_create_prices(self, item_ids: list[int]) -> dict:
         """Calculate prices for all assets of this owner."""
         tradehub = 60003760
         headers = {
@@ -355,7 +355,7 @@ class LocationManagerBase(models.Manager):
 
     _UPDATE_EMPTY_GRACE_MINUTES = 360
 
-    def get_or_create_esi(self, location_id: int) -> Tuple[Any, bool]:
+    def get_or_create_esi(self, location_id: int) -> tuple[Any, bool]:
         """Get or create location object with data fetched from ESI."""
         empty_threshold = now() - dt.timedelta(minutes=self._UPDATE_EMPTY_GRACE_MINUTES)
         stale_threshold = now() - dt.timedelta(hours=ASSETS_LOCATION_STALE_HOURS)
@@ -375,7 +375,7 @@ class LocationManagerBase(models.Manager):
 
         return location, created
 
-    def update_or_create_esi(self, location_id: int) -> Tuple[Any, bool]:
+    def update_or_create_esi(self, location_id: int) -> tuple[Any, bool]:
         """Update or create location object with data fetched from ESI."""
         if self.model.is_solar_system_id(location_id):
             eve_solar_system, _ = EveSolarSystem.objects.get_or_create_esi(
@@ -407,7 +407,7 @@ class LocationManagerBase(models.Manager):
 
     def _station_update_or_create_dict(
         self, location_id: int, station: dict
-    ) -> Tuple[Any, bool]:
+    ) -> tuple[Any, bool]:
         if station.get("system_id"):
             eve_solar_system, _ = EveSolarSystem.objects.get_or_create_esi(
                 id=station.get("system_id")

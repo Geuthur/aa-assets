@@ -1,4 +1,4 @@
-from typing import Any, List
+from typing import Any
 
 from ninja import NinjaAPI
 
@@ -26,7 +26,7 @@ class RequestsApiEndpoints:
     def __init__(self, api: NinjaAPI):
         @api.get(
             "requests/",
-            response={200: List[schema.Requests], 403: str},
+            response={200: list[schema.Requests], 403: str},
             tags=self.tags,
         )
         def get_requests(request: WSGIRequest):
@@ -80,7 +80,7 @@ class RequestsApiEndpoints:
 
         @api.get(
             "requests/myrequests/",
-            response={200: List[schema.Requests], 403: str},
+            response={200: list[schema.Requests], 403: str},
             tags=self.tags,
         )
         def get_my_requests(request):

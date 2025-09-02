@@ -1,5 +1,5 @@
 from datetime import datetime
-from typing import Any, Optional
+from typing import Any
 
 from ninja import Schema
 
@@ -13,21 +13,21 @@ class Character(Schema):
     character_id: int
     corporation_id: int
     corporation_name: str
-    alliance_id: Optional[int] = None
-    alliance_name: Optional[str] = None
+    alliance_id: int | None = None
+    alliance_name: str | None = None
 
 
 class Corporation(Schema):
     corporation_id: int
     corporation_name: str
-    alliance_id: Optional[int] = None
-    alliance_name: Optional[str] = None
+    alliance_id: int | None = None
+    alliance_name: str | None = None
 
 
 class EveName(Schema):
     id: int
     name: str
-    cat: Optional[str] = None
+    cat: str | None = None
 
 
 class Assets(Schema):
@@ -42,7 +42,7 @@ class Requests(Schema):
     order: Any
     action: str
     created: datetime
-    closed: Optional[datetime] = None
-    approver: Optional[Any]
+    closed: datetime | None = None
+    approver: Any | None
     requestor: Any
     actions: Any
