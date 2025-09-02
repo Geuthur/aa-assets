@@ -14,5 +14,5 @@
 
 .ts-shake {
     animation: ts-shake 0.5s;
-    animation-duration: infinite;
+    animation-iteration-count: infinite;
 }
