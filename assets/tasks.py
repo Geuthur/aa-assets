@@ -8,17 +8,18 @@ from celery import shared_task
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
+from esi.exceptions import HTTPNotModified
 from eveuniverse.models import EveType
 
 from allianceauth.eveonline.models import Token
 from allianceauth.services.tasks import QueueOnce
 
+from assets import contexts
 from assets.app_settings import ASSETS_UPDATE_PERIOD
 from assets.decorators import when_esi_is_available
 from assets.hooks import get_extension_logger
 from assets.models import Assets, Location, Owner
 from assets.providers import esi
-from assets.task_helpers.etag_helpers import NotModifiedError, etag_results
 from assets.task_helpers.location_helpers import fetch_location, fetch_parent_location
 
 TZ_STRING = "%Y-%m-%dT%H:%M:%SZ"
@@ -240,54 +241,65 @@ def update_all_parent_locations(self, force_refresh=False):
     count = 0
     for owner in owners:
         owner_id = owner.character.character.character_id
-        if owner.corporation is None:
-            req_scopes = [
-                "esi-universe.read_structures.v1",
-                "esi-assets.read_assets.v1",
-            ]
-            token = Token.get_token(owner_id, req_scopes)
-
-            assets_esi = esi.client.Assets.get_characters_character_id_assets(
-                character_id=owner.character.character.character_id,
-                token=token.valid_access_token(),
-            )
-
-            assets = etag_results(assets_esi, token, force_refresh=force_refresh)
-        else:
-            req_scopes = [
-                "esi-universe.read_structures.v1",
-                "esi-assets.read_corporation_assets.v1",
-            ]
-            token = Token.get_token(owner_id, req_scopes)
-
-            assets_esi = esi.client.Assets.get_corporations_corporation_id_assets(
-                corporation_id=owner.corporation.corporation_id,
-                token=token.valid_access_token(),
-            )
-
-            assets = etag_results(assets_esi, token, force_refresh=force_refresh)
-
         try:
-            for asset in assets:
-                asset_ids.append(asset["item_id"])
-                assets_by_id[asset["item_id"]] = asset
-                if asset["location_id"] in asset_ids:
-                    location_id = asset["location_id"]
-                    asset_locations[location_id] = [asset["item_id"]]
-            for location_id in asset_locations:
-                asset = assets_by_id[location_id]
-                parent_id = asset["location_id"]
-                eve_type = asset["type_id"]
-
-                update_parent_location.apply_async(
-                    args=[location_id, parent_id, owner_id, eve_type],
-                    kwargs={"force_refresh": force_refresh},
-                    priority=8,
+            if owner.corporation is None:
+                req_scopes = [
+                    "esi-universe.read_structures.v1",
+                    "esi-assets.read_assets.v1",
+                ]
+                token = Token.get_token(owner_id, req_scopes)
+                assets_esi = esi.client.Assets.GetCharactersCharacterIdAssets(
+                    character_id=owner.character.character.character_id,
+                    token=token,
                 )
-                count = count + 1
-        except NotModifiedError:
-            logger.debug("No Updates for Parent Locations")
-            return "No Updates for Parent Locations"
+                assets, response = assets_esi.results(
+                    return_response=True,
+                    force_refresh=force_refresh,
+                )
+                logger.debug("Response Status: %s", response.status_code)
+            else:
+                req_scopes = [
+                    "esi-universe.read_structures.v1",
+                    "esi-assets.read_corporation_assets.v1",
+                ]
+                token = Token.get_token(owner_id, req_scopes)
+
+                assets_esi = esi.client.Assets.GetCorporationsCorporationIdAssets(
+                    corporation_id=owner.corporation.corporation_id,
+                    token=token,
+                )
+
+                assets, response = assets_esi.results(
+                    return_response=True,
+                    force_refresh=force_refresh,
+                )
+                logger.debug("Response Status: %s", response.status_code)
+        except HTTPNotModified:
+            logger.debug("No Updates for: %s", owner.name)
+            continue
+
+        # Collect all location ids
+        for asset in assets:
+            asset: contexts.GetAssetsContext
+
+            asset_ids.append(asset.item_id)
+            assets_by_id[asset.item_id] = asset
+            if asset.location_id in asset_ids:
+                location_id = asset.location_id
+                asset_locations[location_id] = [asset.item_id]
+
+        # Update all parent locations
+        for location_id in asset_locations:
+            asset = assets_by_id[location_id]
+            parent_id = asset.location_id
+            eve_type = asset.type_id
+
+            update_parent_location.apply_async(
+                args=[location_id, parent_id, owner_id, eve_type],
+                kwargs={"force_refresh": force_refresh},
+                priority=8,
+            )
+            count += 1
 
     logger.debug("Queued %s Parent Locations Updated Tasks", count)
     return f"Queued {count} Parent Locations Updated Tasks"

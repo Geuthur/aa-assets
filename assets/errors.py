@@ -13,3 +13,7 @@ class DatabaseError(Exception):
 
 class CustomError(Exception):
     pass
+
+
+class HTTPGatewayTimeoutError(Exception):
+    pass

@@ -1,5 +1,7 @@
 """Models for assets."""
 
+from bravado.exception import HTTPInternalServerError
+
 from django.contrib.auth.models import Permission, User
 
 # Django
@@ -8,6 +10,7 @@ from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 from esi.errors import TokenError
+from esi.exceptions import HTTPNotModified
 from esi.models import Token
 
 # Alliance Auth (External Libs)
@@ -19,6 +22,8 @@ from allianceauth.eveonline.evelinks import dotlan
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
 from app_utils.django import users_with_permission
 
+from assets import contexts
+from assets.errors import HTTPGatewayTimeoutError
 from assets.helpers.discord import send_user_notification
 from assets.hooks import get_extension_logger
 from assets.managers import (
@@ -29,11 +34,6 @@ from assets.managers import (
     get_market_price,
 )
 from assets.providers import esi
-from assets.task_helpers.etag_helpers import (
-    HTTPGatewayTimeoutError,
-    NotModifiedError,
-    etag_results,
-)
 
 logger = get_extension_logger(__name__)
 
@@ -115,6 +115,45 @@ class Owner(models.Model):
             raise ValueError("No character defined")
         return self.character.character
 
+    def process_assets(self, assets: list[contexts.GetAssetsContext]):
+        logger.debug("Processing %s assets for %s", len(assets), self.name)
+        logger.debug("Assets: %s", assets)
+        items = []
+        item_ids = list(
+            {
+                asset.type_id
+                for asset in assets
+                if get_market_price(asset.type_id) is None
+            }
+        )
+
+        if item_ids:
+            # Update or create prices for all items and save them in cache
+            Assets.objects.update_or_create_prices(item_ids)
+
+        for asset in assets:
+            try:
+                price = float(get_market_price(asset.type_id))
+            except AttributeError:
+                price = None
+
+            location_flag = Assets.LocationFlag.from_esi_data(asset.location_flag)
+            eve_type, _ = EveType.objects.get_or_create_esi(id=asset.type_id)
+            asset_item = Assets(
+                location=get_or_create_location(asset.location_id),
+                location_flag=location_flag,
+                location_type=asset.location_type,
+                eve_type=eve_type,
+                item_id=asset.type_id,
+                quantity=asset.quantity,
+                singleton=asset.is_singleton,
+                blueprint_copy=asset.is_blueprint_copy,
+                owner=self,
+                price=price,
+            )
+            items.append(asset_item)
+        return items
+
     def update_assets_esi(self, force_refresh=False):
         try:
             if self.corporation:
@@ -132,47 +171,16 @@ class Owner(models.Model):
                     ["esi-universe.read_structures.v1", "esi-assets.read_assets.v1"]
                 )
                 assets = self._fetch_personal_assets(token, force_refresh=force_refresh)
-        except NotModifiedError:
+
+            items = self.process_assets(assets)
+        except HTTPInternalServerError as exc:
+            logger.debug("%s: Update has an HTTP internal server error: %s", self, exc)
+        except HTTPNotModified:
             logger.info("No new Assets for: %s", self.name)
             return
         except HTTPGatewayTimeoutError:
             logger.info("Gateway Timeout for: %s", self.name)
             return
-
-        items = []
-        item_ids = list(
-            {
-                asset["type_id"]
-                for asset in assets
-                if get_market_price(asset["type_id"]) is None
-            }
-        )
-
-        if item_ids:
-            # Update or create prices for all items and save them in cache
-            Assets.objects.update_or_create_prices(item_ids)
-
-        for asset in assets:
-            try:
-                price = float(get_market_price(asset.get("type_id")))
-            except AttributeError:
-                price = None
-
-            location_flag = Assets.LocationFlag.from_esi_data(asset["location_flag"])
-            eve_type, _ = EveType.objects.get_or_create_esi(id=asset["type_id"])
-            asset_item = Assets(
-                location=get_or_create_location(asset["location_id"]),
-                location_flag=location_flag,
-                location_type=asset.get("location_type"),
-                eve_type=eve_type,
-                item_id=asset.get("type_id"),
-                quantity=asset.get("quantity"),
-                singleton=asset.get("is_singleton"),
-                blueprint_copy=asset.get("is_blueprint_copy"),
-                owner=self,
-                price=price,
-            )
-            items.append(asset_item)
 
         try:
             if items:
@@ -220,22 +228,30 @@ class Owner(models.Model):
             logger.info("Updated %s orders for %s", len(orders_to_update), self.name)
             RequestAssets.objects.bulk_update(orders_to_update, ["asset_pk"])
 
-    def _fetch_corporate_assets(self, token, force_refresh=False) -> list:
+    def _fetch_corporate_assets(self, token: Token, force_refresh=False) -> list:
         """Fetch all assets for this owner from ESI."""
-        asset_esi = esi.client.Assets.get_corporations_corporation_id_assets(
+        asset_esi = esi.client.Assets.GetCorporationsCorporationIdAssets(
             corporation_id=self.corporation_strict.corporation_id,
-            token=token.valid_access_token(),
+            token=token,
         )
-        assets = etag_results(asset_esi, token, force_refresh=force_refresh)
+        assets, response = asset_esi.results(
+            return_response=True,
+            force_refresh=force_refresh,
+        )
+        logger.debug("Response Status: %s", response.status_code)
         return assets
 
-    def _fetch_personal_assets(self, token, force_refresh=False) -> list:
+    def _fetch_personal_assets(self, token: Token, force_refresh=False) -> list:
         """Fetch all assets for this owner from ESI."""
-        asset_esi = esi.client.Assets.get_characters_character_id_assets(
+        asset_esi = esi.client.Assets.GetCharactersCharacterIdAssets(
             character_id=self.eve_character_strict.character_id,
-            token=token.valid_access_token(),
+            token=token,
         )
-        assets = etag_results(asset_esi, token, force_refresh=force_refresh)
+        assets, response = asset_esi.results(
+            return_response=True,
+            force_refresh=force_refresh,
+        )
+        logger.debug("Response Status: %s", response.status_code)
         return assets
 
     def valid_token(self, scopes) -> Token:
