@@ -1,9 +1,12 @@
 """AA Hooks"""
 
+# Standard Library
 import logging
 
+# Alliance Auth
 from allianceauth.authentication.models import UserProfile
 
+# AA Assets
 from assets.app_settings import ASSETS_APP_NAME
 
 

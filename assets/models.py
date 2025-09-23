@@ -1,27 +1,28 @@
 """Models for assets."""
 
+# Third Party
 from bravado.exception import HTTPInternalServerError
 
-from django.contrib.auth.models import Permission, User
-
 # Django
+from django.contrib.auth.models import Permission, User
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
-from esi.errors import TokenError
-from esi.exceptions import HTTPNotModified
-from esi.models import Token
-
-# Alliance Auth (External Libs)
-from eveuniverse.models import EveEntity, EveSolarSystem, EveType
 
 # Alliance Auth
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.evelinks import dotlan
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
-from app_utils.django import users_with_permission
+from esi.errors import TokenError
+from esi.exceptions import HTTPNotModified
+from esi.models import Token
 
+# Alliance Auth (External Libs)
+from app_utils.django import users_with_permission
+from eveuniverse.models import EveEntity, EveSolarSystem, EveType
+
+# AA Assets
 from assets import contexts
 from assets.errors import HTTPGatewayTimeoutError
 from assets.helpers.discord import send_user_notification

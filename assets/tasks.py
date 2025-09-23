@@ -1,19 +1,26 @@
 """App Tasks"""
 
+# Standard Library
 import datetime
 import json
 
+# Third Party
 from celery import shared_task
 
+# Django
 from django.core.cache import cache
 from django.core.serializers.json import DjangoJSONEncoder
 from django.utils import timezone
-from esi.exceptions import HTTPNotModified
-from eveuniverse.models import EveType
 
+# Alliance Auth
 from allianceauth.eveonline.models import Token
 from allianceauth.services.tasks import QueueOnce
+from esi.exceptions import HTTPNotModified
 
+# Alliance Auth (External Libs)
+from eveuniverse.models import EveType
+
+# AA Assets
 from assets import contexts
 from assets.app_settings import ASSETS_UPDATE_PERIOD
 from assets.decorators import when_esi_is_available

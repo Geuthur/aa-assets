@@ -2,11 +2,14 @@
 Decorators
 """
 
+# Standard Library
 import time
 from functools import wraps
 
+# Alliance Auth (External Libs)
 from app_utils.esi import EsiDailyDowntime, fetch_esi_status
 
+# AA Assets
 from assets.app_settings import IS_TESTING
 from assets.hooks import get_extension_logger
 

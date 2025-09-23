@@ -2,6 +2,7 @@
 import datetime as dt
 from typing import Any
 
+# Third Party
 import requests
 
 # Django
@@ -13,9 +14,10 @@ from django.db.models.functions import Concat
 from django.utils.timezone import now
 
 # Alliance Auth
-from eveuniverse.models import EveEntity, EveSolarSystem, EveType
-
 from allianceauth.eveonline.models import EveCharacter
+
+# Alliance Auth (External Libs)
+from eveuniverse.models import EveEntity, EveSolarSystem, EveType
 
 # AA Assets
 from assets import __version__, contexts

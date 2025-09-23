@@ -1,7 +1,9 @@
 """App URLs"""
 
+# Django
 from django.urls import path, re_path
 
+# AA Assets
 from assets import views
 from assets.api import api
 

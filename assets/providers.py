@@ -1,7 +1,9 @@
 """Shared ESI client for Assets."""
 
+# Alliance Auth
 from esi.openapi_clients import ESIClientProvider
 
+# AA Assets
 from assets import (
     __app_name_useragent__,
     __esi_compatibility_date__,

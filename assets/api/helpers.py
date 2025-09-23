@@ -1,11 +1,14 @@
+# Django
 from django.core.exceptions import ObjectDoesNotExist
 from django.template.loader import render_to_string
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
+# Alliance Auth
 from allianceauth.eveonline.models import EveCharacter
 
+# AA Assets
 from assets.hooks import get_extension_logger
 from assets.models import Assets, Owner, Request
 

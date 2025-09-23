@@ -1,10 +1,17 @@
+# Third Party
 from bravado.exception import HTTPForbidden
 
+# Django
 from django.core.cache import cache
+
+# Alliance Auth
 from esi.exceptions import HTTPNotModified
 from esi.models import Token
+
+# Alliance Auth (External Libs)
 from eveuniverse.models import EveSolarSystem
 
+# AA Assets
 from assets import contexts
 from assets.hooks import get_extension_logger
 from assets.models import Location
