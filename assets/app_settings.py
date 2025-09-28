@@ -35,3 +35,6 @@ ASSETS_LOCATION_STALE_HOURS = clean_setting("ASSETS_LOCATION_STALE_HOURS", 168)
 
 # Set the Stale Status for Assets Updates in Minutes
 ASSETS_UPDATE_PERIOD = clean_setting("ASSETS_UPDATE_PERIOD", 60)  # in minutes
+
+# Cache Key
+ASSETS_CACHE_KEY = "ASSETS"

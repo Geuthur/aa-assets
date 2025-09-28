@@ -12,8 +12,9 @@ from eveuniverse.models import EveType
 
 from allianceauth.eveonline.models import Token
 from allianceauth.services.tasks import QueueOnce
+from app_utils.allianceauth import get_redis_client
 
-from assets.app_settings import ASSETS_UPDATE_PERIOD
+from assets.app_settings import ASSETS_CACHE_KEY, ASSETS_UPDATE_PERIOD
 from assets.decorators import when_esi_is_available
 from assets.hooks import get_extension_logger
 from assets.models import Assets, Location, Owner
@@ -348,3 +349,16 @@ def update_parent_location(
     set_loc_cooldown(parent_id)
     logger.debug("Parent Location Task: %s Complete, Set Cooldown", location_id)
     return f"Parent Location Task: {location_id} Complete, Set Cooldown"
+
+
+@shared_task(base=QueueOnce)
+def clear_all_etags():
+    logger.debug("Clearing all etags")
+    _client = get_redis_client()
+    keys = _client.keys(f":?:{ASSETS_CACHE_KEY}-*")
+    logger.info("Deleting %s etag keys", len(keys))
+    if keys:
+        deleted = _client.delete(*keys)
+        logger.info("Deleted %s etag keys", deleted)
+    else:
+        logger.info("No etag keys to delete")

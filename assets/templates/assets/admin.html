@@ -1,0 +1,47 @@
+{% extends "assets/base.html" %}
+{% load i18n %}
+
+{% block page_template_title %}
+    {{ title }}
+{% endblock page_template_title %}
+
+{% block page_topic %}
+    <h1 class="page-header text-center">
+        {{ title }}
+    </h1>
+{% endblock page_topic %}
+
+{% block assets_block %}
+    <div class="card-body">
+        <div class="card bg-secondary">
+            <div class="card-header text-center bg-primary">{% translate "Administration" %}</div>
+            <div class="card-body w-25">
+                <form action="{% url 'assets:admin' %}" method="post">
+                    {% csrf_token %}
+                    <div class="mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" name="force_refresh" id="force_refresh">
+                        <label class="form-check-label" for="force_refresh">{% translate "Mark all tasks as Force Refresh" %}</label>
+                    </div>
+                    <hr class="my-4"> <!-- Bootstrap Trennlinie -->
+                    <div class="mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" name="run_clear_etag" id="run_clear_etag">
+                        <label class="form-check-label" for="run_clear_etag">{% translate "Clear all cached ETags" %}</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" name="run_update_all_assets" id="run_update_all_assets">
+                        <label class="form-check-label" for="run_update_all_assets">{% translate "Update All Assets" %}</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" name="run_update_all_locations" id="run_update_all_locations">
+                        <label class="form-check-label" for="run_update_all_locations">{% translate "Update All Locations" %}</label>
+                    </div>
+                    <div class="mb-3 form-check">
+                        <input class="form-check-input" type="checkbox" name="run_update_all_parent_locations" id="run_update_all_parent_locations">
+                        <label class="form-check-label" for="run_update_all_parent_locations">{% translate "Update All Parent Locations" %}</label>
+                    </div>
+                    <input type="submit" value="{% translate 'Submit' %}" class="btn col-md-12 btn-primary" />
+                </form>
+            </div>
+        </div>
+    </div>
+{% endblock assets_block %}
