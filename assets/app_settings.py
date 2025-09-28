@@ -30,9 +30,15 @@ FUZZ_BASE_URL_REGEX = r"^http[s]?:\/\/(www\.)?fuzzwork\.co\.uk\/"
 # If True you need to set up the Logger
 ASSETS_LOGGER_USE = clean_setting("ASSETS_LOGGER_USE", False)
 
+# Global timeout for tasks in seconds to reduce task accumulation during outages.
+ASSETS_TASKS_TIME_LIMIT = clean_setting("ASSETS_TASKS_TIME_LIMIT", 600)
+
 # Hours after a existing location (e.g. structure) becomes stale and gets updated
 # e.g. for name changes of structures
 ASSETS_LOCATION_STALE_HOURS = clean_setting("ASSETS_LOCATION_STALE_HOURS", 168)
 
 # Set the Stale Status for Assets Updates in Minutes
 ASSETS_UPDATE_PERIOD = clean_setting("ASSETS_UPDATE_PERIOD", 60)  # in minutes
+
+# Assets Cache System
+ASSETS_CACHE_KEY = "ASSETS"

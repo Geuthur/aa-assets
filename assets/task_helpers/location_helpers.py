@@ -1,11 +1,8 @@
-# Third Party
-from bravado.exception import HTTPForbidden
-
 # Django
 from django.core.cache import cache
 
 # Alliance Auth
-from esi.exceptions import HTTPNotModified
+from esi.exceptions import HTTPClientError, HTTPNotModified
 from esi.models import Token
 
 # Alliance Auth (External Libs)
@@ -13,6 +10,7 @@ from eveuniverse.models import EveSolarSystem
 
 # AA Assets
 from assets import contexts
+from assets.app_settings import ASSETS_CACHE_KEY
 from assets.hooks import get_extension_logger
 from assets.models import Location
 from assets.providers import esi
@@ -20,22 +18,24 @@ from assets.providers import esi
 logger = get_extension_logger(__name__)
 
 
-def set_error_count_flag():
-    return cache.set("esi_errors_timeout", 1, 60)
+def get_cache_key(location_id):
+    return f"{ASSETS_CACHE_KEY}-{location_id}_no_permission"
 
 
-def get_location_type(location_id):
-    existing = Location.objects.filter(id=location_id)
-    current_loc = existing.exists()
+def get_location_type(location_id) -> tuple[Location | None, Location | None]:
+    """Check if location is already in DB or is a special location type"""
+    existing_location = Location.objects.filter(id=location_id)
+    current_loc = existing_location.exists()
 
     if current_loc and location_id < 64_000_000:
-        return existing.first(), existing
+        return existing_location.first(), existing_location
 
-    existing = existing.first()
+    existing_location = existing_location.first()
 
     if location_id == 2004:
         # ASSET SAFETY
-        return Location(id=location_id, name="Asset Safety"), existing
+        return Location(id=location_id, name="Asset Safety"), existing_location
+    # Location is a Solar System
     if 30_000_000 < location_id < 33_000_000:
         system, _ = EveSolarSystem.objects.get_or_create_esi(id=location_id)
         logger.debug("Fetched Solar System: %s", system)
@@ -49,8 +49,9 @@ def get_location_type(location_id):
                 name=system.name,
                 eve_solar_system=system,
             ),
-            existing,
+            existing_location,
         )
+    # Location is a Station
     if 60_000_000 < location_id < 64_000_000:
         try:
             station = esi.client.Universe.GetUniverseStationsStationId(
@@ -59,7 +60,7 @@ def get_location_type(location_id):
             station: contexts.GetUniverseStationsStationIdContext
         except HTTPNotModified:
             logger.debug("No Updates for Station: %s", location_id)
-            return existing, existing
+            return existing_location, existing_location
 
         logger.debug("Fetched Station: %s", station)
         return (
@@ -68,14 +69,25 @@ def get_location_type(location_id):
                 name=station.name,
                 eve_solar_system_id=station.system_id,
             ),
-            existing,
+            existing_location,
         )
-    return None, existing
+    # Location is a Structure
+    return None, existing_location
 
 
 # pylint: disable=too-many-return-statements
-def fetch_location(location_id, location_flag, character_id):
+def fetch_location(
+    location_id, location_flag, character_id, force_refresh=False
+) -> Location | None:
     """Takes a location_id and character_id and returns a location model for items in a station/structure or in space"""
+
+    # Check if we have a cached no-permission flag
+    if cache.get(get_cache_key(location_id)):
+        logger.debug(
+            "Skipping fetch for location_id %s due to cached no-permission flag",
+            location_id,
+        )
+        return None, False
 
     standard_location_flags = [
         "AssetSafety",
@@ -93,116 +105,152 @@ def fetch_location(location_id, location_flag, character_id):
         # Skip unnecessary locations (e.g. Fits, Drone Bay, etc.)
         if location_flag is not None:
             logger.debug("Skipping location flag: %s", location_flag)
-            return None
+            return None, False
 
     # Check which location type it is
-    location, existing = get_location_type(location_id)
+    location, existing_location = get_location_type(location_id)
+
+    # Exit if location already exists and is a Solar System or Station
     if location:
-        return location
+        return location, False
 
     req_scopes = ["esi-universe.read_structures.v1"]
 
     token = Token.get_token(character_id, req_scopes)
 
     if not token:
-        return None
+        return None, False
 
     try:
         structure = esi.client.Universe.GetUniverseStructuresStructureId(
             structure_id=location_id, token=token
-        ).result()
+        ).result(force_refresh=force_refresh)
         structure: contexts.GetUniverseStructuresStructureIdContext
-    except HTTPForbidden as e:
-        logger.debug("Failed to get: %s", e)
-        if int(e.response.headers.get("x-esi-error-limit-remain")) < 50:
-            set_error_count_flag()
-        logger.debug(
-            "Failed to get location:%s, Error:%s, Errors Remaining:%s, Time Remaining: %s",
-            location_id,
-            e.message,
-            e.response.headers.get("x-esi-error-limit-remain"),
-            e.response.headers.get("x-esi-error-limit-reset"),
-        )
-        return None
     except HTTPNotModified:
         logger.debug("No Updates for Location: %s", location_id)
-        return existing
+        return existing_location, False
+    except HTTPClientError as e:
+        logger.debug("Failed to get: %s", e)
+        logger.debug(e.headers)
+        logger.debug(e.data)
+        logger.debug(
+            "Failed to get location:%s, Errors Remaining:%s, Time Remaining: %s",
+            location_id,
+            e.headers.get("x-esi-error-limit-remain"),
+            e.headers.get("x-esi-error-limit-reset"),
+        )
+        if e.status_code == 403:
+            logger.debug("Failed to get location %s due to 403 Forbidden", location_id)
+            cache.set(
+                get_cache_key(location_id), 1, (60 * 60 * 24 * 7)
+            )  # Cache for 7 days
+        if e.status_code == 420:
+            logger.debug("Rate limit hit when fetching location %s", location_id)
+            return None, True
+        return None, False
 
     system, _ = EveSolarSystem.objects.get_or_create_esi(id=structure.solar_system_id)
 
     if not system:
         logger.debug("Failed to get Solar System: %s", system)
-        return None
+        return None, False
 
-    if existing:
-        existing.name = structure.name
-        existing.eve_solar_system = system
-        existing.eve_type_id = structure.type_id
-        existing.owner_id = structure.owner_id
-        return existing
+    logger.debug("Fetched Structure: %s", structure.name)
 
-    return Location(
-        id=location_id,
-        name=structure.name,
-        eve_solar_system_id=structure.solar_system_id,
-        eve_type_id=structure.type_id,
-        owner_id=structure.owner_id,
+    if existing_location:
+        existing_location.name = structure.name
+        existing_location.eve_solar_system = system
+        existing_location.eve_type_id = structure.type_id
+        existing_location.owner_id = structure.owner_id
+        return existing_location, False
+
+    return (
+        Location(
+            id=location_id,
+            name=structure.name,
+            eve_solar_system_id=structure.solar_system_id,
+            eve_type_id=structure.type_id,
+            owner_id=structure.owner_id,
+        ),
+        False,
     )
 
 
-def fetch_parent_location(parent_id, character_id):
+def fetch_parent_location(
+    parent_id, character_id, force_refresh=False
+) -> tuple[Location | None, bool]:
     """Takes a parent_id and character_id and returns a location model for items in a station/structure or in space"""
+
+    # Check if we have a cached no-permission flag
+    if cache.get(get_cache_key(parent_id)):
+        logger.debug(
+            "Skipping fetch for parent_id %s due to cached no-permission flag",
+            parent_id,
+        )
+        return None, False
 
     # Check which location type it is
     location, existing = get_location_type(parent_id)
     if location:
-        return location
+        return location, False
 
     req_scopes = ["esi-universe.read_structures.v1"]
 
     token = Token.get_token(character_id, req_scopes)
 
     if not token:
-        return None
+        return None, False
 
     try:
         structure = esi.client.Universe.GetUniverseStructuresStructureId(
             structure_id=parent_id, token=token
-        ).result()
+        ).result(force_refresh=force_refresh)
         structure: contexts.GetUniverseStructuresStructureIdContext
-    except HTTPForbidden as e:
-        logger.debug("Failed to get: %s", e)
-        if int(e.response.headers.get("x-esi-error-limit-remain")) < 50:
-            set_error_count_flag()
-        logger.debug(
-            "Failed to get location:%s, Error:%s, Errors Remaining:%s, Time Remaining: %s",
-            parent_id,
-            e.message,
-            e.response.headers.get("x-esi-error-limit-remain"),
-            e.response.headers.get("x-esi-error-limit-reset"),
-        )
-        return None
     except HTTPNotModified:
         logger.debug("No Updates for Parent Location: %s", parent_id)
-        return existing
+        return existing, False
+    except HTTPClientError as e:
+        logger.debug("Failed to get: %s", e)
+        logger.debug(e.headers)
+        logger.debug(e.data)
+        logger.debug(
+            "Failed to get location:%s, Errors Remaining:%s, Time Remaining: %s",
+            parent_id,
+            e.headers.get("x-esi-error-limit-remain"),
+            e.headers.get("x-esi-error-limit-reset"),
+        )
+        if e.status_code == 403:
+            logger.debug("Failed to get location %s due to 403 Forbidden", parent_id)
+            cache.set(
+                get_cache_key(parent_id), 1, (60 * 60 * 24 * 7)
+            )  # Cache for 7 days
+        if e.status_code == 420:
+            logger.debug("Rate limit hit when fetching parent location %s", parent_id)
+            return None, True
+        return None, False
 
     system, _ = EveSolarSystem.objects.get_or_create_esi(id=structure.solar_system_id)
 
     if not system:
         logger.debug("Failed to get Solar System: %s", system)
-        return None
+        return None, False
+
+    logger.debug("Fetched Structure: %s", structure.name)
 
     if existing:
         existing.name = structure.name
         existing.eve_solar_system = system
         existing.eve_type_id = structure.type_id
         existing.owner_id = structure.owner_id
-        return existing
+        return existing, False
 
-    return Location(
-        id=parent_id,
-        name=structure.name,
-        eve_solar_system_id=structure.solar_system_id,
-        eve_type_id=structure.type_id,
-        owner_id=structure.owner_id,
+    return (
+        Location(
+            id=parent_id,
+            name=structure.name,
+            eve_solar_system_id=structure.solar_system_id,
+            eve_type_id=structure.type_id,
+            owner_id=structure.owner_id,
+        ),
+        False,
     )
