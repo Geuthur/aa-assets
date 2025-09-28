@@ -92,6 +92,13 @@ class Owner(models.Model):
     class Meta:
         default_permissions = ()
 
+    def __str__(self) -> str:
+        if self.corporation:
+            return f"{self.corporation.corporation_name} (Corp)"
+        if self.character and self.character.character:
+            return f"{self.character.character.character_name} (Char)"
+        return f"Owner #{self.pk} (No Corp/Char)"
+
     @property
     def name(self) -> str:
         """Return the name of this owner."""

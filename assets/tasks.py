@@ -15,11 +15,13 @@ from allianceauth.services.tasks import QueueOnce
 from esi.exceptions import HTTPNotModified
 
 # Alliance Auth (External Libs)
+from app_utils.allianceauth import get_redis_client
 from eveuniverse.models import EveType
 
 # AA Assets
 from assets import contexts
 from assets.app_settings import (
+    ASSETS_CACHE_KEY,
     ASSETS_TASKS_TIME_LIMIT,
     ASSETS_UPDATE_PERIOD,
 )
@@ -270,3 +272,16 @@ def update_parent_location(
         self.retry(countdown=300)
     logger.debug("Parent Location Task: %s Complete", location_id)
     return
+
+
+@shared_task(base=QueueOnce)
+def clear_all_etags():
+    logger.debug("Clearing all etags")
+    _client = get_redis_client()
+    keys = _client.keys(f":?:{ASSETS_CACHE_KEY}-*")
+    logger.info("Deleting %s etag keys", len(keys))
+    if keys:
+        deleted = _client.delete(*keys)
+        logger.info("Deleted %s etag keys", deleted)
+    else:
+        logger.info("No etag keys to delete")
