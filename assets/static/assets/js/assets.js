@@ -86,7 +86,7 @@ $(document).ready(() => {
         pageLength: 25,
         autoWidth: false,
         columnDefs: [
-            { 'sortable': false, 'targets': [0, 5] },
+            { 'sortable': false, 'targets': [0, 6] },
         ],
         footerCallback: function (_, data, __, ___, ____) {
             const api = this.api();
