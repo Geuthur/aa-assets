@@ -21,7 +21,13 @@ from allianceauth.eveonline.models import EveCorporationInfo
 from assets import forms
 from assets.hooks import add_info_to_context, get_extension_logger
 from assets.models import Assets, Owner, Request, RequestAssets
-from assets.tasks import update_assets_for_owner
+from assets.tasks import (
+    clear_all_etags,
+    update_all_assets,
+    update_all_locations,
+    update_all_parent_locations,
+    update_assets_for_owner,
+)
 
 logger = get_extension_logger(__name__)
 
@@ -78,6 +84,38 @@ def index(request):
     context = add_info_to_context(request, context)
 
     return render(request, "assets/index.html", context=context)
+
+
+@login_required
+@permissions_required(["assets.basic_access"])
+def admin(request):
+    if not request.user.is_superuser:
+        messages.error(request, _("You do not have permission to access this page."))
+        return redirect("assets:index")
+
+    if request.method == "POST":
+        force_refresh = False
+        if request.POST.get("force_refresh", False):
+            force_refresh = True
+        if request.POST.get("run_clear_etag"):
+            messages.info(request, _("Queued Clear All ETags"))
+            clear_all_etags.apply_async(priority=1)
+        if request.POST.get("run_update_all_assets"):
+            messages.info(request, _("Queued Update All Assets"))
+            update_all_assets.apply_async(
+                kwargs={"force_refresh": force_refresh}, priority=7
+            )
+        if request.POST.get("run_update_all_locations"):
+            messages.info(request, _("Queued Update All Locations"))
+            update_all_locations.apply_async(
+                kwargs={"force_refresh": force_refresh}, priority=7
+            )
+        if request.POST.get("run_update_all_parent_locations"):
+            messages.info(request, _("Queued Update All Parent Locations"))
+            update_all_parent_locations.apply_async(
+                kwargs={"force_refresh": force_refresh}, priority=7
+            )
+    return render(request, "assets/admin.html")
 
 
 @login_required

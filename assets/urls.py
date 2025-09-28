@@ -9,6 +9,7 @@ app_name: str = "assets"
 
 urlpatterns = [
     path("", views.index, name="index"),
+    path("admin/", views.admin, name="admin"),
     path("location/", views.location, name="location"),
     path("<int:location_id>/flag/<str:location_flag>", views.assets, name="assets"),
     path("add_corp/", views.add_corp, name="add_corp"),
