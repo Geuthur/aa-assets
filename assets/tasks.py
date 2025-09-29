@@ -25,6 +25,7 @@ from assets.app_settings import (
     ASSETS_TASKS_TIME_LIMIT,
     ASSETS_UPDATE_PERIOD,
 )
+from assets.constants import STANDARD_FLAG
 from assets.decorators import when_esi_is_available
 from assets.hooks import get_extension_logger
 from assets.models import Assets, Location, Owner
@@ -73,16 +74,11 @@ def update_assets_for_owner(owner_pk: int, force_refresh=False):
 @shared_task(**TASK_DEFAULTS_ONCE)
 @when_esi_is_available
 def update_all_locations(force_refresh=False, runs: int = 0):
-    """Fetch all assets for an owner from ESI."""
-    location_flags = ["Deliveries", "Hangar", "HangarAll", "AssetSafety"]
-    corp_flags = ["CorpDeliveries"]
-
-    location_flags = location_flags + corp_flags
-
+    """Update all locations."""
     skip_date = timezone.now() - datetime.timedelta(days=7)
 
     assets_loc_ids = list(
-        Assets.objects.filter(location_flag__in=location_flags).values_list(
+        Assets.objects.filter(location_flag__in=STANDARD_FLAG).values_list(
             "location_id", flat=True
         )
     )
@@ -95,8 +91,6 @@ def update_all_locations(force_refresh=False, runs: int = 0):
 
     all_locations = set(assets_loc_ids + location_ids)
 
-    logger.debug("Queued %s Structure Updates", len(all_locations))
-
     for location in all_locations:
         update_location.apply_async(
             args=[location], kwargs={"force_refresh": force_refresh}, priority=8
@@ -107,6 +101,7 @@ def update_all_locations(force_refresh=False, runs: int = 0):
 
 @shared_task(bind=True, **TASK_DEFAULTS_ONCE)
 def update_location(self, location_id, force_refresh=False):
+    """Fetch and update a location from ESI."""
     asset = Assets.objects.filter(location_id=location_id).select_related(
         "owner__character__character"
     )

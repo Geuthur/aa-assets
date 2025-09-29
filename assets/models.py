@@ -1,8 +1,5 @@
 """Models for assets."""
 
-# Third Party
-from bravado.exception import HTTPInternalServerError
-
 # Django
 from django.contrib.auth.models import Permission, User
 from django.db import models, transaction
@@ -15,7 +12,7 @@ from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.evelinks import dotlan
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
 from esi.errors import TokenError
-from esi.exceptions import HTTPNotModified
+from esi.exceptions import HTTPClientError, HTTPNotModified
 from esi.models import Token
 
 # Alliance Auth (External Libs)
@@ -181,13 +178,14 @@ class Owner(models.Model):
                 assets = self._fetch_personal_assets(token, force_refresh=force_refresh)
 
             items = self.process_assets(assets)
-        except HTTPInternalServerError as exc:
-            logger.debug("%s: Update has an HTTP internal server error: %s", self, exc)
         except HTTPNotModified:
             logger.info("No new Assets for: %s", self.name)
             return
         except HTTPGatewayTimeoutError:
             logger.info("Gateway Timeout for: %s", self.name)
+            return
+        except HTTPClientError as e:
+            logger.error("Failed to fetch assets for %s: %s", self.name, e)
             return
 
         try:

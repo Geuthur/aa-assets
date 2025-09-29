@@ -11,6 +11,7 @@ from eveuniverse.models import EveSolarSystem
 # AA Assets
 from assets import contexts
 from assets.app_settings import ASSETS_CACHE_KEY
+from assets.constants import STANDARD_FLAG
 from assets.hooks import get_extension_logger
 from assets.models import Location
 from assets.providers import esi
@@ -89,19 +90,7 @@ def fetch_location(
         )
         return None, False
 
-    standard_location_flags = [
-        "AssetSafety",
-        "Deliveries",
-        "Hangar",
-        "HangarAll",
-        "solar_system",
-        "OfficeFolder",
-    ]
-    corp_location_flags = ["CorpDeliveries"]
-
-    accepted_flags = standard_location_flags + corp_location_flags
-
-    if location_flag not in accepted_flags:
+    if location_flag not in STANDARD_FLAG:
         # Skip unnecessary locations (e.g. Fits, Drone Bay, etc.)
         if location_flag is not None:
             logger.debug("Skipping location flag: %s", location_flag)
@@ -128,25 +117,24 @@ def fetch_location(
         structure: contexts.GetUniverseStructuresStructureIdContext
     except HTTPNotModified:
         logger.debug("No Updates for Location: %s", location_id)
-        return existing_location, False
+        return None, False
     except HTTPClientError as e:
-        logger.debug("Failed to get: %s", e)
-        logger.debug(e.headers)
-        logger.debug(e.data)
-        logger.debug(
-            "Failed to get location:%s, Errors Remaining:%s, Time Remaining: %s",
-            location_id,
-            e.headers.get("x-esi-error-limit-remain"),
-            e.headers.get("x-esi-error-limit-reset"),
-        )
         if e.status_code == 403:
             logger.debug("Failed to get location %s due to 403 Forbidden", location_id)
             cache.set(
                 get_cache_key(location_id), 1, (60 * 60 * 24 * 7)
             )  # Cache for 7 days
+            return None, False
         if e.status_code == 420:
-            logger.debug("Rate limit hit when fetching location %s", location_id)
+            logger.debug("Rate limit hit when fetching parent location %s", location_id)
             return None, True
+        logger.debug("Failed to get: %s", e)
+        logger.info(
+            "Failed to get location:%s, Headers:%s, Data: %s",
+            location_id,
+            e.headers,
+            e.data,
+        )
         return None, False
 
     system, _ = EveSolarSystem.objects.get_or_create_esi(id=structure.solar_system_id)
@@ -154,8 +142,6 @@ def fetch_location(
     if not system:
         logger.debug("Failed to get Solar System: %s", system)
         return None, False
-
-    logger.debug("Fetched Structure: %s", structure.name)
 
     if existing_location:
         existing_location.name = structure.name
@@ -210,23 +196,22 @@ def fetch_parent_location(
         logger.debug("No Updates for Parent Location: %s", parent_id)
         return existing, False
     except HTTPClientError as e:
-        logger.debug("Failed to get: %s", e)
-        logger.debug(e.headers)
-        logger.debug(e.data)
-        logger.debug(
-            "Failed to get location:%s, Errors Remaining:%s, Time Remaining: %s",
-            parent_id,
-            e.headers.get("x-esi-error-limit-remain"),
-            e.headers.get("x-esi-error-limit-reset"),
-        )
         if e.status_code == 403:
             logger.debug("Failed to get location %s due to 403 Forbidden", parent_id)
             cache.set(
                 get_cache_key(parent_id), 1, (60 * 60 * 24 * 7)
             )  # Cache for 7 days
+            return None, False
         if e.status_code == 420:
             logger.debug("Rate limit hit when fetching parent location %s", parent_id)
             return None, True
+        logger.debug("Failed to get: %s", e)
+        logger.debug(
+            "Failed to get location:%s, Headers:%s, Data: %s",
+            parent_id,
+            e.headers,
+            e.data,
+        )
         return None, False
 
     system, _ = EveSolarSystem.objects.get_or_create_esi(id=structure.solar_system_id)
