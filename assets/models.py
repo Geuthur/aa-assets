@@ -121,8 +121,6 @@ class Owner(models.Model):
         return self.character.character
 
     def process_assets(self, assets: list[contexts.GetAssetsContext]):
-        logger.debug("Processing %s assets for %s", len(assets), self.name)
-        logger.debug("Assets: %s", assets)
         items = []
         item_ids = list(
             {
