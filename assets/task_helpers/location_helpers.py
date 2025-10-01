@@ -79,7 +79,7 @@ def get_location_type(location_id) -> tuple[Location | None, Location | None]:
 # pylint: disable=too-many-return-statements
 def fetch_location(
     location_id, location_flag, character_id, force_refresh=False
-) -> Location | None:
+) -> tuple[Location | None, bool]:
     """Takes a location_id and character_id and returns a location model for items in a station/structure or in space"""
 
     # Check if we have a cached no-permission flag
