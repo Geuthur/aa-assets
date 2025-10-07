@@ -36,7 +36,7 @@ dependencies = [
     "allianceauth>=4.10,<5",
     "allianceauth-app-utils @ git+https://gitlab.com/Geuthur/allianceauth-app-utils.git@openapi",
     "django-esi>=8a4",
-    "django-eveuniverse>=1.6.0",
+    "django-eveuniverse>=1.6",
     "django-ninja",
 ]
 optional-dependencies.tests-allianceauth-latest = [
