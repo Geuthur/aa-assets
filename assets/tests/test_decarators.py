@@ -18,7 +18,7 @@ from assets.decorators import (
     when_esi_is_available,
 )
 
-DECORATOR_PATH = "ledger.decorators."
+DECORATOR_PATH = "assets.decorators."
 
 
 @patch(DECORATOR_PATH + "ESI_STATUS_ROUTE_RATE_LIMIT", new=1)
