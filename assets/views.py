@@ -1,23 +1,25 @@
 """PvE Views"""
 
+# Standard Library
 from http import HTTPStatus
 
+# Django
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
 from django.core.cache import cache
 from django.db import transaction
-
-# Django
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
 from django.views.decorators.http import require_POST
-from esi.decorators import token_required
 
+# Alliance Auth
 from allianceauth.authentication.decorators import permissions_required
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCorporationInfo
+from esi.decorators import token_required
 
+# AA Assets
 from assets import forms
 from assets.hooks import add_info_to_context, get_extension_logger
 from assets.models import Assets, Owner, Request, RequestAssets

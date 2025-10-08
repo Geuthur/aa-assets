@@ -1,14 +1,18 @@
+# Standard Library
 from typing import Any
 
+# Third Party
 from ninja import NinjaAPI
 
+# Django
 from django.urls import reverse
 from django.utils.html import format_html
 
+# AA Assets
 from assets.api import schema
 from assets.api.assets.helper import update_asset_object
 from assets.api.helpers import get_asset, get_owner
-from assets.constants import STANDARD_FLAG
+from assets.constants import CORPORATION_FLAGS, LOCATION_FLAGS
 from assets.hooks import get_extension_logger
 from assets.models import Assets, Location
 
@@ -36,7 +40,7 @@ class AssetsApiEndpoints:
 
             # Set default location_flag if not provided
             if location_flag == "all":
-                location_flag = STANDARD_FLAG
+                location_flag = LOCATION_FLAGS + CORPORATION_FLAGS
             else:
                 location_flag = [location_flag]
 
@@ -96,7 +100,7 @@ class AssetsApiEndpoints:
             locations_ids = (
                 Assets.objects.filter(
                     owner__in=owner,
-                    location_flag__in=STANDARD_FLAG,
+                    location_flag__in=LOCATION_FLAGS + CORPORATION_FLAGS,
                 )
                 .values_list("location_id", flat=True)
                 .distinct()

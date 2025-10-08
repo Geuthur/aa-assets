@@ -1,94 +1,55 @@
 """App Tasks"""
 
+# Standard Library
 import datetime
-import json
 
+# Third Party
 from celery import shared_task
 
-from django.core.cache import cache
-from django.core.serializers.json import DjangoJSONEncoder
+# Django
 from django.utils import timezone
-from eveuniverse.models import EveType
 
+# Alliance Auth
 from allianceauth.eveonline.models import Token
 from allianceauth.services.tasks import QueueOnce
-from app_utils.allianceauth import get_redis_client
+from esi.exceptions import HTTPNotModified
 
-from assets.app_settings import ASSETS_CACHE_KEY, ASSETS_UPDATE_PERIOD
+# Alliance Auth (External Libs)
+from app_utils.allianceauth import get_redis_client
+from eveuniverse.models import EveType
+
+# AA Assets
+from assets import contexts
+from assets.app_settings import (
+    ASSETS_CACHE_KEY,
+    ASSETS_TASKS_TIME_LIMIT,
+    ASSETS_UPDATE_PERIOD,
+)
+from assets.constants import STANDARD_FLAG
 from assets.decorators import when_esi_is_available
 from assets.hooks import get_extension_logger
 from assets.models import Assets, Location, Owner
 from assets.providers import esi
-from assets.task_helpers.etag_helpers import NotModifiedError, etag_results
 from assets.task_helpers.location_helpers import fetch_location, fetch_parent_location
 
 TZ_STRING = "%Y-%m-%dT%H:%M:%SZ"
 logger = get_extension_logger(__name__)
 
+MAX_RETRIES_DEFAULT = 3
 
-def build_loc_cache_tag(location_id):
-    return f"loc_id_{location_id}"
+# Default params for all tasks.
+TASK_DEFAULTS = {
+    "time_limit": ASSETS_TASKS_TIME_LIMIT,
+    "max_retries": MAX_RETRIES_DEFAULT,
+}
 
-
-def build_loc_cooldown_cache_tag(location_id):
-    return f"cooldown_loc_id_{location_id}"
-
-
-def get_loc_cooldown(location_id):
-    return cache.get(build_loc_cooldown_cache_tag(location_id), False)
-
-
-def set_loc_cooldown(location_id):
-    """Set a 7 days cooldown for a location_id"""
-    return cache.set(
-        build_loc_cooldown_cache_tag(location_id), True, (60 * 60 * 24 * 7)
-    )
+# Default params for tasks that need run once only.
+TASK_DEFAULTS_ONCE = {**TASK_DEFAULTS, **{"base": QueueOnce}}
 
 
-def location_get(location_id):
-    cache_tag = build_loc_cache_tag(location_id)
-    data = json.loads(cache.get(cache_tag, '{"date":false, "characters":[]}'))
-    if data.get("date") is not False:
-        try:
-            data["date"] = datetime.datetime.strptime(
-                data.get("date"), TZ_STRING
-            ).replace(tzinfo=datetime.timezone.utc)
-        except (ValueError, TypeError):
-            data["date"] = datetime.datetime.min.replace(tzinfo=datetime.timezone.utc)
-    return data
-
-
-def location_set(location_id, character_id):
-    cache_tag = build_loc_cache_tag(location_id)
-    date = timezone.now() - datetime.timedelta(days=7)
-    data = location_get(location_id)
-    if data.get("date") is not False:
-        if data.get("date") > date:
-            data.get("characters").append(character_id)
-            cache.set(cache_tag, json.dumps(data, cls=DjangoJSONEncoder), None)
-            return True
-
-        data["date"] = timezone.now().strftime(TZ_STRING)
-        data["characters"] = [character_id]
-        cache.set(cache_tag, json.dumps(data, cls=DjangoJSONEncoder), None)
-
-    if character_id not in data.get("characters"):
-        data.get("characters").append(character_id)
-        data["date"] = timezone.now().strftime(TZ_STRING)
-        cache.set(cache_tag, json.dumps(data, cls=DjangoJSONEncoder), None)
-        return True
-
-    return False
-
-
-def get_error_count_flag():
-    return cache.get("esi_errors_timeout", False)
-
-
+@shared_task(**TASK_DEFAULTS_ONCE)
 @when_esi_is_available
-@shared_task(bind=True, base=QueueOnce)
-# pylint: disable=unused-argument
-def update_all_assets(self, runs: int = 0, force_refresh=False):
+def update_all_assets(runs: int = 0, force_refresh=False):
     """Update all assets."""
     owners = Owner.objects.filter(is_active=True)
     skip_date = timezone.now() - datetime.timedelta(minutes=ASSETS_UPDATE_PERIOD)
@@ -103,100 +64,21 @@ def update_all_assets(self, runs: int = 0, force_refresh=False):
     logger.info("Queued %s Assets Updates", len(owners))
 
 
-@shared_task(bind=True, base=QueueOnce, max_retries=None)
-# pylint: disable=unused-argument
-def update_assets_for_owner(self, owner_pk: int, force_refresh=False):
+@shared_task(**TASK_DEFAULTS_ONCE)
+def update_assets_for_owner(owner_pk: int, force_refresh=False):
     """Fetch all assets for an owner from ESI."""
     owner = Owner.objects.get(pk=owner_pk)
     owner.update_assets_esi(force_refresh=force_refresh)
 
 
-@shared_task(bind=True, base=QueueOnce, max_retries=None)
-def update_location(self, location_id, force_refresh=False):
-    if get_error_count_flag():
-        self.retry(countdown=300)
-
-    if get_loc_cooldown(location_id):
-        if force_refresh:
-            pass
-        else:
-            logger.debug("Cooldown on Location ID: %s", location_id)
-            return f"Cooldown on Location ID: {location_id}"
-
-    # Get Cached location data
-    cached_data = location_get(location_id)
-    skip_date = timezone.now() - datetime.timedelta(days=7)
-
-    asset = Assets.objects.filter(location_id=location_id).select_related(
-        "owner__character__character"
-    )
-
-    if cached_data.get("date") is not False:
-        if cached_data.get("date") > skip_date:
-            asset = asset.exclude(
-                owner__character__character__character_id__in=cached_data.get(
-                    "characters"
-                )
-            )
-
-    char_ids = []
-    if asset.exists():
-        char_ids += asset.values_list(
-            "owner__character__character__character_id", flat=True
-        )
-
-    char_ids = set(char_ids)
-
-    if location_id < 64_000_000:
-        location = fetch_location(location_id, None, 0)
-        if location is not None:
-            location.save()
-            count = Assets.objects.filter(
-                location_id=location_id, location__name=""
-            ).update(location_id=location_id)
-            logger.debug("Updated %s Assets with Location Name", count)
-            return count
-        if get_error_count_flag():
-            self.retry(countdown=300)
-
-    if len(char_ids) == 0:
-        set_loc_cooldown(location_id)
-        logger.debug("No Characters for Location ID: %s", location_id)
-        return f"No Characters for Location ID: {location_id}"
-
-    for char_id in char_ids:
-        location = fetch_location(location_id, None, char_id)
-        if location is not None:
-            location.save()
-            count = Assets.objects.filter(
-                location_id=location_id, location__name=""
-            ).update(location_id=location_id)
-            logger.debug("Updated %s Assets with Location Name", count)
-            return count
-
-        location_set(location_id, char_id)
-        if get_error_count_flag():
-            self.retry(countdown=300)
-
-    set_loc_cooldown(location_id)
-    logger.debug("No Characters for Location ID: %s, Set Cooldown", location_id)
-    return f"No Characters for Location ID: {location_id}, Set Cooldown"
-
-
+@shared_task(**TASK_DEFAULTS_ONCE)
 @when_esi_is_available
-@shared_task(bind=True, base=QueueOnce)
-# pylint: disable=unused-argument
-def update_all_locations(self, force_refresh=False, runs: int = 0):
-    """Fetch all assets for an owner from ESI."""
-    location_flags = ["Deliveries", "Hangar", "HangarAll", "AssetSafety"]
-    corp_flags = ["CorpDeliveries"]
-
-    location_flags = location_flags + corp_flags
-
+def update_all_locations(force_refresh=False, runs: int = 0):
+    """Update all locations."""
     skip_date = timezone.now() - datetime.timedelta(days=7)
 
     assets_loc_ids = list(
-        Assets.objects.filter(location_flag__in=location_flags).values_list(
+        Assets.objects.filter(location_flag__in=STANDARD_FLAG).values_list(
             "location_id", flat=True
         )
     )
@@ -209,30 +91,77 @@ def update_all_locations(self, force_refresh=False, runs: int = 0):
 
     all_locations = set(assets_loc_ids + location_ids)
 
-    logger.debug("Queued %s Structure Updates", len(all_locations))
-
     for location in all_locations:
-        if not get_loc_cooldown(location):
-            update_location.apply_async(
-                args=[location], kwargs={"force_refresh": force_refresh}, priority=8
-            )
-            runs = runs + 1
+        update_location.apply_async(
+            args=[location], kwargs={"force_refresh": force_refresh}, priority=8
+        )
+        runs = runs + 1
     logger.debug("Queued %s/%s Structure Tasks", runs, len(all_locations))
-    return f"Queued {runs} Structure Tasks"
 
 
-@shared_task(bind=True, base=QueueOnce, max_retries=None)
-def update_all_parent_locations(self, force_refresh=False):
-    if get_error_count_flag():
+@shared_task(bind=True, **TASK_DEFAULTS_ONCE)
+def update_location(self, location_id, force_refresh=False):
+    """Fetch and update a location from ESI."""
+    asset = Assets.objects.filter(location_id=location_id).select_related(
+        "owner__character__character"
+    )
+
+    char_ids = []
+    if asset.exists():
+        char_ids += asset.values_list(
+            "owner__character__character__character_id", flat=True
+        )
+    char_ids = set(char_ids)
+
+    if location_id < 64_000_000:
+        location, limit_exceeded = fetch_location(
+            location_id, None, 0, force_refresh=force_refresh
+        )
+        if location is not None:
+            location.save()
+            count = Assets.objects.filter(
+                location_id=location_id, location__name=""
+            ).update(location_id=location_id)
+            logger.debug("Updated %s Assets with Location Name", count)
+            return
+
+    if len(char_ids) == 0:
+        logger.debug("No Characters for Location ID: %s", location_id)
+        return
+
+    for char_id in char_ids:
+        location, limit_exceeded = fetch_location(
+            location_id, None, char_id, force_refresh=force_refresh
+        )
+        if location is not None:
+            location.save()
+            count = Assets.objects.filter(
+                location_id=location_id, location__name=""
+            ).update(location_id=location_id)
+            logger.debug("Updated %s Assets with Location Name", count)
+            return
+
+    if limit_exceeded:
+        logger.debug(
+            "ESI limit exceeded when fetching Parent Location: %s - Retry Later",
+            location_id,
+        )
         self.retry(countdown=300)
+        return
 
+    logger.debug("No Characters for Location ID: %s", location_id)
+    return
+
+
+@shared_task(**TASK_DEFAULTS_ONCE)
+def update_all_parent_locations(force_refresh=False):
     assets = Assets.objects.all().select_related("owner__character__character")
 
     owners = Owner.objects.filter(is_active=True)
 
     if not owners.exists():
         logger.debug("No Characters found skip Update")
-        return "No Characters found skip Update"
+        return
 
     asset_ids = []
     asset_locations = {}
@@ -241,95 +170,84 @@ def update_all_parent_locations(self, force_refresh=False):
     count = 0
     for owner in owners:
         owner_id = owner.character.character.character_id
-        if owner.corporation is None:
-            req_scopes = [
-                "esi-universe.read_structures.v1",
-                "esi-assets.read_assets.v1",
-            ]
-            token = Token.get_token(owner_id, req_scopes)
-
-            assets_esi = esi.client.Assets.get_characters_character_id_assets(
-                character_id=owner.character.character.character_id,
-                token=token.valid_access_token(),
-            )
-
-            assets = etag_results(assets_esi, token, force_refresh=force_refresh)
-        else:
-            req_scopes = [
-                "esi-universe.read_structures.v1",
-                "esi-assets.read_corporation_assets.v1",
-            ]
-            token = Token.get_token(owner_id, req_scopes)
-
-            assets_esi = esi.client.Assets.get_corporations_corporation_id_assets(
-                corporation_id=owner.corporation.corporation_id,
-                token=token.valid_access_token(),
-            )
-
-            assets = etag_results(assets_esi, token, force_refresh=force_refresh)
-
         try:
-            for asset in assets:
-                asset_ids.append(asset["item_id"])
-                assets_by_id[asset["item_id"]] = asset
-                if asset["location_id"] in asset_ids:
-                    location_id = asset["location_id"]
-                    asset_locations[location_id] = [asset["item_id"]]
-            for location_id in asset_locations:
-                asset = assets_by_id[location_id]
-                parent_id = asset["location_id"]
-                eve_type = asset["type_id"]
-
-                update_parent_location.apply_async(
-                    args=[location_id, parent_id, owner_id, eve_type],
-                    kwargs={"force_refresh": force_refresh},
-                    priority=8,
+            if owner.corporation is None:
+                req_scopes = [
+                    "esi-universe.read_structures.v1",
+                    "esi-assets.read_assets.v1",
+                ]
+                token = Token.get_token(owner_id, req_scopes)
+                assets_esi = esi.client.Assets.GetCharactersCharacterIdAssets(
+                    character_id=owner.character.character.character_id,
+                    token=token,
                 )
-                count = count + 1
-        except NotModifiedError:
-            logger.debug("No Updates for Parent Locations")
-            return "No Updates for Parent Locations"
+                assets, response = assets_esi.results(
+                    return_response=True,
+                    force_refresh=force_refresh,
+                )
+                logger.debug("Response Status: %s", response.status_code)
+            else:
+                req_scopes = [
+                    "esi-universe.read_structures.v1",
+                    "esi-assets.read_corporation_assets.v1",
+                ]
+                token = Token.get_token(owner_id, req_scopes)
+
+                assets_esi = esi.client.Assets.GetCorporationsCorporationIdAssets(
+                    corporation_id=owner.corporation.corporation_id,
+                    token=token,
+                )
+
+                assets, response = assets_esi.results(
+                    return_response=True,
+                    force_refresh=force_refresh,
+                )
+                logger.debug("Response Status: %s", response.status_code)
+        except HTTPNotModified:
+            logger.debug("No Updates for: %s", owner.name)
+            continue
+
+        # Collect all location ids
+        for asset in assets:
+            asset: contexts.GetAssetsContext
+
+            asset_ids.append(asset.item_id)
+            assets_by_id[asset.item_id] = asset
+            if asset.location_id in asset_ids:
+                location_id = asset.location_id
+                asset_locations[location_id] = [asset.item_id]
+
+        # Update all parent locations
+        for location_id in asset_locations:
+            asset = assets_by_id[location_id]
+            parent_id = asset.location_id
+            eve_type = asset.type_id
+
+            update_parent_location.apply_async(
+                args=[location_id, parent_id, owner_id, eve_type],
+                kwargs={"force_refresh": force_refresh},
+                priority=8,
+            )
+            count += 1
 
     logger.debug("Queued %s Parent Locations Updated Tasks", count)
-    return f"Queued {count} Parent Locations Updated Tasks"
+    return
 
 
 # pylint: disable=too-many-positional-arguments
-@shared_task(bind=True, base=QueueOnce, max_retries=None)
+@shared_task(bind=True, **TASK_DEFAULTS_ONCE)
 def update_parent_location(
     self, location_id, parent_id, character_id, eve_type_id, force_refresh=False
 ):
-    if get_error_count_flag():
-        self.retry(countdown=300)
-
-    if get_loc_cooldown(parent_id):
-        if force_refresh:
-            pass
-        else:
-            logger.debug("Cooldown on Location ID: %s", parent_id)
-            return f"Cooldown on Location ID: {parent_id}"
-
-    skip_date = timezone.now() - datetime.timedelta(days=7)
     parent_check = Location.objects.get(id=location_id)
-
-    # Get Cached location data
-    cached_data = location_get(parent_id)
-    if cached_data.get("date") is not False:
-        if cached_data.get("date") > skip_date:
-            logger.debug(
-                "Excluding Parent ID: %s from %s",
-                parent_id,
-                cached_data.get("characters"),
-            )
-            return (
-                f"Excluding Parent ID: {parent_id} from {cached_data.get('characters')}"
-            )
 
     if parent_check.parent is not None:
         logger.debug("Location ID: %s Already has Parent ID", location_id)
-        return f"Location ID: {location_id} Already has Parent ID"
+        return
 
-    parent = fetch_parent_location(parent_id, character_id)
+    parent, limit_exceeded = fetch_parent_location(
+        parent_id, character_id, force_refresh=force_refresh
+    )
     if parent is not None:
         eve_type, _ = EveType.objects.get_or_create_esi(id=eve_type_id)
         Location.objects.update_or_create(
@@ -340,15 +258,15 @@ def update_parent_location(
             },
         )
         logger.debug("Parent Location: %s Updated for %s", parent_id, location_id)
-        return f"Parent Location: {location_id} Updated"
-
-    location_set(parent_id, character_id)
-    if get_error_count_flag():
+        return
+    if limit_exceeded:
+        logger.debug(
+            "ESI limit exceeded when fetching Parent Location: %s - Retry Later",
+            parent_id,
+        )
         self.retry(countdown=300)
-
-    set_loc_cooldown(parent_id)
-    logger.debug("Parent Location Task: %s Complete, Set Cooldown", location_id)
-    return f"Parent Location Task: {location_id} Complete, Set Cooldown"
+    logger.debug("Parent Location Task: %s Complete", location_id)
+    return
 
 
 @shared_task(base=QueueOnce)

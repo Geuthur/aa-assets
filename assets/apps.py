@@ -3,6 +3,7 @@
 # Django
 from django.apps import AppConfig
 
+# AA Assets
 # AA Example App
 from assets import __version__
 

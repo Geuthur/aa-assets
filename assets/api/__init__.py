@@ -1,8 +1,11 @@
+# Third Party
 from ninja import NinjaAPI
 from ninja.security import django_auth
 
+# Django
 from django.conf import settings
 
+# AA Assets
 from assets.api import assets, requests
 from assets.hooks import get_extension_logger
 

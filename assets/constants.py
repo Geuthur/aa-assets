@@ -22,8 +22,9 @@ DISCORD_EMBED_COLOR_MAP = {
     "danger": DISCORD_EMBED_COLOR_DANGER,
 }
 
-STANDARD_FLAG = [
-    "Hangar",
+LOCATION_FLAGS = ["Deliveries", "Hangar", "HangarAll", "AssetSafety"]
+CORPORATION_FLAGS = [
+    "CorpDeliveries",
     "CorpSAG1",
     "CorpSAG2",
     "CorpSAG3",
@@ -32,3 +33,6 @@ STANDARD_FLAG = [
     "CorpSAG6",
     "CorpSAG7",
 ]
+OWN_CITADELS = ["StructureFuel"]  # Ensure we get own citadels updates
+
+STANDARD_FLAG = LOCATION_FLAGS + CORPORATION_FLAGS + OWN_CITADELS

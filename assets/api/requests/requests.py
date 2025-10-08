@@ -1,12 +1,16 @@
+# Standard Library
 from typing import Any
 
+# Third Party
 from ninja import NinjaAPI
 
+# Django
 from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import render
 from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
+# AA Assets
 from assets.api import schema
 from assets.api.helpers import get_character_permission, get_manage_permission
 from assets.api.requests.helper import (
