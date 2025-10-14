@@ -5,12 +5,31 @@ Decorators
 import time
 from functools import wraps
 
-from app_utils.esi import EsiDailyDowntime, fetch_esi_status
+# Third Party
+from django.core.cache import cache
 
+# Alliance Auth
+from allianceauth.services.hooks import get_extension_logger
+
+# Alliance Auth (External Libs)
+from app_utils.esi import fetch_esi_status
+from app_utils.logging import LoggerAddTag
+
+# AA Assets
+from assets import __title__
 from assets.app_settings import IS_TESTING
-from assets.hooks import get_extension_logger
 
-logger = get_extension_logger(__name__)
+logger = LoggerAddTag(get_extension_logger(__name__), __title__)
+
+ESI_STATUS_ROUTE_RATE_LIMIT = 5
+ESI_STATUS_KEY = "esi-is-available-status"
+
+
+def get_esi_available_cache() -> bool:
+    """Return True if ESI availability cache is present."""
+    if cache.get(ESI_STATUS_KEY):
+        return True
+    return False
 
 
 def when_esi_is_available(func):
@@ -24,14 +43,18 @@ def when_esi_is_available(func):
 
     @wraps(func)
     def outer(*args, **kwargs):
-        if IS_TESTING is not True:
-            try:
-                fetch_esi_status().raise_for_status()
-            except EsiDailyDowntime:
-                logger.info("Daily Downtime detected. Aborting.")
-                return None  # function will not run
 
-        return func(*args, **kwargs)
+        # During tests we skip ESI checks
+        if IS_TESTING or get_esi_available_cache():
+            logger.debug("Skipping ESI check (testing mode or cache present).")
+            return func(*args, **kwargs)
+
+        # Check ESI status
+        if fetch_esi_status().is_ok:
+            logger.debug("ESI is available, proceeding.")
+            cache.set(ESI_STATUS_KEY, "1", timeout=ESI_STATUS_ROUTE_RATE_LIMIT)
+            return func(*args, **kwargs)
+        return None  # function will not run
 
     return outer
 
