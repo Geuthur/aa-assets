@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: AA Assets\n"
 "Report-Msgid-Bugs-To: https://github.com/Geuthur/aa-assets/issues\n"
 "POT-Creation-Date: 2025-10-15 08:14+0200\n"
-"PO-Revision-Date: 2025-10-15 08:19+0000\n"
+"PO-Revision-Date: 2025-10-15 08:37+0000\n"
 "Last-Translator: Weblate Admin <geuthur@users.noreply.weblate.voices-of-"
 "war.de>\n"
 "Language-Team: German <https://weblate.voices-of-war.de/projects/"
@@ -616,10 +616,8 @@ msgid "Submit"
 msgstr "Senden"
 
 #: assets/templates/assets/base.html:9
-#, fuzzy
-#| msgid "Asset Safety"
 msgid "Assets System"
-msgstr "Besitzsicherheit"
+msgstr "Besitzsicherheit System"
 
 #: assets/templates/assets/bundles/settings-bundles.html:22
 msgid "Buy"
@@ -647,33 +645,25 @@ msgstr "Corporation hinzufügen"
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:6
 #: assets/templates/assets/partials/menu/navigation.html:7 assets/views.py:129
-#, fuzzy
-#| msgid "Action"
 msgid "Locations"
-msgstr "Aktion"
+msgstr "Standorte"
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:12
 #: assets/views.py:84 assets/views.py:142
-#, fuzzy
-#| msgid "Corp Assets"
 msgid "Assets"
-msgstr "Corp Besitz"
+msgstr "Besitz"
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:19
-#, fuzzy
-#| msgid "Requests"
 msgid "My Requests"
-msgstr "Anfragen"
+msgstr "Meine Anfragen"
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:27
 msgid "Requests"
 msgstr "Anfragen"
 
 #: assets/templates/assets/partials/menu/navigation.html:16 assets/views.py:163
-#, fuzzy
-#| msgid "Requests"
 msgid "Manage Requests"
-msgstr "Anfragen"
+msgstr "Anfragen verwalten"
 
 #: assets/templates/assets/partials/modal/confirm.html:29
 #: assets/templates/assets/partials/modal/multi-order.html:33
@@ -692,10 +682,8 @@ msgid "Close"
 msgstr "Schließen"
 
 #: assets/templates/assets/partials/modal/single-order.html:27
-#, fuzzy
-#| msgid "Buy All"
 msgid "All"
-msgstr "Kaufe Alles"
+msgstr "Alle"
 
 #: assets/templates/assets/partials/modal/view-order.html:14
 #: assets/templates/assets/partials/modal/view-order.html:20
@@ -741,10 +729,8 @@ msgid "Name"
 msgstr ""
 
 #: assets/templates/assets/partials/table/location.html:9
-#, fuzzy
-#| msgid "Asset Safety"
 msgid "System"
-msgstr "Besitzsicherheit"
+msgstr "System"
 
 #: assets/templates/assets/partials/table/my-requests.html:9
 #: assets/templates/assets/partials/table/requests.html:10
