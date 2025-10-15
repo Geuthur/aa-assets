@@ -16,17 +16,17 @@ msgstr ""
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=(n != 1);\n"
-
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
+"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
+"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
+"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 #: assets/api/requests/helper.py:21
 msgid "Get Order Information"
 msgstr ""
 
 #: assets/api/requests/helper.py:44 assets/api/requests/helper.py:114
-#, fuzzy
-#| msgid "Mark Request as Cancelled"
 msgid "Mark Request as Canceled"
-msgstr "Antrag als storniert markieren"
+msgstr ""
 
 #: assets/api/requests/helper.py:45 assets/api/requests/helper.py:115
 #, python-brace-format
@@ -35,7 +35,7 @@ msgstr ""
 
 #: assets/api/requests/helper.py:63
 msgid "Mark Request as Completed"
-msgstr "Antrag als fertig markieren"
+msgstr ""
 
 #: assets/api/requests/helper.py:64
 #, python-brace-format
@@ -44,7 +44,7 @@ msgstr ""
 
 #: assets/api/requests/helper.py:82 assets/api/requests/helper.py:133
 msgid "Mark Request as Open"
-msgstr "Antrag als offen markieren"
+msgstr ""
 
 #: assets/api/requests/helper.py:83 assets/api/requests/helper.py:134
 #, python-brace-format
@@ -66,7 +66,7 @@ msgstr ""
 
 #: assets/models.py:402
 msgid "Asset Safety"
-msgstr "Besitzsicherheit"
+msgstr ""
 
 #: assets/models.py:403
 msgid "Auto Fit"
@@ -534,7 +534,7 @@ msgstr ""
 
 #: assets/models.py:542
 msgid "undefined"
-msgstr "undefiniert"
+msgstr ""
 
 #: assets/models.py:704
 #, python-brace-format
@@ -614,14 +614,12 @@ msgid "Submit"
 msgstr ""
 
 #: assets/templates/assets/base.html:9
-#, fuzzy
-#| msgid "Asset Safety"
 msgid "Assets System"
-msgstr "Besitzsicherheit"
+msgstr ""
 
 #: assets/templates/assets/bundles/settings-bundles.html:22
 msgid "Buy"
-msgstr "Kaufe"
+msgstr ""
 
 #: assets/templates/assets/bundles/settings-bundles.html:23
 msgid "Multi Buy"
@@ -637,75 +635,65 @@ msgstr ""
 
 #: assets/templates/assets/partials/menu/administration.html:7
 msgid "Add Character"
-msgstr "Character hinzufügen"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/administration.html:15
 msgid "Add Corporation"
-msgstr "Corporation hinzufügen"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:6
 #: assets/templates/assets/partials/menu/navigation.html:7 assets/views.py:129
-#, fuzzy
-#| msgid "Action"
 msgid "Locations"
-msgstr "Aktion"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:12
 #: assets/views.py:84 assets/views.py:142
-#, fuzzy
-#| msgid "Corp Assets"
 msgid "Assets"
-msgstr "Corp Besitz"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:19
-#, fuzzy
-#| msgid "Requests"
 msgid "My Requests"
-msgstr "Anfragen"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:27
 msgid "Requests"
-msgstr "Anfragen"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/navigation.html:16 assets/views.py:163
-#, fuzzy
-#| msgid "Requests"
 msgid "Manage Requests"
-msgstr "Anfragen"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/confirm.html:29
 #: assets/templates/assets/partials/modal/multi-order.html:33
 #: assets/templates/assets/partials/modal/single-order.html:36
 msgid "Cancel"
-msgstr "Abbrechen"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/confirm.html:33
 #: assets/templates/assets/partials/modal/multi-order.html:37
 #: assets/templates/assets/partials/modal/single-order.html:40
 msgid "Confirm"
-msgstr "Bestätige"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/modal.html:28
 msgid "Close"
-msgstr "Schliessen"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/single-order.html:27
-#, fuzzy
-#| msgid "Buy All"
 msgid "All"
-msgstr "Kaufe Alles"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/view-order.html:14
 #: assets/templates/assets/partials/modal/view-order.html:20
 #: assets/templates/assets/partials/table/my-requests.html:8
 #: assets/templates/assets/partials/table/requests.html:9
 msgid "Order List"
-msgstr "Einkaufliste"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/view-order.html:21
 #: assets/templates/assets/partials/table/assets.html:20
 msgid "Quantity"
-msgstr "Anzahl"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/view-order.html:42
 msgid "No data found..."
@@ -721,14 +709,14 @@ msgstr ""
 
 #: assets/templates/assets/partials/table/assets.html:23
 msgid "Price"
-msgstr "Preis"
+msgstr ""
 
 #: assets/templates/assets/partials/table/assets.html:24
 #: assets/templates/assets/partials/table/location.html:10
 #: assets/templates/assets/partials/table/my-requests.html:12
 #: assets/templates/assets/partials/table/requests.html:13
 msgid "Action"
-msgstr "Aktion"
+msgstr ""
 
 #: assets/templates/assets/partials/table/location.html:7
 msgid "ID"
@@ -739,15 +727,13 @@ msgid "Name"
 msgstr ""
 
 #: assets/templates/assets/partials/table/location.html:9
-#, fuzzy
-#| msgid "Asset Safety"
 msgid "System"
-msgstr "Besitzsicherheit"
+msgstr ""
 
 #: assets/templates/assets/partials/table/my-requests.html:9
 #: assets/templates/assets/partials/table/requests.html:10
 msgid "Requestor"
-msgstr "Anforderer"
+msgstr ""
 
 #: assets/templates/assets/partials/table/my-requests.html:10
 #: assets/templates/assets/partials/table/requests.html:11
@@ -757,7 +743,7 @@ msgstr ""
 #: assets/templates/assets/partials/table/my-requests.html:11
 #: assets/templates/assets/partials/table/requests.html:12
 msgid "Created"
-msgstr "Erstellt"
+msgstr ""
 
 #: assets/views.py:95
 msgid "You do not have permission to access this page."
@@ -785,90 +771,32 @@ msgstr ""
 
 #: assets/views.py:347 assets/views.py:405 assets/views.py:457
 msgid "You are on cooldown. Please wait 60 seconds before trying again."
-msgstr "Du hast einen cooldown. Bitte warte 60 sekunden und versuch es erneut."
+msgstr ""
 
 #: assets/views.py:366
-#, fuzzy, python-brace-format
-#| msgid ""
-#| "The request for Order {user_request_pk} from "
-#| "{user_request_requesting_user} "
+#, python-brace-format
 msgid ""
 "The request for Order {user_request_pk} from {user_request_requesting_user} "
 "has been closed as cancelled."
 msgstr ""
-"Die Anfrage für Order {user_request_pk} von {user_request_requesting_user} "
 
 #: assets/views.py:380 assets/views.py:436 assets/views.py:487
-#, fuzzy, python-brace-format
-#| msgid ""
-#| "The request for Order {user_request_pk} from "
-#| "{user_request_requesting_user} "
+#, python-brace-format
 msgid ""
 "The request for Order {user_request_pk} from {user_request_requesting_user} "
 "has failed."
 msgstr ""
-"Die Anfrage für Order {user_request_pk} von {user_request_requesting_user} "
 
 #: assets/views.py:424
-#, fuzzy, python-brace-format
-#| msgid ""
-#| "The request for Order {user_request_pk} from "
-#| "{user_request_requesting_user} "
+#, python-brace-format
 msgid ""
 "The request for Order {user_request_pk} from {user_request_requesting_user} "
 "has been closed as completed."
 msgstr ""
-"Die Anfrage für Order {user_request_pk} von {user_request_requesting_user} "
 
 #: assets/views.py:475
-#, fuzzy, python-brace-format
-#| msgid ""
-#| "The request for Order {user_request_pk} from "
-#| "{user_request_requesting_user} "
+#, python-brace-format
 msgid ""
 "The request for Order {user_request_pk} from {user_request_requesting_user} "
 "has been reopened."
 msgstr ""
-"Die Anfrage für Order {user_request_pk} von {user_request_requesting_user} "
-
-#~ msgid "Please enter a valid quantity."
-#~ msgstr "Bitte gib eine gültige Zahl ein."
-
-#~ msgid "Please enter a valid quantity for at least one items."
-#~ msgstr "Bitte gib mindestens eine gültige Zahl ein."
-
-#~ msgid "Specific Buy"
-#~ msgstr "Spezifische Käufe"
-
-#~ msgid "Buy Items"
-#~ msgstr "Kaufe Gegenstände"
-
-#~ msgid "Confirm Purchase"
-#~ msgstr "Bestätige Einkauf"
-
-#~ msgid "Are you sure you want to proceed with the purchase?"
-#~ msgstr "Bist du dir sicher das du den Kauf abschliessen möchtest?"
-
-#~ msgid "pieces"
-#~ msgstr "stück"
-
-#, fuzzy
-#~| msgid "Confirm"
-#~ msgid "Confirm Action"
-#~ msgstr "Bestätige"
-
-#, python-brace-format
-#~ msgid "has been closed as cancelled."
-#~ msgstr "wurde geschlossen und ist storniert."
-
-#, python-brace-format
-#~ msgid "has failed."
-#~ msgstr "schlug fehl"
-
-#, python-brace-format
-#~ msgid "has been closed as completed."
-#~ msgstr "wurde geschlossen und ist abgeschlossen."
-
-#, python-brace-format
-#~ msgid "has been reopened."
-#~ msgstr "wurde wieder geöffnet"
