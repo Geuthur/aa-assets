@@ -8,9 +8,8 @@ msgstr ""
 "Project-Id-Version: AA Assets\n"
 "Report-Msgid-Bugs-To: https://github.com/Geuthur/aa-assets/issues\n"
 "POT-Creation-Date: 2025-10-15 08:14+0200\n"
-"PO-Revision-Date: 2025-10-16 05:25+0000\n"
-"Last-Translator: Weblate Admin <geuthur@users.noreply.weblate.voices-of-"
-"war.de>\n"
+"PO-Revision-Date: 2025-10-17 06:28+0000\n"
+"Last-Translator: Peter Pfeufer <info@ppfeufer.de>\n"
 "Language-Team: German <https://weblate.voices-of-war.de/projects/"
 "allianceauth/aa-assets/de/>\n"
 "Language: de\n"
@@ -699,7 +698,7 @@ msgstr "Anzahl"
 
 #: assets/templates/assets/partials/modal/view-order.html:42
 msgid "No data found..."
-msgstr "Keine daten gefunden..."
+msgstr "Keine Daten gefunden..."
 
 #: assets/templates/assets/partials/table/assets.html:21
 msgid "Location"
