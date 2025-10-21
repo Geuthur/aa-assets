@@ -22,7 +22,7 @@ msgid "Get Order Information"
 msgstr ""
 
 #: assets/api/requests/helper.py:44 assets/api/requests/helper.py:114
-msgid "Mark Request as Canceled"
+msgid "Mark Request as Cancelled"
 msgstr ""
 
 #: assets/api/requests/helper.py:45 assets/api/requests/helper.py:115
@@ -560,12 +560,12 @@ msgstr ""
 #: assets/models.py:746
 #, python-brace-format
 msgid ""
-"{canceler} has canceled the Order for {self.requesting_user} ID: {self.pk}."
+"{canceler} has cancelled the Order for {self.requesting_user} ID: {self.pk}."
 msgstr ""
 
 #: assets/models.py:749
 msgid ""
-"{canceler} has canceled the following items:{self."
+"{canceler} has cancelled the following items:{self."
 "convert_order_to_notifiy()}\n"
 msgstr ""
 
