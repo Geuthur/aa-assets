@@ -3,31 +3,30 @@
 # This file is distributed under the same license as the PACKAGE package.
 # FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
 #
+#, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: AA Assets\n"
+"Project-Id-Version: AA Assets \n"
 "Report-Msgid-Bugs-To: https://github.com/Geuthur/aa-assets/issues\n"
 "POT-Creation-Date: 2025-10-15 08:14+0200\n"
-"PO-Revision-Date: 2025-10-17 06:28+0000\n"
-"Last-Translator: Peter Pfeufer <info@ppfeufer.de>\n"
-"Language-Team: German <https://weblate.voices-of-war.de/projects/"
-"allianceauth/aa-assets/de/>\n"
-"Language: de\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
-"Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.13.3\n"
-
+"Plural-Forms: nplurals=4; plural=(n % 1 == 0 && n % 10 == 1 && n % 100 != "
+"11 ? 0 : n % 1 == 0 && n % 10 >= 2 && n % 10 <= 4 && (n % 100 < 12 || n % "
+"100 > 14) ? 1 : n % 1 == 0 && (n % 10 ==0 || (n % 10 >=5 && n % 10 <=9) || "
+"(n % 100 >=11 && n % 100 <=14 )) ? 2: 3);\n"
 #: assets/api/requests/helper.py:21
 msgid "Get Order Information"
 msgstr ""
 
 #: assets/api/requests/helper.py:44 assets/api/requests/helper.py:114
-#, fuzzy
-#| msgid "Mark Request as Cancelled"
 msgid "Mark Request as Canceled"
-msgstr "Antrag als storniert markieren"
+msgstr ""
 
 #: assets/api/requests/helper.py:45 assets/api/requests/helper.py:115
 #, python-brace-format
@@ -36,7 +35,7 @@ msgstr ""
 
 #: assets/api/requests/helper.py:63
 msgid "Mark Request as Completed"
-msgstr "Antrag als fertig markieren"
+msgstr ""
 
 #: assets/api/requests/helper.py:64
 #, python-brace-format
@@ -45,7 +44,7 @@ msgstr ""
 
 #: assets/api/requests/helper.py:82 assets/api/requests/helper.py:133
 msgid "Mark Request as Open"
-msgstr "Antrag als offen markieren"
+msgstr ""
 
 #: assets/api/requests/helper.py:83 assets/api/requests/helper.py:134
 #, python-brace-format
@@ -59,7 +58,7 @@ msgstr ""
 
 #: assets/forms.py:28
 msgid "Amount"
-msgstr "Betrag"
+msgstr ""
 
 #: assets/forms.py:56
 msgid "Amount for "
@@ -67,7 +66,7 @@ msgstr ""
 
 #: assets/models.py:402
 msgid "Asset Safety"
-msgstr "Besitzsicherheit"
+msgstr ""
 
 #: assets/models.py:403
 msgid "Auto Fit"
@@ -535,7 +534,7 @@ msgstr ""
 
 #: assets/models.py:542
 msgid "undefined"
-msgstr "undefiniert"
+msgstr ""
 
 #: assets/models.py:704
 #, python-brace-format
@@ -588,15 +587,15 @@ msgstr ""
 
 #: assets/templates/assets/admin.html:17
 msgid "Administration"
-msgstr "Verwaltung"
+msgstr ""
 
 #: assets/templates/assets/admin.html:23
 msgid "Mark all tasks as Force Refresh"
-msgstr "Erzwinge Aktualisierung für alle markierten Tasks"
+msgstr ""
 
 #: assets/templates/assets/admin.html:28
 msgid "Clear all cached ETags"
-msgstr "Alle zwischengespeicherten ETags löschen"
+msgstr ""
 
 #: assets/templates/assets/admin.html:32
 msgid "Update All Assets"
@@ -612,15 +611,15 @@ msgstr ""
 
 #: assets/templates/assets/admin.html:42
 msgid "Submit"
-msgstr "Senden"
+msgstr ""
 
 #: assets/templates/assets/base.html:9
 msgid "Assets System"
-msgstr "Besitzsicherheit System"
+msgstr ""
 
 #: assets/templates/assets/bundles/settings-bundles.html:22
 msgid "Buy"
-msgstr "Kaufe"
+msgstr ""
 
 #: assets/templates/assets/bundles/settings-bundles.html:23
 msgid "Multi Buy"
@@ -632,73 +631,73 @@ msgstr ""
 
 #: assets/templates/assets/partials/form/required-field.html:4
 msgid "This field is required"
-msgstr "Dieses Feld ist erforderlich"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/administration.html:7
 msgid "Add Character"
-msgstr "Charakter hinzufügen"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/administration.html:15
 msgid "Add Corporation"
-msgstr "Corporation hinzufügen"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:6
 #: assets/templates/assets/partials/menu/navigation.html:7 assets/views.py:129
 msgid "Locations"
-msgstr "Standorte"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:12
 #: assets/views.py:84 assets/views.py:142
 msgid "Assets"
-msgstr "Besitz"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:19
 msgid "My Requests"
-msgstr "Meine Anfragen"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:27
 msgid "Requests"
-msgstr "Anfragen"
+msgstr ""
 
 #: assets/templates/assets/partials/menu/navigation.html:16 assets/views.py:163
 msgid "Manage Requests"
-msgstr "Anfragen verwalten"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/confirm.html:29
 #: assets/templates/assets/partials/modal/multi-order.html:33
 #: assets/templates/assets/partials/modal/single-order.html:36
 msgid "Cancel"
-msgstr "Abbrechen"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/confirm.html:33
 #: assets/templates/assets/partials/modal/multi-order.html:37
 #: assets/templates/assets/partials/modal/single-order.html:40
 msgid "Confirm"
-msgstr "Bestätigen"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/modal.html:28
 msgid "Close"
-msgstr "Schließen"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/single-order.html:27
 msgid "All"
-msgstr "Alle"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/view-order.html:14
 #: assets/templates/assets/partials/modal/view-order.html:20
 #: assets/templates/assets/partials/table/my-requests.html:8
 #: assets/templates/assets/partials/table/requests.html:9
 msgid "Order List"
-msgstr "Einkaufliste"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/view-order.html:21
 #: assets/templates/assets/partials/table/assets.html:20
 msgid "Quantity"
-msgstr "Anzahl"
+msgstr ""
 
 #: assets/templates/assets/partials/modal/view-order.html:42
 msgid "No data found..."
-msgstr "Keine Daten gefunden..."
+msgstr ""
 
 #: assets/templates/assets/partials/table/assets.html:21
 msgid "Location"
@@ -710,14 +709,14 @@ msgstr ""
 
 #: assets/templates/assets/partials/table/assets.html:23
 msgid "Price"
-msgstr "Preis"
+msgstr ""
 
 #: assets/templates/assets/partials/table/assets.html:24
 #: assets/templates/assets/partials/table/location.html:10
 #: assets/templates/assets/partials/table/my-requests.html:12
 #: assets/templates/assets/partials/table/requests.html:13
 msgid "Action"
-msgstr "Aktion"
+msgstr ""
 
 #: assets/templates/assets/partials/table/location.html:7
 msgid "ID"
@@ -725,34 +724,34 @@ msgstr ""
 
 #: assets/templates/assets/partials/table/location.html:8
 msgid "Name"
-msgstr "Name"
+msgstr ""
 
 #: assets/templates/assets/partials/table/location.html:9
 msgid "System"
-msgstr "System"
+msgstr ""
 
 #: assets/templates/assets/partials/table/my-requests.html:9
 #: assets/templates/assets/partials/table/requests.html:10
 msgid "Requestor"
-msgstr "Anforderer"
+msgstr ""
 
 #: assets/templates/assets/partials/table/my-requests.html:10
 #: assets/templates/assets/partials/table/requests.html:11
 msgid "Status"
-msgstr "Status"
+msgstr ""
 
 #: assets/templates/assets/partials/table/my-requests.html:11
 #: assets/templates/assets/partials/table/requests.html:12
 msgid "Created"
-msgstr "Erstellt"
+msgstr ""
 
 #: assets/views.py:95
 msgid "You do not have permission to access this page."
-msgstr "Du hast keine Berechtigung diese Seite zu sehen."
+msgstr ""
 
 #: assets/views.py:103
 msgid "Queued Clear All ETags"
-msgstr "Alle zwischengespeicherten ETags löschen - in Warteschlange eingereiht"
+msgstr ""
 
 #: assets/views.py:106
 msgid "Queued Update All Assets"
@@ -772,7 +771,7 @@ msgstr ""
 
 #: assets/views.py:347 assets/views.py:405 assets/views.py:457
 msgid "You are on cooldown. Please wait 60 seconds before trying again."
-msgstr "Du hast einen cooldown. Bitte warte 60 sekunden und versuch es erneut."
+msgstr ""
 
 #: assets/views.py:366
 #, python-brace-format
@@ -780,8 +779,6 @@ msgid ""
 "The request for Order {user_request_pk} from {user_request_requesting_user} "
 "has been closed as cancelled."
 msgstr ""
-"Die Anfrage für die Bestellung {user_request_pk} von "
-"{user_request_requesting_user} wurde als storniert geschlossen."
 
 #: assets/views.py:380 assets/views.py:436 assets/views.py:487
 #, python-brace-format
@@ -789,8 +786,6 @@ msgid ""
 "The request for Order {user_request_pk} from {user_request_requesting_user} "
 "has failed."
 msgstr ""
-"Die Anfrage für die Bestellung {user_request_pk} von "
-"{user_request_requesting_user} ist fehlgeschlagen."
 
 #: assets/views.py:424
 #, python-brace-format
@@ -798,8 +793,6 @@ msgid ""
 "The request for Order {user_request_pk} from {user_request_requesting_user} "
 "has been closed as completed."
 msgstr ""
-"Die Anfrage für die Bestellung {user_request_pk} von "
-"{user_request_requesting_user} wurde als abgeschlossen geschlossen."
 
 #: assets/views.py:475
 #, python-brace-format
@@ -807,47 +800,3 @@ msgid ""
 "The request for Order {user_request_pk} from {user_request_requesting_user} "
 "has been reopened."
 msgstr ""
-"Die Anfrage für die Bestellung {user_request_pk} von "
-"{user_request_requesting_user} wurde erneut geöffnet."
-
-#~ msgid "Please enter a valid quantity."
-#~ msgstr "Bitte gib eine gültige Zahl ein."
-
-#~ msgid "Please enter a valid quantity for at least one items."
-#~ msgstr "Bitte gib mindestens eine gültige Zahl ein."
-
-#~ msgid "Specific Buy"
-#~ msgstr "Spezifische Käufe"
-
-#~ msgid "Buy Items"
-#~ msgstr "Kaufe Gegenstände"
-
-#~ msgid "Confirm Purchase"
-#~ msgstr "Bestätige Einkauf"
-
-#~ msgid "Are you sure you want to proceed with the purchase?"
-#~ msgstr "Bist du dir sicher das du den Kauf abschliessen möchtest?"
-
-#~ msgid "pieces"
-#~ msgstr "stück"
-
-#, fuzzy
-#~| msgid "Confirm"
-#~ msgid "Confirm Action"
-#~ msgstr "Bestätige"
-
-#, python-brace-format
-#~ msgid "has been closed as cancelled."
-#~ msgstr "wurde geschlossen und ist storniert."
-
-#, python-brace-format
-#~ msgid "has failed."
-#~ msgstr "schlug fehl"
-
-#, python-brace-format
-#~ msgid "has been closed as completed."
-#~ msgstr "wurde geschlossen und ist abgeschlossen."
-
-#, python-brace-format
-#~ msgid "has been reopened."
-#~ msgstr "wurde wieder geöffnet"
