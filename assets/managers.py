@@ -2,6 +2,7 @@
 import datetime as dt
 from typing import Any
 
+# Third Party
 import requests
 
 # Django
@@ -13,12 +14,13 @@ from django.db.models.functions import Concat
 from django.utils.timezone import now
 
 # Alliance Auth
-from eveuniverse.models import EveEntity, EveSolarSystem, EveType
-
 from allianceauth.eveonline.models import EveCharacter
 
+# Alliance Auth (External Libs)
+from eveuniverse.models import EveEntity, EveSolarSystem, EveType
+
 # AA Assets
-from assets import __version__
+from assets import __version__, contexts
 from assets.app_settings import ASSETS_LOCATION_STALE_HOURS, STORAGE_BASE_KEY
 from assets.hooks import get_extension_logger
 from assets.providers import esi
@@ -392,9 +394,10 @@ class LocationManagerBase(models.Manager):
             )
         elif self.model.is_station_id(location_id):
             logger.info("%s: Fetching station from ESI", location_id)
-            station = esi.client.Universe.get_universe_stations_station_id(
+            station = esi.client.Universe.GetUniverseStationsStationId(
                 station_id=location_id
-            ).results()
+            ).result()
+
             location, created = self._station_update_or_create_dict(
                 location_id=location_id, station=station
             )
@@ -406,29 +409,30 @@ class LocationManagerBase(models.Manager):
         return location, created
 
     def _station_update_or_create_dict(
-        self, location_id: int, station: dict
+        self, location_id: int, station: contexts.GetUniverseStationsStationIdContext
     ) -> tuple[Any, bool]:
-        if station.get("system_id"):
+        logger.debug("Updating or creating station %s", station)
+        if station.system_id:
             eve_solar_system, _ = EveSolarSystem.objects.get_or_create_esi(
-                id=station.get("system_id")
+                id=station.system_id
             )
         else:
             eve_solar_system = None
 
-        if station.get("type_id"):
-            eve_type, _ = EveType.objects.get_or_create_esi(id=station.get("type_id"))
+        if station.type_id:
+            eve_type, _ = EveType.objects.get_or_create_esi(id=station.type_id)
         else:
             eve_type = None
 
-        if station.get("owner"):
-            owner, _ = EveEntity.objects.get_or_create_esi(id=station.get("owner"))
+        if station.owner:
+            owner, _ = EveEntity.objects.get_or_create_esi(id=station.owner)
         else:
             owner = None
 
         return self.update_or_create(
             id=location_id,
             defaults={
-                "name": station.get("name", ""),
+                "name": station.name,
                 "eve_solar_system": eve_solar_system,
                 "eve_type": eve_type,
                 "owner": owner,

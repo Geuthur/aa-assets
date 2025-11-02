@@ -1,8 +1,24 @@
 """Initialize the app"""
 
-from assets.app_settings import ASSETS_APP_NAME
-
-__version__ = "0.1.3"
+__version__ = "0.2.0"
 __title__ = "Assets"
 
-USER_AGENT_TEXT = f"{ASSETS_APP_NAME} v{__version__}"
+__package_name__ = "aa-assets"
+__app_name__ = "assets"
+__esi_compatibility_date__ = "2025-08-26"
+__app_name_useragent__ = "AA-Assets"
+
+__github_url__ = f"https://github.com/Geuthur/{__package_name__}"
+
+__character_operations__ = [
+    "GetCharactersCharacterIdAssets",
+]
+
+__corporation_operations__ = [
+    "GetCorporationsCorporationIdAssets",
+]
+
+__universe_operations__ = [
+    "GetUniverseStationsStationId",
+    "GetUniverseStructuresStructureId",
+]

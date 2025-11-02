@@ -6,7 +6,7 @@ requires = [
 
 [project]
 name = "aa-assets"
-description = "Character and Corporation statistics, including detailed information on ESS, Ratting, Trading, Mining, and other activities."
+description = "Show Assets from character/corporation and give the option to order it."
 readme = "README.md"
 license = { file = "LICENSE" }
 authors = [
@@ -33,16 +33,19 @@ dynamic = [
     "version",
 ]
 dependencies = [
-    "allianceauth>=4",
-    "allianceauth-app-utils>=1.19",
-    "django-eveuniverse>=1.3",
+    "allianceauth>=4.10,<5",
+    "allianceauth-app-utils @ git+https://gitlab.com/Geuthur/allianceauth-app-utils.git@openapi",
+    "django-esi>=8a4",
+    "django-eveuniverse>=1.6",
     "django-ninja",
 ]
 optional-dependencies.tests-allianceauth-latest = [
     "coverage",
-    "django-webtest",
+    "factory-boy",
 ]
 urls.Changelog = "https://github.com/Geuthur/aa-assets/blob/master/CHANGELOG.md"
+urls.Documentation = "https://github.com/Geuthur/aa-assets/blob/master/README.md"
+urls.Donations = "https://ko-fi.com/Geuthur"
 urls.Homepage = "https://github.com/Geuthur/aa-assets"
 urls.Source = "https://github.com/Geuthur/aa-assets"
 urls.Tracker = "https://github.com/Geuthur/aa-assets/issues"
@@ -55,25 +58,5 @@ include = [
 [tool.hatch.version]
 path = "assets/__init__.py"
 
-[tool.isort]
-profile = "black"
-multi_line_output = 3
-sections = [
-    "FUTURE",
-    "STDLIB",
-    "THIRDPARTY",
-    "DJANGO",
-    "ALLIANCEAUTH",
-    "FIRSTPARTY",
-    "LOCALFOLDER",
-]
-known_allianceauth = [
-    "allianceauth",
-    "app_utils",
-]
-known_django = [
-    "django",
-    "django_webtest",
-    "esi",
-    "eveuniverse",
-]
+[tool.hatch.metadata]
+allow-direct-references = true

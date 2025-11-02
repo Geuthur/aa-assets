@@ -2,10 +2,11 @@
 Decorators
 """
 
+# Standard Library
 import time
 from functools import wraps
 
-# Third Party
+# Django
 from django.core.cache import cache
 
 # Alliance Auth
@@ -33,11 +34,9 @@ def get_esi_available_cache() -> bool:
 
 
 def when_esi_is_available(func):
-    """Make sure the decorated task only runs when esi is available.
-
-    Raise exception when ESI is offline.
+    """
+    Make sure the decorated task only runs when esi is available and store the result.
     Complete the task without running it when downtime is detected.
-
     Automatically disabled during tests.
     """
 
