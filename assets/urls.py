@@ -7,7 +7,7 @@ from django.urls import path, re_path
 from assets import views
 from assets.api import api
 
-app_name: str = "assets"
+app_name: str = "assets"  # pylint: disable=invalid-name
 
 urlpatterns = [
     path("", views.index, name="index"),
