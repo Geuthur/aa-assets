@@ -11,10 +11,10 @@ Section Order:
 ### Removed
 -->
 
+## [0.2.0] - 2025-11-13
+
 ### Added
 
-- Temporary pin `django-ninja` to `django-ninja<=1.5`
-  - https://github.com/vitalik/django-ninja/pull/1524
 - Modal System
 - Confirm Modal
   - View Order Modal
@@ -32,11 +32,19 @@ Section Order:
 
 ### Changed
 
+- Updated dependencies
+  - `allianceauth-app-utils` to `>=2b2`
+  - `django-esi` to `8,<9`
 - Assets System
 - Refactor Modal System
 - Handle Button HTML in Python
 - Fetch Menu Request Count from API
 - Task Update Interval
+
+### Removed
+
+- csrf arg from `django-ninja`
+- allow-direct-references
 
 ## [0.1.2] - 2024-09-23
 

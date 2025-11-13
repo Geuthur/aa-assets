@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: AA Assets \n"
+"Project-Id-Version: AA Assets 0.2.0\n"
 "Report-Msgid-Bugs-To: https://github.com/Geuthur/aa-assets/issues\n"
-"POT-Creation-Date: 2025-10-15 08:14+0200\n"
+"POT-Creation-Date: 2025-11-13 23:40+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -22,7 +22,7 @@ msgid "Get Order Information"
 msgstr ""
 
 #: assets/api/requests/helper.py:44 assets/api/requests/helper.py:114
-msgid "Mark Request as Cancelled"
+msgid "Mark Request as Canceled"
 msgstr ""
 
 #: assets/api/requests/helper.py:45 assets/api/requests/helper.py:115
@@ -560,12 +560,12 @@ msgstr ""
 #: assets/models.py:746
 #, python-brace-format
 msgid ""
-"{canceler} has cancelled the Order for {self.requesting_user} ID: {self.pk}."
+"{canceler} has canceled the Order for {self.requesting_user} ID: {self.pk}."
 msgstr ""
 
 #: assets/models.py:749
 msgid ""
-"{canceler} has cancelled the following items:{self."
+"{canceler} has canceled the following items:{self."
 "convert_order_to_notifiy()}\n"
 msgstr ""
 
