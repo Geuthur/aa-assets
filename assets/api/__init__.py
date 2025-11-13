@@ -16,7 +16,6 @@ api = NinjaAPI(
     version="0.1.0",
     urls_namespace="assets:api",
     auth=django_auth,
-    csrf=True,
     openapi_url=settings.DEBUG and "/openapi.json" or "",
 )
 
