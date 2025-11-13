@@ -15,11 +15,6 @@ Section Order:
 
 - Temporary pin `django-ninja` to `django-ninja<=1.5`
   - https://github.com/vitalik/django-ninja/pull/1524
-
-## [0.2.0] - IN DEVELOPMENT
-
-### Added
-
 - Modal System
 - Confirm Modal
   - View Order Modal
