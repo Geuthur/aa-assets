@@ -8,16 +8,16 @@ msgstr ""
 "Project-Id-Version: AA Assets\n"
 "Report-Msgid-Bugs-To: https://github.com/Geuthur/aa-assets/issues\n"
 "POT-Creation-Date: 2025-10-15 08:14+0200\n"
-"PO-Revision-Date: 2025-10-17 06:28+0000\n"
-"Last-Translator: Peter Pfeufer <info@ppfeufer.de>\n"
-"Language-Team: German <https://weblate.voices-of-war.de/projects/"
-"allianceauth/aa-assets/de/>\n"
+"PO-Revision-Date: 2025-12-23 10:27+0000\n"
+"Last-Translator: Weblate Admin <geuthur@users.noreply.weblate.geuthur.de>\n"
+"Language-Team: German <https://weblate.geuthur.de/projects/allianceauth/aa-"
+"assets/de/>\n"
 "Language: de\n"
 "MIME-Version: 1.0\n"
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.13.3\n"
+"X-Generator: Weblate 5.15.1\n"
 
 #: assets/api/requests/helper.py:21
 msgid "Get Order Information"
@@ -36,7 +36,7 @@ msgstr ""
 
 #: assets/api/requests/helper.py:63
 msgid "Mark Request as Completed"
-msgstr "Antrag als fertig markieren"
+msgstr "Anfrage als abgeschlossen markieren"
 
 #: assets/api/requests/helper.py:64
 #, python-brace-format
@@ -45,7 +45,7 @@ msgstr ""
 
 #: assets/api/requests/helper.py:82 assets/api/requests/helper.py:133
 msgid "Mark Request as Open"
-msgstr "Antrag als offen markieren"
+msgstr "Anfrage als offen markieren"
 
 #: assets/api/requests/helper.py:83 assets/api/requests/helper.py:134
 #, python-brace-format
@@ -67,7 +67,7 @@ msgstr ""
 
 #: assets/models.py:402
 msgid "Asset Safety"
-msgstr "Besitzsicherheit"
+msgstr "Asset-Sicherheit"
 
 #: assets/models.py:403
 msgid "Auto Fit"
@@ -327,7 +327,7 @@ msgstr ""
 
 #: assets/models.py:471
 msgid "Reward"
-msgstr ""
+msgstr "Belohnung"
 
 #: assets/models.py:472
 msgid "Rig power slot 1"
@@ -407,7 +407,7 @@ msgstr ""
 
 #: assets/models.py:491
 msgid "Skill"
-msgstr ""
+msgstr "Skill"
 
 #: assets/models.py:492
 msgid "Skill In Training"
@@ -616,11 +616,11 @@ msgstr "Senden"
 
 #: assets/templates/assets/base.html:9
 msgid "Assets System"
-msgstr "Besitzsicherheit System"
+msgstr "Assets System"
 
 #: assets/templates/assets/bundles/settings-bundles.html:22
 msgid "Buy"
-msgstr "Kaufe"
+msgstr "Kaufen"
 
 #: assets/templates/assets/bundles/settings-bundles.html:23
 msgid "Multi Buy"
@@ -650,7 +650,7 @@ msgstr "Standorte"
 #: assets/templates/assets/partials/menu/assets/navigation.html:12
 #: assets/views.py:84 assets/views.py:142
 msgid "Assets"
-msgstr "Besitz"
+msgstr "Assets"
 
 #: assets/templates/assets/partials/menu/assets/navigation.html:19
 msgid "My Requests"
@@ -689,12 +689,12 @@ msgstr "Alle"
 #: assets/templates/assets/partials/table/my-requests.html:8
 #: assets/templates/assets/partials/table/requests.html:9
 msgid "Order List"
-msgstr "Einkaufliste"
+msgstr "Bestellliste"
 
 #: assets/templates/assets/partials/modal/view-order.html:21
 #: assets/templates/assets/partials/table/assets.html:20
 msgid "Quantity"
-msgstr "Anzahl"
+msgstr "Menge"
 
 #: assets/templates/assets/partials/modal/view-order.html:42
 msgid "No data found..."
@@ -702,7 +702,7 @@ msgstr "Keine Daten gefunden..."
 
 #: assets/templates/assets/partials/table/assets.html:21
 msgid "Location"
-msgstr ""
+msgstr "Standort"
 
 #: assets/templates/assets/partials/table/assets.html:22
 msgid "Location Flag"
@@ -721,7 +721,7 @@ msgstr "Aktion"
 
 #: assets/templates/assets/partials/table/location.html:7
 msgid "ID"
-msgstr ""
+msgstr "ID"
 
 #: assets/templates/assets/partials/table/location.html:8
 msgid "Name"
@@ -734,7 +734,7 @@ msgstr "System"
 #: assets/templates/assets/partials/table/my-requests.html:9
 #: assets/templates/assets/partials/table/requests.html:10
 msgid "Requestor"
-msgstr "Anforderer"
+msgstr "Antragsteller"
 
 #: assets/templates/assets/partials/table/my-requests.html:10
 #: assets/templates/assets/partials/table/requests.html:11
