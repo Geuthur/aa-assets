@@ -51,10 +51,8 @@ urls.Homepage = "https://github.com/Geuthur/aa-assets"
 urls.Source = "https://github.com/Geuthur/aa-assets"
 urls.Tracker = "https://github.com/Geuthur/aa-assets/issues"
 
-[tool.hatch.build]
-include = [
+[tool.hatch]
+build.include = [
     "/assets",
 ]
-
-[tool.hatch.version]
-path = "assets/__init__.py"
+version.path = "assets/__init__.py"
