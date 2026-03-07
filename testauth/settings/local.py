@@ -36,20 +36,23 @@ SITE_NAME = "testauth"
 # Change this to enable/disable debug mode, which displays
 # useful error messages but can leak sensitive data.
 DEBUG = False
+LOGGING = None
 
 NOTIFICATIONS_REFRESH_TIME = 30
 NOTIFICATIONS_MAX_PER_USER = 50
 
-# Enter credentials to use MySQL/MariaDB. Comment out to use sqlite3
-DATABASES["default"] = {
-    "ENGINE": "django.db.backends.mysql",
-    "NAME": "alliance_auth",
-    "USER": "root",
-    "PASSWORD": "temp_password_aa_tox_tests",
-    "HOST": "127.0.0.1",
-    "PORT": "3306",
-    "OPTIONS": {"charset": "utf8mb4"},
-}
+# Use the USE_MYSQL environment variable to select the database backend (MySQL or Memcached).
+# NOTE: On Windows, set this variable in the system/user environment variables.
+if os.environ.get("USE_MYSQL", True) is True:
+    DATABASES["default"] = {
+        "ENGINE": "django.db.backends.mysql",
+        "NAME": "temp_allianceauth",
+        "USER": "root",
+        "PASSWORD": "temp_password_aa_tox_tests",
+        "HOST": "127.0.0.1",
+        "PORT": "3306",
+        "OPTIONS": {"charset": "utf8mb4"},
+    }
 
 # Add any additional apps to this list.
 INSTALLED_APPS += [
@@ -112,16 +115,5 @@ DEFAULT_FROM_EMAIL = ""
 #######################################
 
 # workarounds to suppress warnings
-LOGGING = None
 STATICFILES_DIRS = []
 ANALYTICS_DISABLED = True
-
-
-CELERYBEAT_SCHEDULE["assets_character_audit_update_all"] = {
-    "task": "assets.tasks.update_all_characters",
-    "schedule": crontab(hour="*/1"),
-}
-CELERYBEAT_SCHEDULE["assets_corporation_audit_update_all"] = {
-    "task": "assets.tasks.update_all_corps",
-    "schedule": crontab(hour="*/1"),
-}
