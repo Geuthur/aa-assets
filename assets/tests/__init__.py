@@ -11,7 +11,6 @@ from django.urls import reverse
 
 # AA Assets
 from assets.tests.testdata.integrations.allianceauth import load_allianceauth
-from assets.tests.testdata.integrations.eveentity import load_eveentity
 from assets.tests.testdata.utils import create_user_from_evecharacter
 from assets.views import add_char, add_corp
 
@@ -104,7 +103,6 @@ class AssetsTestCase(NoSocketsTestCase):
         super().setUpClass()
         # Initialize Alliance Auth test data
         load_allianceauth()
-        load_eveentity()
 
         # Request Factory
         cls.factory = RequestFactory()
