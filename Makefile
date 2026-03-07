@@ -1,4 +1,4 @@
-# Makefile for AA Ledger
+# Makefile for AA Assets
 
 # Variables
 appname = aa-assets

@@ -2,25 +2,16 @@
 from http import HTTPStatus
 
 # Django
-from django.contrib.auth.models import Permission
-from django.contrib.contenttypes.models import ContentType
-from django.test import RequestFactory, TestCase
 from django.urls import reverse
 
-# Alliance Auth (External Libs)
-from app_utils.testdata_factories import UserMainFactory
+# AA Assets
+from assets.tests import AssetsTestCase
 
 
-class TestViews(TestCase):
+class TestViews(AssetsTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        cls.factory = RequestFactory()
-        cls.user = UserMainFactory(
-            permissions=[
-                "assets.basic_access",
-            ]
-        )
 
     def test_index_view(self):
         self.client.force_login(self.user)
