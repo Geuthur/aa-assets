@@ -22,6 +22,8 @@ Assets System with Ordering Feature
     - [Step 5 - Setting up Permissions](#step5)
     - [Step 6 - (Optional) Setting up Compatibilies](#step6)
   - [Highlights](#highlights)
+  - [Translations](#translations)
+  - [Contributing](#contributing)
 
 ## Features<a name="features"></a>
 
@@ -61,17 +63,38 @@ Configure your Alliance Auth settings (`local.py`) as follows:
 To set up the Scheduled Tasks add following code to your `local.py`
 
 ```python
-CELERYBEAT_SCHEDULE["assets_update_all_assets"] = {
-    "task": "assets.tasks.update_all_assets",
-    "schedule": crontab(minute="*/15"),
+if "assets" in INSTALLED_APPS:
+    CELERYBEAT_SCHEDULE["assets_update_all_assets"] = {
+        "task": "assets.tasks.update_all_assets",
+        "schedule": crontab(minute="*/15"),
+    }
+    CELERYBEAT_SCHEDULE["assets_update_all_locations"] = {
+        "task": "assets.tasks.update_all_locations",
+        "schedule": crontab(minute=0, hour="*/12"),
+    }
+    CELERYBEAT_SCHEDULE["assets_update_all_parent_locations"] = {
+        "task": "assets.tasks.update_all_parent_locations",
+        "schedule": crontab(minute=0, hour=0, day_of_week=0),
+    }
+```
+
+### Step 3.1 - (Optional) Add own Logger File
+
+To set up the Logger add following code to your `local.py`
+Ensure that you have writing permission in logs folder.
+
+```python
+LOGGING["handlers"]["assets_file"] = {
+    "level": "INFO",
+    "class": "logging.handlers.RotatingFileHandler",
+    "filename": os.path.join(BASE_DIR, "log/assets.log"),
+    "formatter": "verbose",
+    "maxBytes": 1024 * 1024 * 5,
+    "backupCount": 5,
 }
-CELERYBEAT_SCHEDULE["assets_update_all_locations"] = {
-    "task": "assets.tasks.update_all_locations",
-    "schedule": crontab(minute=0, hour="*/12"),
-}
-CELERYBEAT_SCHEDULE["assets_update_all_parent_locations"] = {
-    "task": "assets.tasks.update_all_parent_locations",
-    "schedule": crontab(minute=0, hour=0, day_of_week=0),
+LOGGING["loggers"]["extensions.assets"] = {
+    "handlers": ["assets_file"],
+    "level": "DEBUG",
 }
 ```
 
@@ -100,28 +123,15 @@ The Following Settings can be setting up in the `local.py`
 
 - ASSETS_APP_NAME: `"YOURNAME"` - Set the name of the APP
 
-To set up Own Logger add following code to your `local.py`
-Ensure that you have writing permission in logs folder.
-
-```python
-LOGGING["handlers"]["assets_file"] = {
-    "level": "INFO",
-    "class": "logging.handlers.RotatingFileHandler",
-    "filename": os.path.join(BASE_DIR, "log/assets.log"),
-    "formatter": "verbose",
-    "maxBytes": 1024 * 1024 * 5,
-    "backupCount": 5,
-}
-LOGGING["loggers"]["extensions.assets"] = {
-    "handlers": ["assets_file", "console", "extension_file"],
-    "level": "DEBUG",
-}
-```
-
 ## Highlights<a name="highlights"></a>
 
-> [!NOTE]
-> Contributing
-> You want to improve the project?
-> Just Make a [Pull Request](https://github.com/Geuthur/aa-assets/pulls) with the Guidelines.
-> We Using pre-commit
+## Translations<a name="translations"></a>
+
+[![Translations](https://weblate.geuthur.de/widget/allianceauth/aa-assets/multi-auto.svg)](https://weblate.geuthur.de/engage/allianceauth/)
+
+Help us translate this app into your language or improve existing translations. Join our team!"
+
+## Contributing <a name="contributing"></a>
+
+You want to improve the project?
+Please ensure you read the [contribution guidelines](https://github.com/Geuthur/aa-assets/blob/master/CONTRIBUTING.md)

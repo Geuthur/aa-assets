@@ -16,7 +16,6 @@ from esi.exceptions import HTTPClientError, HTTPNotModified
 from esi.models import Token
 
 # Alliance Auth (External Libs)
-from app_utils.django import users_with_permission
 from eveuniverse.models import EveEntity, EveSolarSystem, EveType
 
 # AA Assets
@@ -40,6 +39,32 @@ def get_or_create_location(location_id: int) -> "Location":
     """Get or create a location sync - helper function."""
     obj, _ = Location.objects.get_or_create_esi(location_id=location_id)
     return obj
+
+
+def users_with_permission(
+    permission: Permission, include_superusers=True
+) -> models.QuerySet:
+    """returns queryset of users that have the given Django permission
+
+    Args:
+        permission: required permission
+        include_superusers: whether superusers are included in the returned list
+
+    Taken from the `allianceauth-app-utils` package.
+    Credits to: Erik Kalkoken
+    """
+    users_qs = (
+        permission.user_set.all()
+        | User.objects.filter(
+            groups__in=list(permission.group_set.values_list("pk", flat=True))
+        )
+        | User.objects.select_related("profile").filter(
+            profile__state__in=list(permission.state_set.values_list("pk", flat=True))
+        )
+    )
+    if include_superusers:
+        users_qs |= User.objects.filter(is_superuser=True)
+    return users_qs.distinct()
 
 
 class General(models.Model):
@@ -120,6 +145,16 @@ class Owner(models.Model):
             raise ValueError("No character defined")
         return self.character.character
 
+    @classmethod
+    def get_esi_scopes(cls) -> list[str]:
+        """Return the required ESI scopes for this owner."""
+        if cls.corporation:
+            return [
+                "esi-universe.read_structures.v1",
+                "esi-assets.read_corporation_assets.v1",
+            ]
+        return ["esi-universe.read_structures.v1", "esi-assets.read_assets.v1"]
+
     def process_assets(self, assets: list[contexts.GetAssetsContext]):
         items = []
         item_ids = list(
@@ -160,19 +195,12 @@ class Owner(models.Model):
     def update_assets_esi(self, force_refresh=False):
         try:
             if self.corporation:
-                token = self.valid_token(
-                    [
-                        "esi-universe.read_structures.v1",
-                        "esi-assets.read_corporation_assets.v1",
-                    ]
-                )
+                token = self.valid_token(self.get_esi_scopes())
                 assets = self._fetch_corporate_assets(
                     token, force_refresh=force_refresh
                 )
             else:
-                token = self.valid_token(
-                    ["esi-universe.read_structures.v1", "esi-assets.read_assets.v1"]
-                )
+                token = self.valid_token(self.get_esi_scopes())
                 assets = self._fetch_personal_assets(token, force_refresh=force_refresh)
 
             items = self.process_assets(assets)

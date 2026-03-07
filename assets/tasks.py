@@ -15,25 +15,24 @@ from allianceauth.services.tasks import QueueOnce
 from esi.exceptions import HTTPNotModified
 
 # Alliance Auth (External Libs)
-from app_utils.allianceauth import get_redis_client
 from eveuniverse.models import EveType
 
 # AA Assets
-from assets import contexts
+from assets import __title__, contexts
 from assets.app_settings import (
     ASSETS_CACHE_KEY,
     ASSETS_TASKS_TIME_LIMIT,
     ASSETS_UPDATE_PERIOD,
 )
 from assets.constants import STANDARD_FLAG
-from assets.decorators import when_esi_is_available
 from assets.hooks import get_extension_logger
 from assets.models import Assets, Location, Owner
-from assets.providers import esi
+from assets.providers import AppLogger, esi
 from assets.task_helpers.location_helpers import fetch_location, fetch_parent_location
 
+logger = AppLogger(get_extension_logger(__name__), __title__)
+
 TZ_STRING = "%Y-%m-%dT%H:%M:%SZ"
-logger = get_extension_logger(__name__)
 
 MAX_RETRIES_DEFAULT = 3
 
@@ -48,7 +47,6 @@ TASK_DEFAULTS_ONCE = {**TASK_DEFAULTS, **{"base": QueueOnce}}
 
 
 @shared_task(**TASK_DEFAULTS_ONCE)
-@when_esi_is_available
 def update_all_assets(runs: int = 0, force_refresh=False):
     """Update all assets."""
     owners = Owner.objects.filter(is_active=True)
@@ -72,7 +70,6 @@ def update_assets_for_owner(owner_pk: int, force_refresh=False):
 
 
 @shared_task(**TASK_DEFAULTS_ONCE)
-@when_esi_is_available
 def update_all_locations(force_refresh=False, runs: int = 0):
     """Update all locations."""
     skip_date = timezone.now() - datetime.timedelta(days=7)
@@ -272,7 +269,19 @@ def update_parent_location(
 @shared_task(base=QueueOnce)
 def clear_all_etags():
     logger.debug("Clearing all etags")
-    _client = get_redis_client()
+    try:
+        # Third Party
+        # pylint: disable=import-outside-toplevel
+        from django_redis import get_redis_connection
+
+        _client = get_redis_connection("default")
+    except (NotImplementedError, ModuleNotFoundError):
+        # Django
+        # pylint: disable=import-outside-toplevel
+        from django.core.cache import caches
+
+        default_cache = caches["default"]
+        _client = default_cache.get_master_client()
     keys = _client.keys(f":?:{ASSETS_CACHE_KEY}-*")
     logger.info("Deleting %s etag keys", len(keys))
     if keys:
