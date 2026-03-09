@@ -6,7 +6,7 @@ from esi.exceptions import HTTPClientError, HTTPNotModified
 from esi.models import Token
 
 # Alliance Auth (External Libs)
-from eveuniverse.models import EveSolarSystem
+from eve_sde.models.map import SolarSystem
 
 # AA Assets
 from assets import contexts
@@ -38,7 +38,7 @@ def get_location_type(location_id) -> tuple[Location | None, Location | None]:
         return Location(id=location_id, name="Asset Safety"), existing_location
     # Location is a Solar System
     if 30_000_000 < location_id < 33_000_000:
-        system, _ = EveSolarSystem.objects.get_or_create_esi(id=location_id)
+        system, _ = SolarSystem.objects.get(id=location_id)
         logger.debug("Fetched Solar System: %s", system)
         if not system:
             return None
@@ -137,7 +137,7 @@ def fetch_location(
         )
         return None, False
 
-    system, _ = EveSolarSystem.objects.get_or_create_esi(id=structure.solar_system_id)
+    system, _ = SolarSystem.objects.get(id=structure.solar_system_id)
 
     if not system:
         logger.debug("Failed to get Solar System: %s", system)
@@ -214,7 +214,7 @@ def fetch_parent_location(
         )
         return None, False
 
-    system, _ = EveSolarSystem.objects.get_or_create_esi(id=structure.solar_system_id)
+    system = SolarSystem.objects.get(id=structure.solar_system_id)
 
     if not system:
         logger.debug("Failed to get Solar System: %s", system)

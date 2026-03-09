@@ -1,6 +1,6 @@
 # Standard Library
 import datetime as dt
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 # Third Party
 import requests
@@ -15,15 +15,25 @@ from django.utils.timezone import now
 
 # Alliance Auth
 from allianceauth.eveonline.models import EveCharacter
+from allianceauth.eveonline.providers import ObjectNotFound
 
 # Alliance Auth (External Libs)
-from eveuniverse.models import EveEntity, EveSolarSystem, EveType
+from eve_sde.models.map import SolarSystem
+from eve_sde.models.types import ItemType
 
 # AA Assets
 from assets import __version__, contexts
-from assets.app_settings import ASSETS_LOCATION_STALE_HOURS, STORAGE_BASE_KEY
+from assets.app_settings import (
+    ASSETS_BULK_BATCH_SIZE,
+    ASSETS_LOCATION_STALE_HOURS,
+    STORAGE_BASE_KEY,
+)
 from assets.hooks import get_extension_logger
 from assets.providers import esi
+
+if TYPE_CHECKING:
+    # AA Assets
+    from assets.models import EveEntity as EveEntityContext
 
 logger = get_extension_logger(__name__)
 
@@ -380,10 +390,8 @@ class LocationManagerBase(models.Manager):
     def update_or_create_esi(self, location_id: int) -> tuple[Any, bool]:
         """Update or create location object with data fetched from ESI."""
         if self.model.is_solar_system_id(location_id):
-            eve_solar_system, _ = EveSolarSystem.objects.get_or_create_esi(
-                id=location_id
-            )
-            eve_type, _ = EveType.objects.get_or_create_esi(id=EVE_TYPE_ID_SOLAR_SYSTEM)
+            eve_solar_system = SolarSystem.objects.get(id=location_id)
+            eve_type = ItemType.objects.get(id=EVE_TYPE_ID_SOLAR_SYSTEM)
             location, created = self.update_or_create(
                 id=location_id,
                 defaults={
@@ -411,21 +419,23 @@ class LocationManagerBase(models.Manager):
     def _station_update_or_create_dict(
         self, location_id: int, station: contexts.GetUniverseStationsStationIdContext
     ) -> tuple[Any, bool]:
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import EveEntity
+
         logger.debug("Updating or creating station %s", station)
         if station.system_id:
-            eve_solar_system, _ = EveSolarSystem.objects.get_or_create_esi(
-                id=station.system_id
-            )
+            eve_solar_system = SolarSystem.objects.get(id=station.system_id)
         else:
             eve_solar_system = None
 
         if station.type_id:
-            eve_type, _ = EveType.objects.get_or_create_esi(id=station.type_id)
+            eve_type = ItemType.objects.get(id=station.type_id)
         else:
             eve_type = None
 
         if station.owner:
-            owner, _ = EveEntity.objects.get_or_create_esi(id=station.owner)
+            owner, _ = EveEntity.objects.get_or_create_esi(eve_id=station.owner)
         else:
             owner = None
 
@@ -700,3 +710,66 @@ class RequestManagerBase(models.Manager):
 
 
 RequestManager = RequestManagerBase.from_queryset(RequestQuerySet)
+
+
+class EveEntityManager(models.Manager["EveEntityContext"]):
+    def get_or_create_esi(self, *, eve_id: int) -> tuple["EveEntityContext", bool]:
+        """gets or creates entity object with data fetched from ESI"""
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import EveEntity
+
+        try:
+            entity = self.get(id=eve_id)
+            return entity, False
+        except EveEntity.DoesNotExist:
+            return self.update_or_create_esi(eve_id=eve_id)
+
+    def create_bulk_from_esi(self, eve_ids):
+        """gets bulk names with ESI"""
+        if len(eve_ids) > 0:
+            # pylint: disable=import-outside-toplevel
+            # AA Assets
+            from assets.models import EveEntity
+
+            chunk_size = 500
+            id_chunks = [
+                eve_ids[i : i + chunk_size] for i in range(0, len(eve_ids), chunk_size)
+            ]
+            for chunk in id_chunks:
+                response = esi.client.Universe.PostUniverseNames(body=chunk).results()
+                new_names = []
+                logger.debug(
+                    "Eve Entity Manager EveName: count in %s count out %s",
+                    len(chunk),
+                    len(response),
+                )
+                for entity in response:
+                    new_names.append(
+                        EveEntity(
+                            id=entity.id,
+                            name=entity.name,
+                            category=entity.category,
+                        )
+                    )
+                EveEntity.objects.bulk_create(
+                    new_names,
+                    batch_size=ASSETS_BULK_BATCH_SIZE,
+                    ignore_conflicts=True,
+                )
+            return True
+        return True
+
+    def update_or_create_esi(self, *, eve_id: int) -> tuple[Any, bool]:
+        """updates or creates entity object with data fetched from ESI"""
+        response = esi.client.Universe.PostUniverseNames(body=[eve_id]).results()
+        if len(response) != 1:
+            raise ObjectNotFound(eve_id, "unknown_type")
+        entity_data = response[0]
+        return self.update_or_create(
+            id=entity_data.id,
+            defaults={
+                "name": entity_data.name,
+                "category": entity_data.category,
+            },
+        )

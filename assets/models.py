@@ -2,6 +2,7 @@
 
 # Django
 from django.contrib.auth.models import Permission, User
+from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.utils import timezone
 from django.utils.html import format_html
@@ -10,21 +11,32 @@ from django.utils.translation import gettext_lazy as _
 # Alliance Auth
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.evelinks import dotlan
-from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
+from allianceauth.eveonline.models import (
+    EveAllianceInfo,
+    EveCharacter,
+    EveCorporationInfo,
+)
 from esi.errors import TokenError
 from esi.exceptions import HTTPClientError, HTTPNotModified
 from esi.models import Token
 
 # Alliance Auth (External Libs)
-from eveuniverse.models import EveEntity, EveSolarSystem, EveType
+from eve_sde.models.map import SolarSystem
+from eve_sde.models.types import ItemType
 
 # AA Assets
 from assets import contexts
 from assets.errors import HTTPGatewayTimeoutError
 from assets.helpers.discord import send_user_notification
+from assets.helpers.eveonline import (
+    get_alliance_logo_url,
+    get_character_portrait_url,
+    get_corporation_logo_url,
+)
 from assets.hooks import get_extension_logger
 from assets.managers import (
     AssetsManager,
+    EveEntityManager,
     LocationManager,
     OwnerManager,
     RequestManager,
@@ -80,6 +92,127 @@ class General(models.Model):
             ("manage_requests", "Can manage requests"),
         )
         default_permissions = ()
+
+
+class EveEntity(models.Model):
+    """An Eve entity like a corporation or a character"""
+
+    objects: EveEntityManager = EveEntityManager()
+
+    class Meta:
+        default_permissions = ()
+
+    CATEGORY_ALLIANCE = "alliance"
+    CATEGORY_CHARACTER = "character"
+    CATEGORY_CORPORATION = "corporation"
+
+    CATEGORY_CHOICES = (
+        (CATEGORY_ALLIANCE, "Alliance"),
+        (CATEGORY_CORPORATION, "Corporation"),
+        (CATEGORY_CHARACTER, "Character"),
+    )
+
+    id = models.IntegerField(
+        primary_key=True, validators=[MinValueValidator(0)], verbose_name=_("ID")
+    )
+    category = models.CharField(
+        max_length=32, choices=CATEGORY_CHOICES, verbose_name=_("Category")
+    )
+    name = models.CharField(max_length=254, verbose_name=_("Name"))
+
+    # optionals for character/corp
+    corporation = models.ForeignKey(
+        "EveEntity",
+        on_delete=models.SET_NULL,
+        null=True,
+        default=None,
+        related_name="corp",
+    )
+    alliance = models.ForeignKey(
+        "EveEntity",
+        on_delete=models.SET_NULL,
+        null=True,
+        default=None,
+        related_name="alli",
+    )
+    last_update = models.DateTimeField(auto_now=True)
+
+    def __str__(self) -> str:
+        return str(self.name)
+
+    def __repr__(self) -> str:
+        return (
+            f"{self.__class__.__name__}(id={self.id}, category='{self.category}', "
+            f"name='{self.name}')"
+        )
+
+    @property
+    def is_alliance(self) -> bool:
+        """Return True if entity is an alliance, else False."""
+        return self.category == self.CATEGORY_ALLIANCE
+
+    @property
+    def is_corporation(self) -> bool:
+        """Return True if entity is an corporation, else False."""
+        return self.category == self.CATEGORY_CORPORATION
+
+    @property
+    def is_character(self) -> bool:
+        """Return True if entity is a character, else False."""
+        return self.category == self.CATEGORY_CHARACTER
+
+    def get_portrait(self, size=64, as_html=False) -> str:
+        """
+        Get the portrait URL for this entity.
+
+        Args:
+            size (int, optional): The size of the portrait.
+            as_html (bool, optional): Whether to return the portrait as an HTML img tag.
+        Returns:
+            str: The URL of the portrait or an HTML img tag.
+        """
+        if self.category == self.CATEGORY_ALLIANCE:
+            return get_alliance_logo_url(
+                alliance_id=self.id,
+                size=size,
+                alliance_name=self.name,
+                as_html=as_html,
+            )
+
+        if self.category == self.CATEGORY_CORPORATION:
+            return get_corporation_logo_url(
+                corporation_id=self.id,
+                size=size,
+                corporation_name=self.name,
+                as_html=as_html,
+            )
+
+        if self.category == self.CATEGORY_CHARACTER:
+            return get_character_portrait_url(
+                character_id=self.id,
+                size=size,
+                character_name=self.name,
+                as_html=as_html,
+            )
+        return ""
+
+    def icon_url(self, size=128) -> str:
+        """Url to an icon image for this organization."""
+        if self.category == self.CATEGORY_ALLIANCE:
+            return EveAllianceInfo.generic_logo_url(self.id, size=size)
+
+        if self.category == self.CATEGORY_CORPORATION:
+            return EveCorporationInfo.generic_logo_url(self.id, size=size)
+
+        if self.category == self.CATEGORY_CHARACTER:
+            return EveCharacter.generic_portrait_url(self.id, size=size)
+
+        raise NotImplementedError(
+            f"Avatar URL not implemented for category {self.category}"
+        )
+
+    def needs_update(self):
+        return self.last_update + timezone.timedelta(days=7) < timezone.now()
 
 
 class Owner(models.Model):
@@ -176,7 +309,7 @@ class Owner(models.Model):
                 price = None
 
             location_flag = Assets.LocationFlag.from_esi_data(asset.location_flag)
-            eve_type, _ = EveType.objects.get_or_create_esi(id=asset.type_id)
+            eve_type = ItemType.objects.get(id=asset.type_id)
             asset_item = Assets(
                 location=get_or_create_location(asset.location_id),
                 location_flag=location_flag,
@@ -340,7 +473,7 @@ class Location(models.Model):
         help_text="In-game name of this station or structure",
     )
     eve_solar_system = models.ForeignKey(
-        EveSolarSystem,
+        SolarSystem,
         on_delete=models.SET_DEFAULT,
         default=None,
         null=True,
@@ -348,7 +481,7 @@ class Location(models.Model):
         related_name="+",
     )
     eve_type = models.ForeignKey(
-        EveType,
+        ItemType,
         on_delete=models.SET_DEFAULT,
         default=None,
         null=True,
@@ -586,7 +719,7 @@ class Assets(models.Model):
         help_text="Corporation that owns the asset",
     )
     eve_type = models.ForeignKey(
-        EveType, on_delete=models.CASCADE, related_name="+", help_text="asset type"
+        ItemType, on_delete=models.CASCADE, related_name="+", help_text="asset type"
     )
     location = models.ForeignKey(
         Location,
@@ -842,7 +975,7 @@ class RequestAssets(models.Model):
     )
 
     eve_type = models.ForeignKey(
-        EveType,
+        ItemType,
         on_delete=models.CASCADE,
         related_name="+",
         help_text="The asset type this request belongs to",
