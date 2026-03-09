@@ -13,7 +13,6 @@ class Migration(migrations.Migration):
     dependencies = [
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
         ("authentication", "0023_alter_userprofile_language"),
-        ("eveuniverse", "0010_alter_eveindustryactivityduration_eve_type_and_more"),
         ("eveonline", "0017_alliance_and_corp_names_are_not_unique"),
     ]
 
@@ -175,7 +174,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_DEFAULT,
                         related_name="+",
-                        to="eveuniverse.evesolarsystem",
+                        to="eve_sde.solarsystem",
                     ),
                 ),
                 (
@@ -186,7 +185,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_DEFAULT,
                         related_name="+",
-                        to="eveuniverse.evetype",
+                        to="eve_sde.itemtype",
                     ),
                 ),
                 (
@@ -198,7 +197,7 @@ class Migration(migrations.Migration):
                         null=True,
                         on_delete=django.db.models.deletion.SET_DEFAULT,
                         related_name="+",
-                        to="eveuniverse.eveentity",
+                        to="assets.eveentity",
                     ),
                 ),
                 (
@@ -397,7 +396,7 @@ class Migration(migrations.Migration):
                         help_text="asset type",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="+",
-                        to="eveuniverse.evetype",
+                        to="eve_sde.itemtype",
                     ),
                 ),
                 (
