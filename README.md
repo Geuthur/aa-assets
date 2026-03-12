@@ -19,6 +19,7 @@ Assets System with Ordering Feature
     - [Step 2 - Configure Alliance Auth](#step2)
     - [Step 3 - Add the Scheduled Tasks and Settings](#step3)
     - [Step 4 - Migration to AA](#step4)
+      - [Step 4.1 - Preload EVE SDE Data](#step41)
     - [Step 5 - Setting up Permissions](#step5)
     - [Step 6 - (Optional) Setting up Compatibilies](#step6)
   - [Highlights](#highlights)
@@ -40,7 +41,7 @@ Assets System with Ordering Feature
 ## Installation<a name="installation"></a>
 
 > [!NOTE]
-> AA Assets needs at least Alliance Auth v4.0.0
+> AA Assets needs at least Alliance Auth v4.12.0
 > Please make sure to update your Alliance Auth before you install this APP
 
 ### Step 1 - Install the Package<a name="step1"></a>
@@ -55,8 +56,17 @@ pip install aa-assets
 
 Configure your Alliance Auth settings (`local.py`) as follows:
 
-- Add `'eveuniverse',` to `INSTALLED_APPS`
-- Add `'assets',` to `INSTALLED_APPS`
+```python
+INSTALLED_APPS = [
+    # other apps
+    "eve_sde",  # only if it not already existing
+    "assets",
+    # other apps?
+]
+
+# This line is right below the `INSTALLED_APPS` list, if not already exist!
+INSTALLED_APPS = ["modeltranslation"] + INSTALLED_APPS
+```
 
 ### Step 3 - Add the Scheduled Tasks<a name="step3"></a>
 
@@ -75,6 +85,17 @@ if "assets" in INSTALLED_APPS:
     CELERYBEAT_SCHEDULE["assets_update_all_parent_locations"] = {
         "task": "assets.tasks.update_all_parent_locations",
         "schedule": crontab(minute=0, hour=0, day_of_week=0),
+    }
+```
+
+This also only need to be added if it is not already!
+
+```python
+if "eve_sde" in INSTALLED_APPS:
+    # Run at 12:00 UTC each day
+    CELERYBEAT_SCHEDULE["EVE SDE :: Check for SDE Updates"] = {
+        "task": "eve_sde.tasks.check_for_sde_updates",
+        "schedule": crontab(minute="0", hour="12"),
     }
 ```
 
@@ -103,6 +124,15 @@ LOGGING["loggers"]["extensions.assets"] = {
 ```shell
 python manage.py collectstatic
 python manage.py migrate
+
+```
+
+### Step 4.1 - Preload EVE SDE Data<a name="step41">
+
+AA Ledger uses EVE SDE data to map IDs to names for EveTypes. You will need to preload some data from SDE once.
+
+```shell
+python manage.py esde_load_sde
 ```
 
 ### Step 5 - Setting up Permissions<a name="step5"></a>

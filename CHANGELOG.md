@@ -11,6 +11,50 @@ Section Order:
 ### Removed
 -->
 
+> [!WARNING]
+>
+> Please note that this release involves structural dependency changes.
+> To avoid any service disruptions, it is essential to read the update manual prior to performing the upgrade.
+
+### Update Instructions
+
+After isntalling this version, you need to modify `INSTALLED_APPS` in your `local.py`
+
+```python
+INSTALLED_APPS = [
+    # other apps
+    "eve_sde",  # only if it not already existing
+    "assets",
+    # other apps?
+]
+
+# This line is right below the `INSTALLED_APPS` list, if not already exist!
+INSTALLED_APPS = ["modeltranslation"] + INSTALLED_APPS
+```
+
+Add the following new task to ensure the SDE data is kept up to date.
+
+```python
+if "eve_sde" in INSTALLED_APPS:
+    # Run at 12:00 UTC each day
+    CELERYBEAT_SCHEDULE["EVE SDE :: Check for SDE Updates"] = {
+        "task": "eve_sde.tasks.check_for_sde_updates",
+        "schedule": crontab(minute="0", hour="12"),
+    }
+```
+
+> [!IMPORTANT]
+> This is only for installed Assets Enviroment
+> You need to have eveuniverse installed during the migration otherwise it will not migrate the old entries.
+
+After running migrations, make sure to run the following commands to import the SDE data into your database.
+
+```shell
+python manage.py esde_load_sde
+```
+
+Restart your Auth via `supervisor` after running these commands
+
 ## [0.2.0] - 2025-11-13
 
 ### Added

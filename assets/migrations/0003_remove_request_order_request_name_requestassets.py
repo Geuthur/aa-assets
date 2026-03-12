@@ -8,7 +8,6 @@ from django.db import migrations, models
 class Migration(migrations.Migration):
 
     dependencies = [
-        ("eveuniverse", "0010_alter_eveindustryactivityduration_eve_type_and_more"),
         ("assets", "0002_alter_request_status"),
     ]
 
@@ -209,7 +208,7 @@ class Migration(migrations.Migration):
                         help_text="The asset type this request belongs to",
                         on_delete=django.db.models.deletion.CASCADE,
                         related_name="+",
-                        to="eveuniverse.evetype",
+                        to="eve_sde.itemtype",
                     ),
                 ),
                 (

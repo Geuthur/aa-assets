@@ -15,7 +15,7 @@ from allianceauth.services.tasks import QueueOnce
 from esi.exceptions import HTTPNotModified
 
 # Alliance Auth (External Libs)
-from eveuniverse.models import EveType
+from eve_sde.models.types import ItemType
 
 # AA Assets
 from assets import __title__, contexts
@@ -246,7 +246,7 @@ def update_parent_location(
         parent_id, character_id, force_refresh=force_refresh
     )
     if parent is not None:
-        eve_type, _ = EveType.objects.get_or_create_esi(id=eve_type_id)
+        eve_type = ItemType.objects.get(id=eve_type_id)
         Location.objects.update_or_create(
             id=location_id,
             defaults={

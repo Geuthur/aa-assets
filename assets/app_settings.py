@@ -23,3 +23,5 @@ ASSETS_UPDATE_PERIOD = getattr(settings, "ASSETS_UPDATE_PERIOD", 60)  # in minut
 
 # Assets Cache System
 ASSETS_CACHE_KEY = getattr(settings, "ASSETS_CACHE_KEY", "ASSETS")
+
+ASSETS_BULK_BATCH_SIZE = getattr(settings, "ASSETS_BULK_BATCH_SIZE", 500)
