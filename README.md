@@ -74,15 +74,15 @@ To set up the Scheduled Tasks add following code to your `local.py`
 
 ```python
 if "assets" in INSTALLED_APPS:
-    CELERYBEAT_SCHEDULE["assets_update_all_assets"] = {
+    CELERYBEAT_SCHEDULE["AA Assets :: Update All Assets"] = {
         "task": "assets.tasks.update_all_assets",
         "schedule": crontab(minute="*/15"),
     }
-    CELERYBEAT_SCHEDULE["assets_update_all_locations"] = {
+    CELERYBEAT_SCHEDULE["AA Assets :: Update All Locations"] = {
         "task": "assets.tasks.update_all_locations",
         "schedule": crontab(minute=0, hour="*/12"),
     }
-    CELERYBEAT_SCHEDULE["assets_update_all_parent_locations"] = {
+    CELERYBEAT_SCHEDULE["AA Assets :: Update All Parent Locations"] = {
         "task": "assets.tasks.update_all_parent_locations",
         "schedule": crontab(minute=0, hour=0, day_of_week=0),
     }
