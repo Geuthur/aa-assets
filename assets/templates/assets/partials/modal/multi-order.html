@@ -1,6 +1,6 @@
 {% load i18n %}
 {% load static %}
-{% load bootstrap %}
+{% load django_bootstrap5 %}
 
 <!-- Approve Request Modal -->
 <div class="modal fade" id="assets-multi-request" tabindex="-1" role="dialog" aria-hidden="true">
@@ -21,7 +21,7 @@
                         <div class="d-flex align-items-center gap-2">
                             {% csrf_token %}
                             <fieldset class="assets-multi-request-form flex-grow-1">
-                                {{ forms.multi_request|bootstrap }}
+                                {% bootstrap_form forms.multi_request %}
                             </fieldset>
                         </div>
                     </form>
