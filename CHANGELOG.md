@@ -11,6 +11,13 @@ Section Order:
 ### Removed
 -->
 
+## [3.0.0] - 08.05.2026
+
+> [!IMPORTANT]
+>
+> This Release needs at least Alliance Auth v5
+> Please make sure to update your Alliance Auth before you install this APP
+
 > [!WARNING]
 >
 > Please note that this release involves structural dependency changes.
@@ -43,17 +50,31 @@ if "eve_sde" in INSTALLED_APPS:
     }
 ```
 
-> [!IMPORTANT]
-> This is only for installed Assets Enviroment
-> You need to have eveuniverse installed during the migration otherwise it will not migrate the old entries.
-
 After running migrations, make sure to run the following commands to import the SDE data into your database.
 
 ```shell
+python manage.py migrate eve_sde
 python manage.py esde_load_sde
 ```
 
+Migrate the app and collect static.
+
+```shell
+python manage.py migrate assets
+python manage.py collectstatic --noinput
+```
+
 Restart your Auth via `supervisor` after running these commands
+
+### Added
+
+- Python 3.13 Support
+- Downtime Checker for ESI Tasks
+- Compatibility to Alliance Auth v5
+
+### Removed
+
+- Compatibility to Alliance Auth v4
 
 ## [0.2.0] - 2025-11-13
 
