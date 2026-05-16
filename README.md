@@ -1,5 +1,8 @@
 # Assets module for AllianceAuth.<a name="aa-assets"></a>
 
+![Licence](https://img.shields.io/github/license/geuthur/aa-assets)
+![Python](https://img.shields.io/pypi/pyversions/aa-assets)
+![Django](https://img.shields.io/pypi/frameworkversions/django/aa-assets.svg?label=django)
 [![pre-commit.ci status](https://results.pre-commit.ci/badge/github/Geuthur/aa-assets/master.svg)](https://results.pre-commit.ci/latest/github/Geuthur/aa-assets/master)
 [![Code style: black](https://img.shields.io/badge/code%20style-black-000000.svg)](https://github.com/psf/black)
 [![Tests](https://github.com/Geuthur/aa-assets/actions/workflows/autotester.yml/badge.svg)](https://github.com/Geuthur/aa-assets/actions/workflows/autotester.yml)
@@ -18,8 +21,8 @@ Assets System with Ordering Feature
     - [Step 1 - Install the Package](#step1)
     - [Step 2 - Configure Alliance Auth](#step2)
     - [Step 3 - Add the Scheduled Tasks and Settings](#step3)
-    - [Step 4 - Migration to AA](#step4)
-      - [Step 4.1 - Preload EVE SDE Data](#step41)
+    - [Step 4 - Migrate & Preload EVE SDE Data](#step4)
+      - [Step 4.1 - Migrate App and collect static](#step41)
     - [Step 5 - Setting up Permissions](#step5)
     - [Step 6 - (Optional) Setting up Compatibilies](#step6)
   - [Highlights](#highlights)
@@ -41,7 +44,7 @@ Assets System with Ordering Feature
 ## Installation<a name="installation"></a>
 
 > [!NOTE]
-> AA Assets needs at least Alliance Auth v4.12.0
+> AA Assets needs at least Alliance Auth v5
 > Please make sure to update your Alliance Auth before you install this APP
 
 ### Step 1 - Install the Package<a name="step1"></a>
@@ -119,20 +122,22 @@ LOGGING["loggers"]["extensions.assets"] = {
 }
 ```
 
-### Step 4 - Migration to AA<a name="step4"></a>
+### Step 4 - Migrate & Preload EVE SDE Data<a name="step4"></a>
+
+AA Assets uses EVE SDE data to map IDs to names for EveTypes. You will need to preload some data from SDE once.
 
 ```shell
-python manage.py collectstatic
-python manage.py migrate
-
+python manage.py migrate eve_sde
+python manage.py esde_load_sde
 ```
 
-### Step 4.1 - Preload EVE SDE Data<a name="step41">
+### Step 4.1 - Migrate App and collect static<a name="step41">
 
-AA Ledger uses EVE SDE data to map IDs to names for EveTypes. You will need to preload some data from SDE once.
+Migrate the app and collect static.
 
 ```shell
-python manage.py esde_load_sde
+python manage.py migrate assets
+python manage.py collectstatic --noinput
 ```
 
 ### Step 5 - Setting up Permissions<a name="step5"></a>
