@@ -15,7 +15,6 @@ from django.utils.timezone import now
 
 # Alliance Auth
 from allianceauth.eveonline.models import EveCharacter
-from allianceauth.eveonline.providers import ObjectNotFound
 
 # Alliance Auth (External Libs)
 from eve_sde.models.map import SolarSystem
@@ -28,6 +27,7 @@ from assets.app_settings import (
     ASSETS_LOCATION_STALE_HOURS,
     STORAGE_BASE_KEY,
 )
+from assets.errors import ObjectNotFound
 from assets.hooks import get_extension_logger
 from assets.providers import esi
 
@@ -764,7 +764,7 @@ class EveEntityManager(models.Manager["EveEntityContext"]):
         """updates or creates entity object with data fetched from ESI"""
         response = esi.client.Universe.PostUniverseNames(body=[eve_id]).results()
         if len(response) != 1:
-            raise ObjectNotFound(eve_id, "unknown_type")
+            raise ObjectNotFound(f"Unknown Type with ID {eve_id} not found.")
         entity_data = response[0]
         return self.update_or_create(
             id=entity_data.id,
