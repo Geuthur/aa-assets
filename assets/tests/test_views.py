@@ -5,6 +5,7 @@ from http import HTTPStatus
 from django.urls import reverse
 
 # AA Assets
+from assets import views
 from assets.tests import AssetsTestCase
 
 
@@ -14,6 +15,12 @@ class TestViews(AssetsTestCase):
         super().setUpClass()
 
     def test_index_view(self):
-        self.client.force_login(self.user)
-        response = self.client.get(reverse("assets:index"))
+        # Test Data
+        request = self.factory.get(reverse("assets:index"))
+        request.user = self.superuser
+
+        # Test Action
+        response = views.index(request)
+
+        # Expected Result
         self.assertEqual(response.status_code, HTTPStatus.OK)
