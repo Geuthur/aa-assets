@@ -11,6 +11,16 @@ Section Order:
 ### Removed
 -->
 
+### Added
+
+- Python 3.13 Support
+- Compatibility to Alliance Auth v5
+
+### Removed
+
+- Compatibility to Alliance Auth v4
+- Dependency `allianceauth-app-utils`
+
 > [!WARNING]
 >
 > Please note that this release involves structural dependency changes.
