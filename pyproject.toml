@@ -52,7 +52,7 @@ urls.Source = "https://github.com/Geuthur/aa-assets"
 urls.Tracker = "https://github.com/Geuthur/aa-assets/issues"
 
 [tool.hatch]
+version.path = "assets/__init__.py"
 build.include = [
     "/assets",
 ]
-version.path = "assets/__init__.py"
