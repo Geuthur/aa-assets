@@ -214,6 +214,9 @@ repos:
       - id: isort
         name: Isort
         description: Sort imports.
+        args:
+          - --profile
+          - black
 
   - repo: https://github.com/Pierre-Sassoulas/black-disable-checker/
     rev: v1.1.3
