@@ -1,7 +1,6 @@
 """Models for assets."""
 
 # Django
-from django.contrib.auth.models import Permission, User
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.utils import timezone
@@ -9,7 +8,7 @@ from django.utils.html import format_html
 from django.utils.translation import gettext_lazy as _
 
 # Alliance Auth
-from allianceauth.authentication.models import CharacterOwnership
+from allianceauth.authentication.models import CharacterOwnership, Permission, User
 from allianceauth.eveonline.evelinks import dotlan
 from allianceauth.eveonline.models import (
     EveAllianceInfo,
