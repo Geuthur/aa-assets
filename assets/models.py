@@ -64,17 +64,19 @@ def users_with_permission(
     Taken from the `allianceauth-app-utils` package.
     Credits to: Erik Kalkoken
     """
+    user_model = permission.user_set.model
+
     users_qs = (
         permission.user_set.all()
-        | User.objects.filter(
+        | user_model.objects.filter(
             groups__in=list(permission.group_set.values_list("pk", flat=True))
         )
-        | User.objects.select_related("profile").filter(
+        | user_model.objects.select_related("profile").filter(
             profile__state__in=list(permission.state_set.values_list("pk", flat=True))
         )
     )
     if include_superusers:
-        users_qs |= User.objects.filter(is_superuser=True)
+        users_qs |= user_model.objects.filter(is_superuser=True)
     return users_qs.distinct()
 
 
