@@ -1,5 +1,12 @@
 # Makefile for AA Assets
 
+# Specify the shell to be used for executing the commands in this Makefile.
+# In this case, it is set to /bin/bash.
+SHELL := /bin/bash
+
+# Resolve the AllianceAuth Django project path.
+myauth_path = $(shell path=$$(cat .make/myauth-path 2>/dev/null | grep . || echo "../myauth"); echo "$${path%/}")
+
 # Variables
 appname = aa-assets
 appname_verbose = AA Assets
@@ -18,6 +25,15 @@ git_repository_issues = $(git_repository)/issues
 check-python-venv:
 	@if [ -z "$(VIRTUAL_ENV)" ]; then \
 		echo "$(TEXT_COLOR_RED)$(TEXT_BOLD)Python virtual environment is NOT active!$(TEXT_RESET)" ; \
+		exit 1; \
+	fi
+
+# Check if the 'myauth' path exists
+.PHONY: check-myauth-path
+check-myauth-path:
+	@if [ ! -d "$(myauth_path)" ]; then \
+		echo "$(TEXT_COLOR_RED)$(TEXT_BOLD)Error: '$(myauth_path)' does not exist!$(TEXT_RESET)"; \
+		echo "Please set the absolute path to your 'myauth' directory in the '.make/myauth-path' file."; \
 		exit 1; \
 	fi
 
@@ -42,10 +58,10 @@ confirm:
 	fi
 
 # Graph models
-.PHONY: graph_models
-graph_models:
+.PHONY: graph-models
+graph-models:
 	@echo "Creating a graph of the models …"
-	@python ../auth/manage.py \
+	@python $(myauth_path)/manage.py \
 		graph_models \
 		$(package) \
 		--arrow-shape normal \
@@ -54,13 +70,11 @@ graph_models:
 # Prepare a new release
 # Generate Graph of the models, translation files and update the version in the package
 .PHONY: prepare-release
-prepare-release:
+prepare-release: pot graph-models
 	@echo ""
 	@echo "Preparing a release …"
 	@read -p "New Version Number: " new_version; \
 	if grep -qE "^## \[$$new_version\]" CHANGELOG.md; then \
-		$(MAKE) pot; \
-		$(MAKE) graph_models; \
 		sed -i "/__version__ = /c\__version__ = \"$$new_version\"" $(package)/__init__.py; \
 		echo "Updated version in $(TEXT_BOLD)$(package)/__init__.py$(TEXT_BOLD_END)"; \
 		echo "$$new_version" | grep -q -E 'alpha|beta'; \
@@ -88,8 +102,8 @@ help::
 	@echo ""
 	@echo "$(TEXT_BOLD)Commands:$(TEXT_BOLD_END)"
 	@echo "  $(TEXT_UNDERLINE)General:$(TEXT_UNDERLINE_END)"
-	@echo "    graph_models                Create a graph of the models"
 	@echo "    help                        Show this help message"
+	@echo "    graph-models                Create a graph of the models"
 	@echo "    prepare-release             Prepare a release and update the version."
 	@echo ""
 
