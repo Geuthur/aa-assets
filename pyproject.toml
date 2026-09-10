@@ -35,13 +35,13 @@ dynamic = [
 ]
 dependencies = [
     "allianceauth>=5.2",
-    "allianceauth-app-utils>=1.3",
     "django-eveonline-sde",
     "django-ninja>=1.5,<2",
 ]
 optional-dependencies.tests-allianceauth-latest = [
     "coverage",
     "factory-boy",
+    "pook",
 ]
 urls.Changelog = "https://github.com/Geuthur/aa-assets/blob/master/CHANGELOG.md"
 urls.Discord = "https://discord.gg/WrHzA4rnxA"

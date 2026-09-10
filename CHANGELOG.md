@@ -3,6 +3,21 @@
 ## [In Development] - Unreleased
 
 <!--
+> [!NOTE]
+>
+
+> [!TIP]
+>
+
+> [!IMPORTANT]
+>
+
+> [!WARNING]
+>
+
+> [!CAUTION]
+>
+
 Section Order:
 
 ### Added
@@ -10,6 +25,8 @@ Section Order:
 ### Changed
 ### Removed
 -->
+
+<!-- Your changes go here -->
 
 ### Added
 
@@ -123,3 +140,10 @@ Restart your Auth via `supervisor` after running these commands
 ### Added
 
 - Initial public release
+
+<!-- Links -->
+
+[0.1.1]: https://github.com/Geuthur/aa-assets/compare/v0.1.0...v0.1.1 "0.1.1"
+[0.1.2]: https://github.com/Geuthur/aa-assets/compare/v0.1.1...v0.1.2 "0.1.2"
+[0.2.0]: https://github.com/Geuthur/aa-assets/compare/v0.1.2...v0.2.0 "0.2.0"
+[in development]: https://github.com/Geuthur/aa-assets/compare/v1.0.0...HEAD "In Development"

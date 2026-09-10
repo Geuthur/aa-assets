@@ -1,16 +1,30 @@
-*.log
-.tox/
-*.old
-__pycache__
-node_modules/
-
-.coverage
+# Environment files
 .env
-.pypirc
+.tox/
 .venv/
+node_modules/
+__pycache__
 
+# Standard System Files
+*.log
+*.tmp
+*.bak
+*.swp
+*.old
+*.cache
+
+# GitHub Stuff
+.coverage
+.pypirc
 /build/
 /dist/
 /coverage.xml
 
-/testing/*
+# Alliance Auth
+testing/
+
+# Make ignore overrides
+.make/config-overrides.ini
+
+# Weblate
+*/locale/en/
