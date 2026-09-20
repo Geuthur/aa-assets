@@ -85,6 +85,8 @@ class General(models.Model):
 
     class Meta:
         managed = False
+        verbose_name = "AA-Assets"
+        verbose_name_plural = "AA-Assets"
         permissions = (
             ("basic_access", "Can access this app"),
             ("corporation_access", "Can access own corporation assets"),
