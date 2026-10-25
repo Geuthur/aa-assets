@@ -33,6 +33,10 @@ Section Order:
 - Python 3.13 Support
 - Compatibility to Alliance Auth v5
 
+### Changed
+
+- Replaced `pook` with `pookx` in the test dependencies.
+
 ### Removed
 
 - Compatibility to Alliance Auth v4

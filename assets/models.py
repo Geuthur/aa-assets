@@ -361,8 +361,7 @@ class Owner(models.Model):
 
             else:
                 logger.info("No updates found for %s", self.name)
-        # pylint: disable=broad-except
-        except Exception as e:
+        except Exception as e:  # pylint: disable=broad-exception-caught
             logger.error(
                 "Error while updating assets for %s: %s",
                 self.name,
