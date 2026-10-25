@@ -7,9 +7,9 @@ msgid ""
 msgstr ""
 "Project-Id-Version: AA Assets\n"
 "Report-Msgid-Bugs-To: https://github.com/Geuthur/aa-assets/issues\n"
-"POT-Creation-Date: 2025-10-15 08:14+0200\n"
-"PO-Revision-Date: 2026-01-11 20:50+0000\n"
-"Last-Translator: Geuthur <geuthur@users.noreply.github.com>\n"
+"POT-Creation-Date: 2025-11-13 23:40+0100\n"
+"PO-Revision-Date: 2026-10-25 13:06+0000\n"
+"Last-Translator: Geuthur <devgeuthur@gmail.com>\n"
 "Language-Team: German <https://weblate.geuthur.de/projects/allianceauth/aa-"
 "assets/de/>\n"
 "Language: de\n"
@@ -19,762 +19,583 @@ msgstr ""
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
 "X-Generator: Weblate 5.15.1\n"
 
-#: assets/api/requests/helper.py:21
 msgid "Get Order Information"
-msgstr ""
+msgstr "Bestellinformationen abrufen"
 
-#: assets/api/requests/helper.py:44 assets/api/requests/helper.py:114
-#, fuzzy
-#| msgid "Mark Request as Cancelled"
 msgid "Mark Request as Canceled"
 msgstr "Antrag als storniert markieren"
 
-#: assets/api/requests/helper.py:45 assets/api/requests/helper.py:115
 #, python-brace-format
 msgid "Cancel Request for {requestor} - ID: {request_id}"
-msgstr ""
+msgstr "Anfrage von {requestor} stornieren - ID: {request_id}"
 
-#: assets/api/requests/helper.py:63
 msgid "Mark Request as Completed"
 msgstr "Anfrage als abgeschlossen markieren"
 
-#: assets/api/requests/helper.py:64
 #, python-brace-format
 msgid "Complete Request for {requestor} - ID: {request_id}"
-msgstr ""
+msgstr "Anfrage von {requestor} abschließen - ID: {request_id}"
 
-#: assets/api/requests/helper.py:82 assets/api/requests/helper.py:133
 msgid "Mark Request as Open"
 msgstr "Anfrage als offen markieren"
 
-#: assets/api/requests/helper.py:83 assets/api/requests/helper.py:134
 #, python-brace-format
 msgid "Reopen Request for {requestor} - ID: {request_id}"
-msgstr ""
+msgstr "Anfrage von {requestor} wieder öffnen - ID: {request_id}"
 
-#: assets/api/requests/requests.py:199
 #, python-brace-format
 msgid "Order for {requestor} - ID: {request_id}"
-msgstr ""
+msgstr "Bestellung für {requestor} - ID: {request_id}"
 
-#: assets/forms.py:28
 msgid "Amount"
 msgstr "Betrag"
 
-#: assets/forms.py:56
 msgid "Amount for "
-msgstr ""
+msgstr "Menge für "
 
-#: assets/models.py:402
 msgid "Asset Safety"
 msgstr "Asset-Sicherheit"
 
-#: assets/models.py:403
 msgid "Auto Fit"
-msgstr ""
+msgstr "Auto-Fit"
 
-#: assets/models.py:404
 msgid "Bonus"
-msgstr ""
+msgstr "Bonus"
 
-#: assets/models.py:405
 msgid "Booster"
-msgstr ""
+msgstr "Booster"
 
-#: assets/models.py:406
 msgid "Booster Hold"
-msgstr ""
+msgstr "Booster-Frachtraum"
 
-#: assets/models.py:407
 msgid "Capsule"
-msgstr ""
+msgstr "Kapsel"
 
-#: assets/models.py:408
 msgid "Cargo"
-msgstr ""
+msgstr "Frachtraum"
 
-#: assets/models.py:409
 msgid "Corp Deliveries"
-msgstr ""
+msgstr "Corp-Lieferungen"
 
-#: assets/models.py:410
 msgid "Corp Security Access Group 1"
-msgstr ""
+msgstr "Corp-Sicherheitszugriffsgruppe 1"
 
-#: assets/models.py:411
 msgid "Corp Security Access Group 2"
-msgstr ""
+msgstr "Corp-Sicherheitszugriffsgruppe 2"
 
-#: assets/models.py:412
 msgid "Corp Security Access Group 3"
-msgstr ""
+msgstr "Corp-Sicherheitszugriffsgruppe 3"
 
-#: assets/models.py:413
 msgid "Corp Security Access Group 4"
-msgstr ""
+msgstr "Corp-Sicherheitszugriffsgruppe 4"
 
-#: assets/models.py:414
 msgid "Corp Security Access Group 5"
-msgstr ""
+msgstr "Corp-Sicherheitszugriffsgruppe 5"
 
-#: assets/models.py:415
 msgid "Corp Security Access Group 6"
-msgstr ""
+msgstr "Corp-Sicherheitszugriffsgruppe 6"
 
-#: assets/models.py:416
 msgid "Corp Security Access Group 7"
-msgstr ""
+msgstr "Corp-Sicherheitszugriffsgruppe 7"
 
-#: assets/models.py:417
 msgid "Crate Loot"
-msgstr ""
+msgstr "Kisten-Beute"
 
-#: assets/models.py:418
 msgid "Deliveries"
-msgstr ""
+msgstr "Lieferungen"
 
-#: assets/models.py:419
 msgid "Drone Bay"
-msgstr ""
+msgstr "Drohnenhangar"
 
-#: assets/models.py:420
 msgid "Dust Battle"
-msgstr ""
+msgstr "Dust-Gefecht"
 
-#: assets/models.py:421
 msgid "Dust Databank"
-msgstr ""
+msgstr "Dust-Datenbank"
 
-#: assets/models.py:422
 msgid "Fighter Bay"
-msgstr ""
+msgstr "Jägerhangar"
 
-#: assets/models.py:423
 msgid "Fighter Tube 0"
-msgstr ""
+msgstr "Jägerstartrohr 0"
 
-#: assets/models.py:424
 msgid "Fighter Tube 1"
-msgstr ""
+msgstr "Jägerstartrohr 1"
 
-#: assets/models.py:425
 msgid "Fighter Tube 2"
-msgstr ""
+msgstr "Jägerstartrohr 2"
 
-#: assets/models.py:426
 msgid "Fighter Tube 3"
-msgstr ""
+msgstr "Jägerstartrohr 3"
 
-#: assets/models.py:427
 msgid "Fighter Tube 4"
-msgstr ""
+msgstr "Jägerstartrohr 4"
 
-#: assets/models.py:428
 msgid "Fleet Hangar"
-msgstr ""
+msgstr "Flottenhangar"
 
-#: assets/models.py:429
 msgid "Frigate escape bay Hangar"
-msgstr ""
+msgstr "Fregatten-Fluchthangar"
 
-#: assets/models.py:430
 msgid "Hangar"
-msgstr ""
+msgstr "Hangar"
 
-#: assets/models.py:431
 msgid "Hangar All"
-msgstr ""
+msgstr "Gesamter Hangar"
 
-#: assets/models.py:432
 msgid "High power slot 1"
-msgstr ""
+msgstr "Hochenergie-Slot 1"
 
-#: assets/models.py:433
 msgid "High power slot 2"
-msgstr ""
+msgstr "Hochenergie-Slot 2"
 
-#: assets/models.py:434
 msgid "High power slot 3"
-msgstr ""
+msgstr "Hochenergie-Slot 3"
 
-#: assets/models.py:435
 msgid "High power slot 4"
-msgstr ""
+msgstr "Hochenergie-Slot 4"
 
-#: assets/models.py:436
 msgid "High power slot 5"
-msgstr ""
+msgstr "Hochenergie-Slot 5"
 
-#: assets/models.py:437
 msgid "High power slot 6"
-msgstr ""
+msgstr "Hochenergie-Slot 6"
 
-#: assets/models.py:438
 msgid "High power slot 7"
-msgstr ""
+msgstr "Hochenergie-Slot 7"
 
-#: assets/models.py:439
 msgid "High power slot 8"
-msgstr ""
+msgstr "Hochenergie-Slot 8"
 
-#: assets/models.py:440
 msgid "Hidden Modifiers"
-msgstr ""
+msgstr "Verborgene Modifikatoren"
 
-#: assets/models.py:441
 msgid "Implant"
-msgstr ""
+msgstr "Implantat"
 
-#: assets/models.py:442
 msgid "Impounded"
-msgstr ""
+msgstr "Beschlagnahmt"
 
-#: assets/models.py:444
 msgid "This item was put into a junkyard through reprocessing."
 msgstr ""
+"Dieser Gegenstand landete durch Wiederaufbereitung auf dem Schrottplatz."
 
-#: assets/models.py:447
 msgid "This item was put into a junkyard through being trashed by its owner."
 msgstr ""
+"Dieser Gegenstand landete auf dem Schrottplatz, weil sein Besitzer ihn "
+"weggeworfen hat."
 
-#: assets/models.py:449
 msgid "Low power slot 1"
-msgstr ""
+msgstr "Niedrigenergie-Slot 1"
 
-#: assets/models.py:450
 msgid "Low power slot 2"
-msgstr ""
+msgstr "Niedrigenergie-Slot 2"
 
-#: assets/models.py:451
 msgid "Low power slot 3"
-msgstr ""
+msgstr "Niedrigenergie-Slot 3"
 
-#: assets/models.py:452
 msgid "Low power slot 4"
-msgstr ""
+msgstr "Niedrigenergie-Slot 4"
 
-#: assets/models.py:453
 msgid "Low power slot 5"
-msgstr ""
+msgstr "Niedrigenergie-Slot 5"
 
-#: assets/models.py:454
 msgid "Low power slot 6"
-msgstr ""
+msgstr "Niedrigenergie-Slot 6"
 
-#: assets/models.py:455
 msgid "Low power slot 7"
-msgstr ""
+msgstr "Niedrigenergie-Slot 7"
 
-#: assets/models.py:456
 msgid "Low power slot 8"
-msgstr ""
+msgstr "Niedrigenergie-Slot 8"
 
-#: assets/models.py:457
 msgid "Locked item, can not be moved unless unlocked"
-msgstr ""
+msgstr "Gesperrter Gegenstand, kann nur nach dem Entsperren verschoben werden"
 
-#: assets/models.py:458
 msgid "Medium power slot 1"
-msgstr ""
+msgstr "Mittelenergie-Slot 1"
 
-#: assets/models.py:459
 msgid "Medium power slot 2"
-msgstr ""
+msgstr "Mittelenergie-Slot 2"
 
-#: assets/models.py:460
 msgid "Medium power slot 3"
-msgstr ""
+msgstr "Mittelenergie-Slot 3"
 
-#: assets/models.py:461
 msgid "Medium power slot 4"
-msgstr ""
+msgstr "Mittelenergie-Slot 4"
 
-#: assets/models.py:462
 msgid "Medium power slot 5"
-msgstr ""
+msgstr "Mittelenergie-Slot 5"
 
-#: assets/models.py:463
 msgid "Medium power slot 6"
-msgstr ""
+msgstr "Mittelenergie-Slot 6"
 
-#: assets/models.py:464
 msgid "Medium power slot 7"
-msgstr ""
+msgstr "Mittelenergie-Slot 7"
 
-#: assets/models.py:465
 msgid "Medium power slot 8"
-msgstr ""
+msgstr "Mittelenergie-Slot 8"
 
-#: assets/models.py:466
 msgid "Office Folder"
-msgstr ""
+msgstr "Büroordner"
 
-#: assets/models.py:467
 msgid "Pilot"
-msgstr ""
+msgstr "Pilot"
 
-#: assets/models.py:468
 msgid "Planet Surface"
-msgstr ""
+msgstr "Planetenoberfläche"
 
-#: assets/models.py:469
 msgid "Quafe Bay"
-msgstr ""
+msgstr "Quafe-Fach"
 
-#: assets/models.py:470
 msgid "Quantum Core Room"
-msgstr ""
+msgstr "Quantenkernraum"
 
-#: assets/models.py:471
 msgid "Reward"
 msgstr "Belohnung"
 
-#: assets/models.py:472
 msgid "Rig power slot 1"
-msgstr ""
+msgstr "Rig-Slot 1"
 
-#: assets/models.py:473
 msgid "Rig power slot 2"
-msgstr ""
+msgstr "Rig-Slot 2"
 
-#: assets/models.py:474
 msgid "Rig power slot 3"
-msgstr ""
+msgstr "Rig-Slot 3"
 
-#: assets/models.py:475
 msgid "Rig power slot 4"
-msgstr ""
+msgstr "Rig-Slot 4"
 
-#: assets/models.py:476
 msgid "Rig power slot 5"
-msgstr ""
+msgstr "Rig-Slot 5"
 
-#: assets/models.py:477
 msgid "Rig power slot 6"
-msgstr ""
+msgstr "Rig-Slot 6"
 
-#: assets/models.py:478
 msgid "Rig power slot 7"
-msgstr ""
+msgstr "Rig-Slot 7"
 
-#: assets/models.py:479
 msgid "Rig power slot 8"
-msgstr ""
+msgstr "Rig-Slot 8"
 
-#: assets/models.py:480
 msgid "Secondary Storage"
-msgstr ""
+msgstr "Sekundärlager"
 
-#: assets/models.py:481
 msgid "Service Slot 0"
-msgstr ""
+msgstr "Service-Slot 0"
 
-#: assets/models.py:482
 msgid "Service Slot 1"
-msgstr ""
+msgstr "Service-Slot 1"
 
-#: assets/models.py:483
 msgid "Service Slot 2"
-msgstr ""
+msgstr "Service-Slot 2"
 
-#: assets/models.py:484
 msgid "Service Slot 3"
-msgstr ""
+msgstr "Service-Slot 3"
 
-#: assets/models.py:485
 msgid "Service Slot 4"
-msgstr ""
+msgstr "Service-Slot 4"
 
-#: assets/models.py:486
 msgid "Service Slot 5"
-msgstr ""
+msgstr "Service-Slot 5"
 
-#: assets/models.py:487
 msgid "Service Slot 6"
-msgstr ""
+msgstr "Service-Slot 6"
 
-#: assets/models.py:488
 msgid "Service Slot 7"
-msgstr ""
+msgstr "Service-Slot 7"
 
-#: assets/models.py:489
 msgid "Ship Hangar"
-msgstr ""
+msgstr "Schiffshangar"
 
-#: assets/models.py:490
 msgid "Ship Offline"
-msgstr ""
+msgstr "Schiff offline"
 
-#: assets/models.py:491
 msgid "Skill"
 msgstr "Skill"
 
-#: assets/models.py:492
 msgid "Skill In Training"
-msgstr ""
+msgstr "Skill im Training"
 
-#: assets/models.py:493
 msgid "Specialized Ammo Hold"
-msgstr ""
+msgstr "Spezialisierter Munitions-Laderaum"
 
-#: assets/models.py:495
 msgid "Specialized Command Center Hold"
-msgstr ""
+msgstr "Spezialisierter Kommandozentralen-Laderaum"
 
-#: assets/models.py:497
 msgid "Specialized Fuel Bay"
-msgstr ""
+msgstr "Spezialisierter Treibstoff-Laderaum"
 
-#: assets/models.py:498
 msgid "Specialized Gas Hold"
-msgstr ""
+msgstr "Spezialisierter Gas-Laderaum"
 
-#: assets/models.py:500
 msgid "Specialized Industrial Ship Hold"
-msgstr ""
+msgstr "Spezialisierter Industrieschiff-Laderaum"
 
-#: assets/models.py:503
 msgid "Specialized Large Ship Hold"
-msgstr ""
+msgstr "Spezialisierter Großschiff-Laderaum"
 
-#: assets/models.py:506
 msgid "Specialized Material Bay"
-msgstr ""
+msgstr "Spezialisierter Material-Laderaum"
 
-#: assets/models.py:509
 msgid "Specialized Medium Ship Hold"
-msgstr ""
+msgstr "Spezialisierter Mittelschiff-Laderaum"
 
-#: assets/models.py:512
 msgid "Specialized Mineral Hold"
-msgstr ""
+msgstr "Spezialisierter Mineral-Laderaum"
 
-#: assets/models.py:514
 msgid "Specialized Ore Hold"
-msgstr ""
+msgstr "Spezialisierter Erz-Laderaum"
 
-#: assets/models.py:517
 msgid "Specialized Planetary Commodities Hold"
-msgstr ""
+msgstr "Spezialisierter Laderaum für planetare Waren"
 
-#: assets/models.py:520
 msgid "Specialized Salvage Hold"
-msgstr ""
+msgstr "Spezialisierter Bergungsgut-Laderaum"
 
-#: assets/models.py:522
 msgid "Specialized Ship Hold"
-msgstr ""
+msgstr "Spezialisierter Schiffs-Laderaum"
 
-#: assets/models.py:524
 msgid "Specialized Small Ship Hold"
-msgstr ""
+msgstr "Spezialisierter Kleinschiff-Laderaum"
 
-#: assets/models.py:526
 msgid "Structure Active"
-msgstr ""
+msgstr "Struktur aktiv"
 
-#: assets/models.py:527
 msgid "Structure Fuel"
-msgstr ""
+msgstr "Struktur-Treibstoff"
 
-#: assets/models.py:528
 msgid "Structure Inactive"
-msgstr ""
+msgstr "Struktur inaktiv"
 
-#: assets/models.py:529
 msgid "Structure Offline"
-msgstr ""
+msgstr "Struktur offline"
 
-#: assets/models.py:530
 msgid "Sub System Bay"
-msgstr ""
+msgstr "Subsystem-Fach"
 
-#: assets/models.py:531
 msgid "Sub System Slot 0"
-msgstr ""
+msgstr "Subsystem-Slot 0"
 
-#: assets/models.py:532
 msgid "Sub System Slot 1"
-msgstr ""
+msgstr "Subsystem-Slot 1"
 
-#: assets/models.py:533
 msgid "Sub System Slot 2"
-msgstr ""
+msgstr "Subsystem-Slot 2"
 
-#: assets/models.py:534
 msgid "Sub System Slot 3"
-msgstr ""
+msgstr "Subsystem-Slot 3"
 
-#: assets/models.py:535
 msgid "Sub System Slot 4"
-msgstr ""
+msgstr "Subsystem-Slot 4"
 
-#: assets/models.py:536
 msgid "Sub System Slot 5"
-msgstr ""
+msgstr "Subsystem-Slot 5"
 
-#: assets/models.py:537
 msgid "Sub System Slot 6"
-msgstr ""
+msgstr "Subsystem-Slot 6"
 
-#: assets/models.py:538
 msgid "Sub System Slot 7"
-msgstr ""
+msgstr "Subsystem-Slot 7"
 
-#: assets/models.py:539
 msgid "Unlocked item, can be moved"
-msgstr ""
+msgstr "Entsperrter Gegenstand, kann verschoben werden"
 
-#: assets/models.py:540
 msgid "Wallet"
-msgstr ""
+msgstr "Wallet"
 
-#: assets/models.py:541
 msgid "Wardrobe"
-msgstr ""
+msgstr "Garderobe"
 
-#: assets/models.py:542
 msgid "undefined"
 msgstr "undefiniert"
 
-#: assets/models.py:704
 #, python-brace-format
 msgid "{self.requesting_user} has Requested a Order"
-msgstr ""
+msgstr "{self.requesting_user} hat eine Bestellung aufgegeben"
 
-#: assets/models.py:706
 msgid ""
-"{self.requesting_user} has requested the following items:{self."
-"convert_order_to_notifiy()}\n"
+"{self.requesting_user} has requested the following items:"
+"{self.convert_order_to_notifiy()}\n"
 msgstr ""
+"{self.requesting_user} hat folgende Gegenstände angefragt:"
+"{self.convert_order_to_notifiy()}\n"
 
-#: assets/models.py:721
 #, python-brace-format
 msgid ""
 "{self.approver_user} has completed the Order for {self.requesting_user} ID: "
 "{self.pk}."
 msgstr ""
+"{self.approver_user} hat die Bestellung für {self.requesting_user} "
+"abgeschlossen. ID: {self.pk}."
 
-#: assets/models.py:724
 msgid ""
-"{self.approver_user} has completed the following items:{self."
-"convert_order_to_notifiy()}\n"
+"{self.approver_user} has completed the following items:"
+"{self.convert_order_to_notifiy()}\n"
 msgstr ""
+"{self.approver_user} hat folgende Gegenstände abgeschlossen:"
+"{self.convert_order_to_notifiy()}\n"
 
-#: assets/models.py:746
 #, python-brace-format
 msgid ""
 "{canceler} has canceled the Order for {self.requesting_user} ID: {self.pk}."
 msgstr ""
+"{canceler} hat die Bestellung für {self.requesting_user} storniert. ID: "
+"{self.pk}."
 
-#: assets/models.py:749
 msgid ""
-"{canceler} has canceled the following items:{self."
-"convert_order_to_notifiy()}\n"
+"{canceler} has canceled the following items:"
+"{self.convert_order_to_notifiy()}\n"
 msgstr ""
+"{canceler} hat folgende Gegenstände storniert:{self.convert_order_to_notifiy"
+"()}\n"
 
-#: assets/models.py:764
 #, python-brace-format
 msgid ""
-"{request.user} has reopened the Order for {self.requesting_user} ID: {self."
-"pk}."
+"{request.user} has reopened the Order for {self.requesting_user} ID: "
+"{self.pk}."
 msgstr ""
+"{request.user} hat die Bestellung für {self.requesting_user} wieder "
+"geöffnet. ID: {self.pk}."
 
-#: assets/models.py:767
 msgid ""
-"{request.user} has reopened the following items:{self."
-"convert_order_to_notifiy()}\n"
+"{request.user} has reopened the following items:"
+"{self.convert_order_to_notifiy()}\n"
 msgstr ""
+"{request.user} hat folgende Gegenstände wieder geöffnet:"
+"{self.convert_order_to_notifiy()}\n"
 
-#: assets/templates/assets/admin.html:17
 msgid "Administration"
 msgstr "Verwaltung"
 
-#: assets/templates/assets/admin.html:23
 msgid "Mark all tasks as Force Refresh"
 msgstr "Erzwinge Aktualisierung für alle markierten Tasks"
 
-#: assets/templates/assets/admin.html:28
 msgid "Clear all cached ETags"
 msgstr "Alle zwischengespeicherten ETags löschen"
 
-#: assets/templates/assets/admin.html:32
 msgid "Update All Assets"
-msgstr ""
+msgstr "Alle Assets aktualisieren"
 
-#: assets/templates/assets/admin.html:36
 msgid "Update All Locations"
-msgstr ""
+msgstr "Alle Standorte aktualisieren"
 
-#: assets/templates/assets/admin.html:40
 msgid "Update All Parent Locations"
-msgstr ""
+msgstr "Alle übergeordneten Standorte aktualisieren"
 
-#: assets/templates/assets/admin.html:42
 msgid "Submit"
 msgstr "Senden"
 
-#: assets/templates/assets/base.html:9
 msgid "Assets System"
 msgstr "Assets System"
 
-#: assets/templates/assets/bundles/settings-bundles.html:22
 msgid "Buy"
 msgstr "Kaufen"
 
-#: assets/templates/assets/bundles/settings-bundles.html:23
 msgid "Multi Buy"
-msgstr ""
+msgstr "Multi Buy"
 
-#: assets/templates/assets/partials/form/minimum-field.html:4
 msgid "Minimum one field is required"
-msgstr ""
+msgstr "Mindestens ein Feld ist erforderlich"
 
-#: assets/templates/assets/partials/form/required-field.html:4
 msgid "This field is required"
 msgstr "Dieses Feld ist erforderlich"
 
-#: assets/templates/assets/partials/menu/administration.html:7
 msgid "Add Character"
 msgstr "Charakter hinzufügen"
 
-#: assets/templates/assets/partials/menu/administration.html:15
 msgid "Add Corporation"
 msgstr "Corporation hinzufügen"
 
-#: assets/templates/assets/partials/menu/assets/navigation.html:6
-#: assets/templates/assets/partials/menu/navigation.html:7 assets/views.py:129
 msgid "Locations"
 msgstr "Standorte"
 
-#: assets/templates/assets/partials/menu/assets/navigation.html:12
-#: assets/views.py:84 assets/views.py:142
 msgid "Assets"
 msgstr "Assets"
 
-#: assets/templates/assets/partials/menu/assets/navigation.html:19
 msgid "My Requests"
 msgstr "Meine Anfragen"
 
-#: assets/templates/assets/partials/menu/assets/navigation.html:27
 msgid "Requests"
 msgstr "Anfragen"
 
-#: assets/templates/assets/partials/menu/navigation.html:16 assets/views.py:163
 msgid "Manage Requests"
 msgstr "Anfragen verwalten"
 
-#: assets/templates/assets/partials/modal/confirm.html:29
-#: assets/templates/assets/partials/modal/multi-order.html:33
-#: assets/templates/assets/partials/modal/single-order.html:36
 msgid "Cancel"
 msgstr "Abbrechen"
 
-#: assets/templates/assets/partials/modal/confirm.html:33
-#: assets/templates/assets/partials/modal/multi-order.html:37
-#: assets/templates/assets/partials/modal/single-order.html:40
 msgid "Confirm"
 msgstr "Bestätigen"
 
-#: assets/templates/assets/partials/modal/modal.html:28
 msgid "Close"
 msgstr "Schließen"
 
-#: assets/templates/assets/partials/modal/single-order.html:27
 msgid "All"
 msgstr "Alle"
 
-#: assets/templates/assets/partials/modal/view-order.html:14
-#: assets/templates/assets/partials/modal/view-order.html:20
-#: assets/templates/assets/partials/table/my-requests.html:8
-#: assets/templates/assets/partials/table/requests.html:9
 msgid "Order List"
 msgstr "Bestellliste"
 
-#: assets/templates/assets/partials/modal/view-order.html:21
-#: assets/templates/assets/partials/table/assets.html:20
 msgid "Quantity"
 msgstr "Menge"
 
-#: assets/templates/assets/partials/modal/view-order.html:42
 msgid "No data found..."
 msgstr "Keine Daten gefunden..."
 
-#: assets/templates/assets/partials/table/assets.html:21
 msgid "Location"
 msgstr "Standort"
 
-#: assets/templates/assets/partials/table/assets.html:22
 msgid "Location Flag"
-msgstr ""
+msgstr "Standort-Flag"
 
-#: assets/templates/assets/partials/table/assets.html:23
 msgid "Price"
 msgstr "Preis"
 
-#: assets/templates/assets/partials/table/assets.html:24
-#: assets/templates/assets/partials/table/location.html:10
-#: assets/templates/assets/partials/table/my-requests.html:12
-#: assets/templates/assets/partials/table/requests.html:13
 msgid "Action"
 msgstr "Aktion"
 
-#: assets/templates/assets/partials/table/location.html:7
 msgid "ID"
 msgstr "ID"
 
-#: assets/templates/assets/partials/table/location.html:8
 msgid "Name"
 msgstr "Name"
 
-#: assets/templates/assets/partials/table/location.html:9
 msgid "System"
 msgstr "System"
 
-#: assets/templates/assets/partials/table/my-requests.html:9
-#: assets/templates/assets/partials/table/requests.html:10
 msgid "Requestor"
 msgstr "Antragsteller"
 
-#: assets/templates/assets/partials/table/my-requests.html:10
-#: assets/templates/assets/partials/table/requests.html:11
 msgid "Status"
 msgstr "Status"
 
-#: assets/templates/assets/partials/table/my-requests.html:11
-#: assets/templates/assets/partials/table/requests.html:12
 msgid "Created"
 msgstr "Erstellt"
 
-#: assets/views.py:95
 msgid "You do not have permission to access this page."
-msgstr "Du hast keine Berechtigung diese Seite zu sehen."
+msgstr "Sie haben keine Berechtigung, diese Seite zu sehen."
 
-#: assets/views.py:103
 msgid "Queued Clear All ETags"
 msgstr "Alle zwischengespeicherten ETags löschen - in Warteschlange eingereiht"
 
-#: assets/views.py:106
 msgid "Queued Update All Assets"
-msgstr ""
+msgstr "Update aller Assets eingereiht"
 
-#: assets/views.py:111
 msgid "Queued Update All Locations"
-msgstr ""
+msgstr "Update aller Standorte eingereiht"
 
-#: assets/views.py:116
 msgid "Queued Update All Parent Locations"
-msgstr ""
+msgstr "Update aller übergeordneten Standorte eingereiht"
 
-#: assets/views.py:248
 msgid "Requested amount exceeds available quantity."
-msgstr ""
+msgstr "Die angeforderte Menge übersteigt die verfügbare Menge."
 
-#: assets/views.py:347 assets/views.py:405 assets/views.py:457
 msgid "You are on cooldown. Please wait 60 seconds before trying again."
-msgstr "Du hast einen cooldown. Bitte warte 60 sekunden und versuch es erneut."
+msgstr ""
+"Sie befinden sich im Cooldown. Bitte warten Sie 60 Sekunden und versuchen "
+"Sie es erneut."
 
-#: assets/views.py:366
 #, python-brace-format
 msgid ""
 "The request for Order {user_request_pk} from {user_request_requesting_user} "
@@ -783,7 +604,6 @@ msgstr ""
 "Die Anfrage für die Bestellung {user_request_pk} von "
 "{user_request_requesting_user} wurde als storniert geschlossen."
 
-#: assets/views.py:380 assets/views.py:436 assets/views.py:487
 #, python-brace-format
 msgid ""
 "The request for Order {user_request_pk} from {user_request_requesting_user} "
@@ -792,7 +612,6 @@ msgstr ""
 "Die Anfrage für die Bestellung {user_request_pk} von "
 "{user_request_requesting_user} ist fehlgeschlagen."
 
-#: assets/views.py:424
 #, python-brace-format
 msgid ""
 "The request for Order {user_request_pk} from {user_request_requesting_user} "
@@ -801,7 +620,6 @@ msgstr ""
 "Die Anfrage für die Bestellung {user_request_pk} von "
 "{user_request_requesting_user} wurde als abgeschlossen geschlossen."
 
-#: assets/views.py:475
 #, python-brace-format
 msgid ""
 "The request for Order {user_request_pk} from {user_request_requesting_user} "
