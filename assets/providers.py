@@ -5,6 +5,7 @@ import logging
 import random
 from contextlib import contextmanager
 from http import HTTPStatus
+from pathlib import Path
 
 # Third Party
 from aiopenapi3 import RequestError
@@ -31,6 +32,7 @@ from assets import (
     __version__,
 )
 
+spec_file = Path(__file__).parent / f"openapi_{__esi_compatibility_date__}.json"
 esi = ESIClientProvider(
     compatibility_date=__esi_compatibility_date__,
     ua_appname=__app_name_useragent__,
@@ -39,6 +41,7 @@ esi = ESIClientProvider(
     operations=__character_operations__
     + __corporation_operations__
     + __universe_operations__,
+    spec_file=spec_file,
 )
 
 
