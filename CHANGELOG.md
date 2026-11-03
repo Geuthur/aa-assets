@@ -36,6 +36,7 @@ Section Order:
 ### Changed
 
 - Replaced `pook` with `pookx` in the test dependencies.
+- ESI client loads the OpenAPI spec from a bundled file (`assets/openapi_2026-07-21.json`) instead of downloading it at runtime.
 
 ### Removed
 
