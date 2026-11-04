@@ -10,15 +10,12 @@ __app_name_useragent__ = "AA-Assets"
 
 __github_url__ = f"https://github.com/Geuthur/{__package_name__}"
 
-__character_operations__ = [
+__operations__ = [
+    # Character operations
     "GetCharactersCharacterIdAssets",
-]
-
-__corporation_operations__ = [
+    # Corporation operations
     "GetCorporationsCorporationIdAssets",
-]
-
-__universe_operations__ = [
+    # Universe operations
     "GetUniverseStationsStationId",
     "GetUniverseStructuresStructureId",
 ]
