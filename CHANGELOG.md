@@ -42,6 +42,7 @@ Section Order:
 - Replaced `pook` with `pookx` in the test dependencies.
 - ESI client loads the OpenAPI spec from a bundled file (`assets/openapi_2026-08-18.json`) instead of downloading it at runtime.
 - ESI compatibility date raised from `2026-07-21` to `2026-08-18`.
+- Merged `__character_operations__`, `__corporation_operations__` and `__universe_operations__` into a single `__operations__` list in `assets/__init__.py`. The set of ESI operations is unchanged.
 
 ### Removed
 
