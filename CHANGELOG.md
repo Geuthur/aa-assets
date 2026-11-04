@@ -33,6 +33,10 @@ Section Order:
 - Python 3.13 Support
 - Compatibility to Alliance Auth v5
 
+### Fixed
+
+- Fixed `make coverage` exiting with 0 when tests failed. The reports are still created, and the target now exits with the status of the test run, or with the status of `coverage report` if the tests passed.
+
 ### Changed
 
 - Replaced `pook` with `pookx` in the test dependencies.
