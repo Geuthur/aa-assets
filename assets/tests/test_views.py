@@ -6,10 +6,10 @@ from django.urls import reverse
 
 # AA Assets
 from assets import views
-from assets.tests import AssetsTestCase
+from assets.tests import AuthTestCase
 
 
-class TestViews(AssetsTestCase):
+class TestViews(AuthTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
