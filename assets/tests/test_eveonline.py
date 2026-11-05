@@ -4,17 +4,11 @@ from unittest.mock import patch
 # AA Assets
 from assets.helpers import eveonline
 from assets.tests import NoSocketsTestCase
-from assets.tests.testdata.integrations.allianceauth import load_allianceauth
 
 MODULE_PATH = "assets.helpers.eveonline"
 
 
 class TestEVEOnlineHelper(NoSocketsTestCase):
-    @classmethod
-    def setUpClass(cls) -> None:
-        super().setUpClass()
-        load_allianceauth()
-
     @patch(f"{MODULE_PATH}.character_portrait_url")
     def test_get_character_portrait_url_should_return_url(
         self, mock_character_portrait_url
