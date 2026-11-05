@@ -42,6 +42,7 @@ Section Order:
 - Replaced `pook` with `pookx` in the test dependencies.
 - Tests use `add_character_to_user` from `aa-evesde-factory` (new test dependency) instead of a duplicated copy in `assets/tests/testdata/utils.py`; the unused duplicates `dt_eveformat`, `random_string`, `add_new_token` and `add_permission_to_user` were removed.
 - Tests create users and characters with `UserMainFactory` (based on `UserFactory` from `aa-evesde-factory`) instead of `create_user_from_evecharacter` and the fixed `allianceauth.json` test data; `load_allianceauth`, `assets/tests/testdata/utils.py` and `assets/tests/testdata/integrations/` were removed.
+- Test base class `AssetsTestCase` replaced by `AuthTestCase` with the same layout as in the other apps (`factory`, `user`, `superuser`); the unused extra users and the `_add_character` and `_add_corporation` helpers were removed.
 - ESI client loads the OpenAPI spec from a bundled file (`assets/openapi_2026-08-18.json`) instead of downloading it at runtime.
 - ESI compatibility date raised from `2026-07-21` to `2026-08-18`.
 - Merged `__character_operations__`, `__corporation_operations__` and `__universe_operations__` into a single `__operations__` list in `assets/__init__.py`. The set of ESI operations is unchanged.
