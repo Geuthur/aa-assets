@@ -39,7 +39,8 @@ Section Order:
 
 ### Changed
 
-- CI: workflows aligned with the aa-example template (`pypi.yml`, new `release.yml`, `autotester.yml` without Python 3.10 and with the current Redis action). `.isort.cfg` moved to the repository root.
+- CI: workflows aligned with the aa-example template (`pypi.yml`, `autotester.yml` with the current Redis action). `.isort.cfg` moved to the repository root. This repository has no `release.yml`.
+- Dropped Python 3.10 (end of life): `requires-python` is now `>=3.11`, classifier and tox environment removed, Python 3.10 removed from the CI matrix
 - Replaced `pook` with `pookx` in the test dependencies.
 - Tests use `add_character_to_user` from `aa-evesde-factory` (new test dependency) instead of a duplicated copy in `assets/tests/testdata/utils.py`; the unused duplicates `dt_eveformat`, `random_string`, `add_new_token` and `add_permission_to_user` were removed.
 - Tests create users and characters with `UserMainFactory` (based on `UserFactory` from `aa-evesde-factory`) instead of `create_user_from_evecharacter` and the fixed `allianceauth.json` test data; `load_allianceauth`, `assets/tests/testdata/utils.py` and `assets/tests/testdata/integrations/` were removed.
