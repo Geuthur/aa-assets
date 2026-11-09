@@ -4,7 +4,7 @@
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
 from django.utils import timezone
-from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext_lazy as _
 
 # Alliance Auth
@@ -873,7 +873,7 @@ class Request(models.Model):
             send_user_notification.delay(
                 user_id=approver.pk,
                 title=title,
-                message=format_html(msg),
+                message=mark_safe(msg),
                 embed_message=True,
                 level="info",
             )
@@ -890,7 +890,7 @@ class Request(models.Model):
         send_user_notification.delay(
             user_id=self.requesting_user.pk,
             title=title,
-            message=format_html(msg),
+            message=mark_safe(msg),
             embed_message=True,
             level="success",
         )
@@ -916,7 +916,7 @@ class Request(models.Model):
             send_user_notification.delay(
                 user_id=approver.pk,
                 title=title,
-                message=format_html(msg),
+                message=mark_safe(msg),
                 embed_message=True,
                 level="danger",
             )
@@ -933,7 +933,7 @@ class Request(models.Model):
         send_user_notification.delay(
             user_id=self.requesting_user.pk,
             title=title,
-            message=format_html(msg),
+            message=mark_safe(msg),
             embed_message=True,
             level="warning",
         )

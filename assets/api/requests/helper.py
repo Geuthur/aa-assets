@@ -2,6 +2,7 @@
 from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import resolve_url
 from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
 # AA Assets
@@ -27,7 +28,7 @@ def _request_list(assets_request: Request, perm: bool, request: WSGIRequest) -> 
         },
         request,
     )
-    return format_html(order_button)
+    return mark_safe(order_button)
 
 
 def _request_actions(assets_request: Request, perm: bool, request: WSGIRequest) -> str:
@@ -93,7 +94,7 @@ def _request_actions(assets_request: Request, perm: bool, request: WSGIRequest) 
             request,
         )
         actions.append(reopen_button)
-    actions_html = format_html("".join(actions))
+    actions_html = mark_safe("".join(actions))
 
     return format_html('<div class="d-flex justify-content-end">{}</div>', actions_html)
 
@@ -144,6 +145,6 @@ def _my_request_actions(
             request,
         )
         actions.append(reopen_button)
-    actions_html = format_html("".join(actions))
+    actions_html = mark_safe("".join(actions))
 
     return format_html('<div class="d-flex justify-content-end">{}</div>', actions_html)

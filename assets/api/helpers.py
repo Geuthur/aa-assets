@@ -1,7 +1,6 @@
 # Django
 from django.core.exceptions import ObjectDoesNotExist
 from django.template.loader import render_to_string
-from django.utils.html import format_html
 from django.utils.safestring import mark_safe
 from django.utils.translation import gettext as _
 
@@ -17,7 +16,7 @@ logger = get_extension_logger(__name__)
 
 def generate_button(template, queryset, settings, request) -> mark_safe:
     """Generate a html button for the tax system"""
-    return format_html(
+    return mark_safe(
         render_to_string(
             template,
             {

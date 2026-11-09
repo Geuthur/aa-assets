@@ -6,7 +6,7 @@ from ninja import NinjaAPI
 
 # Django
 from django.urls import reverse
-from django.utils.html import format_html
+from django.utils.safestring import mark_safe
 
 # AA Assets
 from assets.api import schema
@@ -128,7 +128,7 @@ class AssetsApiEndpoints:
                         "location_id": location.id,
                         "name": location.location_name,
                         "solar_system": location.system_name,
-                        "view": format_html(html),
+                        "view": mark_safe(html),
                     }
                 )
 
