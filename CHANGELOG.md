@@ -32,6 +32,7 @@ Section Order:
 
 - Python 3.13 Support
 - Compatibility to Alliance Auth v5
+- Optional extra `tests-allianceauth-development` (test packages plus the Alliance Auth 6 pre-release) with separate test settings in `testauth/settings/development/` for the tox environment `allianceauth-development` and `make tox-tests-development`; a non-blocking CI job "AA Development" runs it on Python 3.13 and 3.14
 
 ### Fixed
 
