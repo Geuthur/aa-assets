@@ -28,6 +28,10 @@ Section Order:
 
 <!-- Your changes go here -->
 
+### Fixed
+
+- Django 6 compatibility: `format_html()` calls without arguments (raising `TypeError`) replaced by `mark_safe()` in request/asset API helpers and notification messages
+
 ### Added
 
 - Python 3.13 Support
