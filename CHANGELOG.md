@@ -48,6 +48,7 @@ Section Order:
 - Test base class `AssetsTestCase` replaced by `AuthTestCase` with the same layout as in the other apps (`factory`, `user`, `superuser`); the unused extra users and the `_add_character` and `_add_corporation` helpers were removed.
 - ESI client loads the OpenAPI spec from a bundled file (`assets/openapi_2026-08-18.json`) instead of downloading it at runtime.
 - ESI compatibility date raised from `2026-07-21` to `2026-08-18`.
+- Migrations `0001_initial` and `0001_init_v2` depend on the Alliance Auth v5 squash migrations (`authentication.0025_v5squash`, `eveonline.0019_v5squash`) instead of the removed older ones, for Alliance Auth 6 compatibility (works with Alliance Auth 5 as well)
 - Merged `__character_operations__`, `__corporation_operations__` and `__universe_operations__` into a single `__operations__` list in `assets/__init__.py`. The set of ESI operations is unchanged.
 
 ### Removed

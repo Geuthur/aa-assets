@@ -24,8 +24,8 @@ class Migration(migrations.Migration):
     dependencies = [
         ("eve_sde", "0018_blueprintactivity_blueprintactivityproduct_and_more"),
         ("eve_sde", "0014_dogmaeffect_description_de_and_more"),
-        ("authentication", "0023_alter_userprofile_language"),
-        ("eveonline", "0017_alliance_and_corp_names_are_not_unique"),
+        ("authentication", "0025_v5squash"),
+        ("eveonline", "0019_v5squash"),
         migrations.swappable_dependency(settings.AUTH_USER_MODEL),
     ]
 
