@@ -36,7 +36,11 @@ class TestEsiClient(NoSocketsTestCase):
         self.assertTrue(hasattr(client.Assets, "GetCharactersCharacterIdAssets"))
 
 
-@override_settings(CELERY_ALWAYS_EAGER=True, CELERY_EAGER_PROPAGATES_EXCEPTIONS=True)
+@override_settings(
+    CELERY_ALWAYS_EAGER=True,
+    CELERY_EAGER_PROPAGATES_EXCEPTIONS=True,
+    DISABLE_DAILY_DOWNTIME_CHECK=True,
+)
 class TestRetryTaskOnESIError(NoSocketsTestCase):
     """Tests for retry_task_on_esi_error context manager."""
 
