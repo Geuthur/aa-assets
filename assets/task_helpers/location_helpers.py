@@ -76,7 +76,7 @@ def get_location_type(location_id) -> tuple[Location | None, Location | None]:
 # pylint: disable=too-many-return-statements
 def fetch_location(
     location_id, location_flag, character_id, force_refresh=False
-) -> tuple[Location | None, bool]:
+) -> Location | None:
     """Takes a location_id and character_id and returns a location model for items in a station/structure or in space"""
 
     # Check if we have a cached no-permission flag
@@ -85,27 +85,27 @@ def fetch_location(
             "Skipping fetch for location_id %s due to cached no-permission flag",
             location_id,
         )
-        return None, False
+        return None
 
     if location_flag not in STANDARD_FLAG:
         # Skip unnecessary locations (e.g. Fits, Drone Bay, etc.)
         if location_flag is not None:
             logger.debug("Skipping location flag: %s", location_flag)
-            return None, False
+            return None
 
     # Check which location type it is
     location, existing_location = get_location_type(location_id)
 
     # Exit if location already exists and is a Solar System or Station
     if location:
-        return location, False
+        return location
 
     req_scopes = ["esi-universe.read_structures.v1"]
 
     token = Token.get_token(character_id, req_scopes)
 
     if not token:
-        return None, False
+        return None
 
     try:
         structure = esi.client.Universe.GetUniverseStructuresStructureId(
@@ -114,17 +114,14 @@ def fetch_location(
         structure: contexts.GetUniverseStructuresStructureIdContext
     except HTTPNotModified:
         logger.debug("No Updates for Location: %s", location_id)
-        return None, False
+        return None
     except HTTPClientError as e:
         if e.status_code == 403:
             logger.debug("Failed to get location %s due to 403 Forbidden", location_id)
             cache.set(
                 get_cache_key(location_id), 1, (60 * 60 * 24 * 7)
             )  # Cache for 7 days
-            return None, False
-        if e.status_code == 420:
-            logger.debug("Rate limit hit when fetching parent location %s", location_id)
-            return None, True
+            return None
         logger.debug("Failed to get: %s", e)
         logger.info(
             "Failed to get location:%s, Headers:%s, Data: %s",
@@ -132,36 +129,33 @@ def fetch_location(
             e.headers,
             e.data,
         )
-        return None, False
+        return None
 
     system, _ = SolarSystem.objects.get(id=structure.solar_system_id)
 
     if not system:
         logger.debug("Failed to get Solar System: %s", system)
-        return None, False
+        return None
 
     if existing_location:
         existing_location.name = structure.name
         existing_location.eve_solar_system = system
         existing_location.eve_type_id = structure.type_id
         existing_location.owner_id = structure.owner_id
-        return existing_location, False
+        return existing_location
 
-    return (
-        Location(
-            id=location_id,
-            name=structure.name,
-            eve_solar_system_id=structure.solar_system_id,
-            eve_type_id=structure.type_id,
-            owner_id=structure.owner_id,
-        ),
-        False,
+    return Location(
+        id=location_id,
+        name=structure.name,
+        eve_solar_system_id=structure.solar_system_id,
+        eve_type_id=structure.type_id,
+        owner_id=structure.owner_id,
     )
 
 
 def fetch_parent_location(
     parent_id, character_id, force_refresh=False
-) -> tuple[Location | None, bool]:
+) -> Location | None:
     """Takes a parent_id and character_id and returns a location model for items in a station/structure or in space"""
 
     # Check if we have a cached no-permission flag
@@ -170,19 +164,19 @@ def fetch_parent_location(
             "Skipping fetch for parent_id %s due to cached no-permission flag",
             parent_id,
         )
-        return None, False
+        return None
 
     # Check which location type it is
     location, existing = get_location_type(parent_id)
     if location:
-        return location, False
+        return location
 
     req_scopes = ["esi-universe.read_structures.v1"]
 
     token = Token.get_token(character_id, req_scopes)
 
     if not token:
-        return None, False
+        return None
 
     try:
         structure = esi.client.Universe.GetUniverseStructuresStructureId(
@@ -191,17 +185,14 @@ def fetch_parent_location(
         structure: contexts.GetUniverseStructuresStructureIdContext
     except HTTPNotModified:
         logger.debug("No Updates for Parent Location: %s", parent_id)
-        return existing, False
+        return existing
     except HTTPClientError as e:
         if e.status_code == 403:
             logger.debug("Failed to get location %s due to 403 Forbidden", parent_id)
             cache.set(
                 get_cache_key(parent_id), 1, (60 * 60 * 24 * 7)
             )  # Cache for 7 days
-            return None, False
-        if e.status_code == 420:
-            logger.debug("Rate limit hit when fetching parent location %s", parent_id)
-            return None, True
+            return None
         logger.debug("Failed to get: %s", e)
         logger.debug(
             "Failed to get location:%s, Headers:%s, Data: %s",
@@ -209,13 +200,13 @@ def fetch_parent_location(
             e.headers,
             e.data,
         )
-        return None, False
+        return None
 
     system = SolarSystem.objects.get(id=structure.solar_system_id)
 
     if not system:
         logger.debug("Failed to get Solar System: %s", system)
-        return None, False
+        return None
 
     logger.debug("Fetched Structure: %s", structure.name)
 
@@ -224,15 +215,12 @@ def fetch_parent_location(
         existing.eve_solar_system = system
         existing.eve_type_id = structure.type_id
         existing.owner_id = structure.owner_id
-        return existing, False
+        return existing
 
-    return (
-        Location(
-            id=parent_id,
-            name=structure.name,
-            eve_solar_system_id=structure.solar_system_id,
-            eve_type_id=structure.type_id,
-            owner_id=structure.owner_id,
-        ),
-        False,
+    return Location(
+        id=parent_id,
+        name=structure.name,
+        eve_solar_system_id=structure.solar_system_id,
+        eve_type_id=structure.type_id,
+        owner_id=structure.owner_id,
     )
