@@ -4,7 +4,7 @@
 import datetime
 
 # Third Party
-from celery import shared_task
+from celery import Task, shared_task
 
 # Django
 from django.utils import timezone
@@ -26,7 +26,7 @@ from assets.app_settings import (
 )
 from assets.constants import STANDARD_FLAG
 from assets.models import Assets, Location, Owner
-from assets.providers import esi, logger
+from assets.providers import esi, logger, retry_task_on_esi_error
 from assets.task_helpers.location_helpers import fetch_location, fetch_parent_location
 
 TZ_STRING = "%Y-%m-%dT%H:%M:%SZ"
@@ -41,6 +41,8 @@ TASK_DEFAULTS = {
 
 # Default params for tasks that need run once only.
 TASK_DEFAULTS_ONCE = {**TASK_DEFAULTS, **{"base": QueueOnce}}
+# Default params for tasks that need bind=True and run once only.
+TASK_DEFAULTS_BIND_ONCE = {**TASK_DEFAULTS, **{"bind": True, "base": QueueOnce}}
 
 
 @shared_task(**TASK_DEFAULTS_ONCE)
@@ -59,11 +61,12 @@ def update_all_assets(runs: int = 0, force_refresh=False):
     logger.info("Queued %s Assets Updates", len(owners))
 
 
-@shared_task(**TASK_DEFAULTS_ONCE)
-def update_assets_for_owner(owner_pk: int, force_refresh=False):
+@shared_task(**TASK_DEFAULTS_BIND_ONCE)
+def update_assets_for_owner(self: Task, owner_pk: int, force_refresh=False):
     """Fetch all assets for an owner from ESI."""
     owner = Owner.objects.get(pk=owner_pk)
-    owner.update_assets_esi(force_refresh=force_refresh)
+    with retry_task_on_esi_error(self):
+        owner.update_assets_esi(force_refresh=force_refresh)
 
 
 @shared_task(**TASK_DEFAULTS_ONCE)
@@ -93,8 +96,8 @@ def update_all_locations(force_refresh=False, runs: int = 0):
     logger.debug("Queued %s/%s Structure Tasks", runs, len(all_locations))
 
 
-@shared_task(bind=True, **TASK_DEFAULTS_ONCE)
-def update_location(self, location_id, force_refresh=False):
+@shared_task(**TASK_DEFAULTS_BIND_ONCE)
+def update_location(self: Task, location_id, force_refresh=False):
     """Fetch and update a location from ESI."""
     asset = Assets.objects.filter(location_id=location_id).select_related(
         "owner__character__character"
@@ -107,48 +110,39 @@ def update_location(self, location_id, force_refresh=False):
         )
     char_ids = set(char_ids)
 
-    if location_id < 64_000_000:
-        location, limit_exceeded = fetch_location(
-            location_id, None, 0, force_refresh=force_refresh
-        )
-        if location is not None:
-            location.save()
-            count = Assets.objects.filter(
-                location_id=location_id, location__name=""
-            ).update(location_id=location_id)
-            logger.debug("Updated %s Assets with Location Name", count)
+    with retry_task_on_esi_error(self):
+        if location_id < 64_000_000:
+            location = fetch_location(location_id, None, 0, force_refresh=force_refresh)
+            if location is not None:
+                location.save()
+                count = Assets.objects.filter(
+                    location_id=location_id, location__name=""
+                ).update(location_id=location_id)
+                logger.debug("Updated %s Assets with Location Name", count)
+                return
+
+        if len(char_ids) == 0:
+            logger.debug("No Characters for Location ID: %s", location_id)
             return
 
-    if len(char_ids) == 0:
-        logger.debug("No Characters for Location ID: %s", location_id)
-        return
-
-    for char_id in char_ids:
-        location, limit_exceeded = fetch_location(
-            location_id, None, char_id, force_refresh=force_refresh
-        )
-        if location is not None:
-            location.save()
-            count = Assets.objects.filter(
-                location_id=location_id, location__name=""
-            ).update(location_id=location_id)
-            logger.debug("Updated %s Assets with Location Name", count)
-            return
-
-    if limit_exceeded:
-        logger.debug(
-            "ESI limit exceeded when fetching Parent Location: %s - Retry Later",
-            location_id,
-        )
-        self.retry(countdown=300)
-        return
+        for char_id in char_ids:
+            location = fetch_location(
+                location_id, None, char_id, force_refresh=force_refresh
+            )
+            if location is not None:
+                location.save()
+                count = Assets.objects.filter(
+                    location_id=location_id, location__name=""
+                ).update(location_id=location_id)
+                logger.debug("Updated %s Assets with Location Name", count)
+                return
 
     logger.debug("No Characters for Location ID: %s", location_id)
     return
 
 
-@shared_task(**TASK_DEFAULTS_ONCE)
-def update_all_parent_locations(force_refresh=False):
+@shared_task(**TASK_DEFAULTS_BIND_ONCE)
+def update_all_parent_locations(self: Task, force_refresh=False):
     assets = Assets.objects.all().select_related("owner__character__character")
 
     owners = Owner.objects.filter(is_active=True)
@@ -165,38 +159,39 @@ def update_all_parent_locations(force_refresh=False):
     for owner in owners:
         owner_id = owner.character.character.character_id
         try:
-            if owner.corporation is None:
-                req_scopes = [
-                    "esi-universe.read_structures.v1",
-                    "esi-assets.read_assets.v1",
-                ]
-                token = Token.get_token(owner_id, req_scopes)
-                assets_esi = esi.client.Assets.GetCharactersCharacterIdAssets(
-                    character_id=owner.character.character.character_id,
-                    token=token,
-                )
-                assets, response = assets_esi.results(
-                    return_response=True,
-                    force_refresh=force_refresh,
-                )
-                logger.debug("Response Status: %s", response.status_code)
-            else:
-                req_scopes = [
-                    "esi-universe.read_structures.v1",
-                    "esi-assets.read_corporation_assets.v1",
-                ]
-                token = Token.get_token(owner_id, req_scopes)
+            with retry_task_on_esi_error(self):
+                if owner.corporation is None:
+                    req_scopes = [
+                        "esi-universe.read_structures.v1",
+                        "esi-assets.read_assets.v1",
+                    ]
+                    token = Token.get_token(owner_id, req_scopes)
+                    assets_esi = esi.client.Assets.GetCharactersCharacterIdAssets(
+                        character_id=owner.character.character.character_id,
+                        token=token,
+                    )
+                    assets, response = assets_esi.results(
+                        return_response=True,
+                        force_refresh=force_refresh,
+                    )
+                    logger.debug("Response Status: %s", response.status_code)
+                else:
+                    req_scopes = [
+                        "esi-universe.read_structures.v1",
+                        "esi-assets.read_corporation_assets.v1",
+                    ]
+                    token = Token.get_token(owner_id, req_scopes)
 
-                assets_esi = esi.client.Assets.GetCorporationsCorporationIdAssets(
-                    corporation_id=owner.corporation.corporation_id,
-                    token=token,
-                )
+                    assets_esi = esi.client.Assets.GetCorporationsCorporationIdAssets(
+                        corporation_id=owner.corporation.corporation_id,
+                        token=token,
+                    )
 
-                assets, response = assets_esi.results(
-                    return_response=True,
-                    force_refresh=force_refresh,
-                )
-                logger.debug("Response Status: %s", response.status_code)
+                    assets, response = assets_esi.results(
+                        return_response=True,
+                        force_refresh=force_refresh,
+                    )
+                    logger.debug("Response Status: %s", response.status_code)
         except HTTPNotModified:
             logger.debug("No Updates for: %s", owner.name)
             continue
@@ -229,9 +224,9 @@ def update_all_parent_locations(force_refresh=False):
 
 
 # pylint: disable=too-many-positional-arguments
-@shared_task(bind=True, **TASK_DEFAULTS_ONCE)
+@shared_task(**TASK_DEFAULTS_BIND_ONCE)
 def update_parent_location(
-    self, location_id, parent_id, character_id, eve_type_id, force_refresh=False
+    self: Task, location_id, parent_id, character_id, eve_type_id, force_refresh=False
 ):
     parent_check = Location.objects.get(id=location_id)
 
@@ -239,9 +234,10 @@ def update_parent_location(
         logger.debug("Location ID: %s Already has Parent ID", location_id)
         return
 
-    parent, limit_exceeded = fetch_parent_location(
-        parent_id, character_id, force_refresh=force_refresh
-    )
+    with retry_task_on_esi_error(self):
+        parent = fetch_parent_location(
+            parent_id, character_id, force_refresh=force_refresh
+        )
     if parent is not None:
         eve_type = ItemType.objects.get(id=eve_type_id)
         Location.objects.update_or_create(
@@ -253,12 +249,6 @@ def update_parent_location(
         )
         logger.debug("Parent Location: %s Updated for %s", parent_id, location_id)
         return
-    if limit_exceeded:
-        logger.debug(
-            "ESI limit exceeded when fetching Parent Location: %s - Retry Later",
-            parent_id,
-        )
-        self.retry(countdown=300)
     logger.debug("Parent Location Task: %s Complete", location_id)
     return
 

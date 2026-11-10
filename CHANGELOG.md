@@ -28,6 +28,18 @@ Section Order:
 
 <!-- Your changes go here -->
 
+### Fixed
+
+- ESI tasks (`update_assets_for_owner`, `update_location`, `update_parent_location`, `update_all_parent_locations`) now retry on ESI outages and limits through `retry_task_on_esi_error` (HTTP 502/503/504, error limit, bucket limit, request errors, daily downtime)
+
+### Changed
+
+- `retry_task_on_esi_error` follows the app template: ESI outages retry after `DOWNTIME_TIMER` (10 minutes), the daily downtime (11:00-11:15 UTC) is checked (can be disabled with `DISABLE_DAILY_DOWNTIME_CHECK`), new `is_retryable_esi_error` and `DownTimeError`
+
+### Removed
+
+- Own HTTP 420 retry in `update_location` and `update_parent_location`: django-esi raises `ESIErrorLimitException` for HTTP 420, so this code path was never reached
+
 ### Added
 
 - Python 3.13 Support
