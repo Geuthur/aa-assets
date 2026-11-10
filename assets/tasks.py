@@ -18,19 +18,16 @@ from esi.exceptions import HTTPNotModified
 from eve_sde.models.types import ItemType
 
 # AA Assets
-from assets import __title__, contexts
+from assets import contexts
 from assets.app_settings import (
     ASSETS_CACHE_KEY,
     ASSETS_TASKS_TIME_LIMIT,
     ASSETS_UPDATE_PERIOD,
 )
 from assets.constants import STANDARD_FLAG
-from assets.hooks import get_extension_logger
 from assets.models import Assets, Location, Owner
-from assets.providers import AppLogger, esi
+from assets.providers import esi, logger
 from assets.task_helpers.location_helpers import fetch_location, fetch_parent_location
-
-logger = AppLogger(get_extension_logger(__name__), __title__)
 
 TZ_STRING = "%Y-%m-%dT%H:%M:%SZ"
 

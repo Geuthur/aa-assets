@@ -32,7 +32,6 @@ from assets.helpers.eveonline import (
     get_character_portrait_url,
     get_corporation_logo_url,
 )
-from assets.hooks import get_extension_logger
 from assets.managers import (
     AssetsManager,
     EveEntityManager,
@@ -41,9 +40,7 @@ from assets.managers import (
     RequestManager,
     get_market_price,
 )
-from assets.providers import esi
-
-logger = get_extension_logger(__name__)
+from assets.providers import esi, logger
 
 
 def get_or_create_location(location_id: int) -> "Location":

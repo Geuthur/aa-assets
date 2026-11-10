@@ -28,14 +28,12 @@ from assets.app_settings import (
     STORAGE_BASE_KEY,
 )
 from assets.errors import ObjectNotFound
-from assets.hooks import get_extension_logger
-from assets.providers import esi
+from assets.providers import esi, logger
 
 if TYPE_CHECKING:
     # AA Assets
     from assets.models import EveEntity as EveEntityContext
 
-logger = get_extension_logger(__name__)
 
 USERAGENT = f"assets v{__version__}"
 EVE_TYPE_ID_SOLAR_SYSTEM = 5
