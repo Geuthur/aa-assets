@@ -7,9 +7,7 @@ from django.conf import settings
 
 # AA Assets
 from assets.api import assets, requests
-from assets.hooks import get_extension_logger
-
-logger = get_extension_logger(__name__)
+from assets.providers import logger
 
 api = NinjaAPI(
     title="Geuthur API",

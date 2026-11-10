@@ -18,10 +18,7 @@ from assets.api.requests.helper import (
     _request_actions,
     _request_list,
 )
-from assets.hooks import get_extension_logger
 from assets.models import Request, RequestAssets
-
-logger = get_extension_logger(__name__)
 
 
 class RequestsApiEndpoints:

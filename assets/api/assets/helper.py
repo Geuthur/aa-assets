@@ -4,10 +4,7 @@ from django.utils import timezone
 from django.utils.translation import gettext_lazy as _
 
 # AA Assets
-from assets.hooks import get_extension_logger
 from assets.models import Assets, Request, RequestAssets
-
-logger = get_extension_logger(__name__)
 
 
 def update_asset_object(asset: Assets) -> Assets | bool:

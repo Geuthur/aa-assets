@@ -5,15 +5,6 @@ Decorators
 # Standard Library
 import time
 
-# Alliance Auth
-from allianceauth.services.hooks import get_extension_logger
-
-# AA Assets
-from assets import __title__
-from assets.providers import AppLogger
-
-logger = AppLogger(get_extension_logger(__name__), __title__)
-
 ESI_STATUS_ROUTE_RATE_LIMIT = 5
 ESI_STATUS_KEY = "esi-is-available-status"
 

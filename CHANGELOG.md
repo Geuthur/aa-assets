@@ -39,6 +39,7 @@ Section Order:
 
 ### Changed
 
+- The `AppLogger` is created only once in `assets/providers.py`. `managers.py`, `models.py`, `tasks.py`, `api/__init__.py`, `helpers/discord.py` and `task_helpers/location_helpers.py` import it with `from assets.providers import logger` instead of building their own logger; unused loggers in `decorators.py`, `views.py`, `api/helpers.py`, `api/assets/assets.py`, `api/assets/helper.py` and `api/requests/requests.py` were removed, as was the custom `get_extension_logger` in `assets/hooks.py`. Log records now carry the logger name `assets.providers` and the `[Assets]` prefix, and all of them go to the `extensions.assets` logger described in the README (the former `assets/hooks.py` loggers sent them to a separate `assets` logger).
 - CI: workflows aligned with the aa-example template (`pypi.yml`, `autotester.yml` with the current Redis action). `.isort.cfg` moved to the repository root. This repository has no `release.yml`.
 - Dropped Python 3.10 (end of life): `requires-python` is now `>=3.11`, classifier and tox environment removed, Python 3.10 removed from the CI matrix
 - Replaced `pook` with `pookx` in the test dependencies.

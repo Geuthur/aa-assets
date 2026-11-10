@@ -9,10 +9,7 @@ from django.utils.translation import gettext as _
 from allianceauth.eveonline.models import EveCharacter
 
 # AA Assets
-from assets.hooks import get_extension_logger
 from assets.models import Assets, Owner, Request
-
-logger = get_extension_logger(__name__)
 
 
 def generate_button(template, queryset, settings, request) -> mark_safe:

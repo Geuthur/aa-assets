@@ -13,10 +13,7 @@ from assets.api import schema
 from assets.api.assets.helper import update_asset_object
 from assets.api.helpers import get_asset, get_owner
 from assets.constants import CORPORATION_FLAGS, LOCATION_FLAGS
-from assets.hooks import get_extension_logger
 from assets.models import Assets, Location
-
-logger = get_extension_logger(__name__)
 
 
 class AssetsApiEndpoints:

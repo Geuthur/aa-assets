@@ -12,11 +12,8 @@ from eve_sde.models.map import SolarSystem
 from assets import contexts
 from assets.app_settings import ASSETS_CACHE_KEY
 from assets.constants import STANDARD_FLAG
-from assets.hooks import get_extension_logger
 from assets.models import Location
-from assets.providers import esi
-
-logger = get_extension_logger(__name__)
+from assets.providers import esi, logger
 
 
 def get_cache_key(location_id):

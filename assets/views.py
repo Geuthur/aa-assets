@@ -21,7 +21,7 @@ from esi.decorators import token_required
 
 # AA Assets
 from assets import forms
-from assets.hooks import add_info_to_context, get_extension_logger
+from assets.hooks import add_info_to_context
 from assets.models import Assets, Owner, Request, RequestAssets
 from assets.tasks import (
     clear_all_etags,
@@ -30,8 +30,6 @@ from assets.tasks import (
     update_all_parent_locations,
     update_assets_for_owner,
 )
-
-logger = get_extension_logger(__name__)
 
 
 def build_apr_cooldown_cache_tag(user, request_id, mode):
