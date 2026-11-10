@@ -16,10 +16,6 @@ class CustomError(Exception):
     pass
 
 
-class HTTPGatewayTimeoutError(Exception):
-    pass
-
-
 class ObjectNotFound(Exception):
     """Custom exception to indicate that an object was not found."""
 

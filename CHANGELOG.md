@@ -30,6 +30,8 @@ Section Order:
 
 ### Fixed
 
+- `Owner.get_esi_scopes()` is now an instance method and returns the character scopes (`esi-assets.read_assets.v1`) for character owners; before, it always returned the corporation scopes, so character owners asked for a token with the wrong scope
+- Solar system locations and structures no longer crash in `get_location_type` and `fetch_location` (`task_helpers/location_helpers.py`): the solar system is looked up with `filter().first()` instead of unpacking the result of `objects.get()`, and an unknown solar system returns `(None, existing_location)` instead of `None`
 - ESI tasks (`update_assets_for_owner`, `update_location`, `update_parent_location`, `update_all_parent_locations`) now retry on ESI outages and limits through `retry_task_on_esi_error` (HTTP 502/503/504, error limit, bucket limit, request errors, daily downtime)
 
 ### Changed
@@ -39,6 +41,7 @@ Section Order:
 
 ### Removed
 
+- Unused `HTTPGatewayTimeoutError` (`assets/errors.py`) and its dead `except` branch in `Owner.update_assets_esi`
 - Own HTTP 420 retry in `update_location` and `update_parent_location`: django-esi raises `ESIErrorLimitException` for HTTP 420, so this code path was never reached
 
 ### Added
