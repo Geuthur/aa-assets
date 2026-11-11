@@ -35,12 +35,11 @@ def get_location_type(location_id) -> tuple[Location | None, Location | None]:
         return Location(id=location_id, name="Asset Safety"), existing_location
     # Location is a Solar System
     if 30_000_000 < location_id < 33_000_000:
-        system, _ = SolarSystem.objects.get(id=location_id)
+        system = SolarSystem.objects.filter(id=location_id).first()
         logger.debug("Fetched Solar System: %s", system)
         if not system:
-            return None
+            return None, existing_location
 
-        system = system.first()
         return (
             Location(
                 id=location_id,
@@ -131,7 +130,7 @@ def fetch_location(
         )
         return None
 
-    system, _ = SolarSystem.objects.get(id=structure.solar_system_id)
+    system = SolarSystem.objects.filter(id=structure.solar_system_id).first()
 
     if not system:
         logger.debug("Failed to get Solar System: %s", system)

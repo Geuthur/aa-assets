@@ -25,7 +25,6 @@ from eve_sde.models.types import ItemType
 
 # AA Assets
 from assets import contexts
-from assets.errors import HTTPGatewayTimeoutError
 from assets.helpers.discord import send_user_notification
 from assets.helpers.eveonline import (
     get_alliance_logo_url,
@@ -278,10 +277,9 @@ class Owner(models.Model):
             raise ValueError("No character defined")
         return self.character.character
 
-    @classmethod
-    def get_esi_scopes(cls) -> list[str]:
+    def get_esi_scopes(self) -> list[str]:
         """Return the required ESI scopes for this owner."""
-        if cls.corporation:
+        if self.corporation:
             return [
                 "esi-universe.read_structures.v1",
                 "esi-assets.read_corporation_assets.v1",
@@ -339,9 +337,6 @@ class Owner(models.Model):
             items = self.process_assets(assets)
         except HTTPNotModified:
             logger.info("No new Assets for: %s", self.name)
-            return
-        except HTTPGatewayTimeoutError:
-            logger.info("Gateway Timeout for: %s", self.name)
             return
         except HTTPClientError as e:
             logger.error("Failed to fetch assets for %s: %s", self.name, e)

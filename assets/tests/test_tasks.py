@@ -48,15 +48,7 @@ class EsiTaskTestCase(AuthTestCase):
     @classmethod
     def setUpClass(cls):
         super().setUpClass()
-        # Owner.get_esi_scopes() returns the corporation scopes for every owner,
-        # the asset tasks of a character need the character scope as well.
-        esi_user = UserMainFactory(
-            scopes=[
-                "esi-universe.read_structures.v1",
-                "esi-assets.read_assets.v1",
-                "esi-assets.read_corporation_assets.v1",
-            ]
-        )
+        esi_user = UserMainFactory()
         cls.character = esi_user.profile.main_character
         cls.owner = Owner.objects.create(character=cls.character.character_ownership)
 
