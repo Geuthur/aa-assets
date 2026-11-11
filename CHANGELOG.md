@@ -30,6 +30,7 @@ Section Order:
 
 ### Fixed
 
+- Tests no longer share the Redis cache with other processes: `testauth/settings/development/local.py` gives each test run its own random cache `KEY_PREFIX`, like `testauth/settings/local.py` on master. Before, ESI responses cached by a running testauth instance on the same Redis were returned instead of the pook responses. Redis stays the cache backend because Alliance Auth needs `django_redis`
 - Django 6 compatibility: `format_html()` calls without arguments (raising `TypeError`) replaced by `mark_safe()` in request/asset API helpers and notification messages
 
 ### Added
