@@ -18,10 +18,15 @@ from assets.task_helpers.location_helpers import (
     get_location_type,
 )
 from assets.tests import AuthTestCase
-from assets.tests.testdata.esi_urls import clear_esi_limits, structure_url
+from assets.tests.testdata.esi_urls import (
+    clear_esi_limits,
+    station_url,
+    structure_url,
+)
 
 SOLAR_SYSTEM_ID = 30_000_142
 STRUCTURE_ID = 1_000_000_000_001
+STATION_ID = 60_003_760
 
 
 class TestGetLocationType(AuthTestCase):
@@ -112,6 +117,23 @@ class TestFetchLocation(AuthTestCase):
         self.assertIsNone(location)
         self.assertEqual(structure_mock.calls, 0)
 
+    @pook.on
+    def test_should_not_fetch_structure_for_station_not_modified(self):
+        # Test Data
+        pook.get(station_url(STATION_ID), reply=HTTPStatus.NOT_MODIFIED)
+        structure_mock = pook.get(
+            structure_url(STATION_ID), reply=HTTPStatus.OK, persist=True
+        )
+
+        # Test Action
+        location = fetch_location(
+            STATION_ID, None, self.user.profile.main_character.character_id
+        )
+
+        # Expected Result
+        self.assertIsNone(location)
+        self.assertEqual(structure_mock.calls, 0)
+
 
 class TestFetchParentLocation(AuthTestCase):
     def setUp(self):
@@ -172,6 +194,23 @@ class TestFetchParentLocation(AuthTestCase):
         # Test Action
         location = fetch_parent_location(
             SOLAR_SYSTEM_ID, self.user.profile.main_character.character_id
+        )
+
+        # Expected Result
+        self.assertIsNone(location)
+        self.assertEqual(structure_mock.calls, 0)
+
+    @pook.on
+    def test_should_not_fetch_structure_for_station_not_modified(self):
+        # Test Data
+        pook.get(station_url(STATION_ID), reply=HTTPStatus.NOT_MODIFIED)
+        structure_mock = pook.get(
+            structure_url(STATION_ID), reply=HTTPStatus.OK, persist=True
+        )
+
+        # Test Action
+        location = fetch_parent_location(
+            STATION_ID, self.user.profile.main_character.character_id
         )
 
         # Expected Result

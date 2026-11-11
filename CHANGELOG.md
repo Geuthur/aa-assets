@@ -34,6 +34,7 @@ Section Order:
 - Solar system locations and structures no longer crash in `get_location_type` and `fetch_location` (`task_helpers/location_helpers.py`): the solar system is looked up with `filter().first()` instead of unpacking the result of `objects.get()`, and an unknown solar system returns `(None, existing_location)` instead of `None`
 - `fetch_parent_location` no longer crashes with `SolarSystem.DoesNotExist` when the solar system of a structure is unknown: the solar system is looked up with `filter().first()` and the function returns `None`
 - `fetch_location` and `fetch_parent_location` no longer request a structure from ESI when the location ID belongs to an unknown solar system, they return `None`
+- `fetch_location` and `fetch_parent_location` no longer request a structure from ESI for a station that ESI answers with `304 Not Modified` while the station is not yet in the database, they return `None`
 - Tests no longer share the Redis cache with other processes: `testauth/settings/local.py` gives each test run its own random cache `KEY_PREFIX`. Before, ESI responses cached by a running testauth instance on the same Redis were returned instead of the pook responses. Redis stays the cache backend because Alliance Auth needs `django_redis`
 - ESI tasks (`update_assets_for_owner`, `update_location`, `update_parent_location`, `update_all_parent_locations`) now retry on ESI outages and limits through `retry_task_on_esi_error` (HTTP 502/503/504, error limit, bucket limit, request errors, daily downtime)
 

@@ -25,6 +25,11 @@ def is_solar_system(location_id) -> bool:
     return 30_000_000 < location_id < 33_000_000
 
 
+def is_station(location_id) -> bool:
+    """Check if the location_id is in the ID range of stations"""
+    return 60_000_000 < location_id < 64_000_000
+
+
 def get_location_type(location_id) -> tuple[Location | None, Location | None]:
     """Check if location is already in DB or is a special location type"""
     existing_location = Location.objects.filter(id=location_id)
@@ -54,7 +59,7 @@ def get_location_type(location_id) -> tuple[Location | None, Location | None]:
             existing_location,
         )
     # Location is a Station
-    if 60_000_000 < location_id < 64_000_000:
+    if is_station(location_id):
         try:
             station = esi.client.Universe.GetUniverseStationsStationId(
                 station_id=location_id
@@ -107,6 +112,11 @@ def fetch_location(
     # Unknown Solar System, it is no structure
     if is_solar_system(location_id):
         logger.debug("Unknown Solar System: %s", location_id)
+        return None
+
+    # Station without update and not in DB yet, it is no structure
+    if is_station(location_id):
+        logger.debug("No Station data for: %s", location_id)
         return None
 
     req_scopes = ["esi-universe.read_structures.v1"]
@@ -183,6 +193,11 @@ def fetch_parent_location(
     # Unknown Solar System, it is no structure
     if is_solar_system(parent_id):
         logger.debug("Unknown Solar System: %s", parent_id)
+        return None
+
+    # Station without update and not in DB yet, it is no structure
+    if is_station(parent_id):
+        logger.debug("No Station data for: %s", parent_id)
         return None
 
     req_scopes = ["esi-universe.read_structures.v1"]
