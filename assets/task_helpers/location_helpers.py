@@ -20,6 +20,11 @@ def get_cache_key(location_id):
     return f"{ASSETS_CACHE_KEY}-{location_id}_no_permission"
 
 
+def is_solar_system(location_id) -> bool:
+    """Check if the location_id is in the ID range of solar systems"""
+    return 30_000_000 < location_id < 33_000_000
+
+
 def get_location_type(location_id) -> tuple[Location | None, Location | None]:
     """Check if location is already in DB or is a special location type"""
     existing_location = Location.objects.filter(id=location_id)
@@ -34,7 +39,7 @@ def get_location_type(location_id) -> tuple[Location | None, Location | None]:
         # ASSET SAFETY
         return Location(id=location_id, name="Asset Safety"), existing_location
     # Location is a Solar System
-    if 30_000_000 < location_id < 33_000_000:
+    if is_solar_system(location_id):
         system = SolarSystem.objects.filter(id=location_id).first()
         logger.debug("Fetched Solar System: %s", system)
         if not system:
@@ -98,6 +103,11 @@ def fetch_location(
     # Exit if location already exists and is a Solar System or Station
     if location:
         return location
+
+    # Unknown Solar System, it is no structure
+    if is_solar_system(location_id):
+        logger.debug("Unknown Solar System: %s", location_id)
+        return None
 
     req_scopes = ["esi-universe.read_structures.v1"]
 
@@ -170,6 +180,11 @@ def fetch_parent_location(
     if location:
         return location
 
+    # Unknown Solar System, it is no structure
+    if is_solar_system(parent_id):
+        logger.debug("Unknown Solar System: %s", parent_id)
+        return None
+
     req_scopes = ["esi-universe.read_structures.v1"]
 
     token = Token.get_token(character_id, req_scopes)
@@ -201,7 +216,7 @@ def fetch_parent_location(
         )
         return None
 
-    system = SolarSystem.objects.get(id=structure.solar_system_id)
+    system = SolarSystem.objects.filter(id=structure.solar_system_id).first()
 
     if not system:
         logger.debug("Failed to get Solar System: %s", system)
