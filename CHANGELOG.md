@@ -43,7 +43,7 @@ Section Order:
 
 ### Changed
 
-- `General` has a `Permission` enum (`TextChoices`) with the helpers `get_perm`, `has_perm`, `has_any_perm` and `has_management_access`, like the app template. Views, API, hooks, managers and models check permissions through `General` instead of permission strings. Codenames are unchanged, the new migration only changes the type of `Meta.permissions`
+- New test `test_used_permissions_are_defined` checks that every permission string used in code and templates exists in `General.Meta.permissions`
 - The `304 Not Modified` branch for stations in `get_location_type` returns `(None, None)` explicitly instead of the always-`None` `existing_location`; no change in behavior
 - Tests of `retry_task_on_esi_error` no longer depend on the time of day, they disable the daily downtime check unless they test it
 - `retry_task_on_esi_error` follows the app template: ESI outages retry after `DOWNTIME_TIMER` (10 minutes), the daily downtime (11:00-11:15 UTC) is checked (can be disabled with `DISABLE_DAILY_DOWNTIME_CHECK`), new `is_retryable_esi_error` and `DownTimeError`

@@ -22,7 +22,7 @@ from esi.decorators import token_required
 # AA Assets
 from assets import forms
 from assets.hooks import add_info_to_context
-from assets.models import Assets, General, Owner, Request, RequestAssets
+from assets.models import Assets, Owner, Request, RequestAssets
 from assets.tasks import (
     clear_all_etags,
     update_all_assets,
@@ -75,7 +75,7 @@ def create_request_asset_object(
 
 
 @login_required
-@permissions_required([General.get_perm(General.Permission.BASIC_ACCESS)])
+@permissions_required(["assets.basic_access"])
 def index(request):
     context = {
         "corporation_id": request.user.profile.main_character.corporation_id,
@@ -87,7 +87,7 @@ def index(request):
 
 
 @login_required
-@permissions_required([General.get_perm(General.Permission.BASIC_ACCESS)])
+@permissions_required(["assets.basic_access"])
 def admin(request):
     if not request.user.is_superuser:
         messages.error(request, _("You do not have permission to access this page."))
@@ -119,7 +119,7 @@ def admin(request):
 
 
 @login_required
-@permissions_required([General.get_perm(General.Permission.BASIC_ACCESS)])
+@permissions_required(["assets.basic_access"])
 def location(request):
     context = {
         "corporation_id": request.user.profile.main_character.corporation_id,
@@ -132,7 +132,7 @@ def location(request):
 
 
 @login_required
-@permissions_required([General.get_perm(General.Permission.BASIC_ACCESS)])
+@permissions_required(["assets.basic_access"])
 def assets(request, location_id: int, location_flag: str):
     context = {
         "corporation_id": request.user.profile.main_character.corporation_id,
@@ -153,7 +153,7 @@ def assets(request, location_id: int, location_flag: str):
 
 
 @login_required
-@permissions_required([General.get_perm(General.Permission.BASIC_ACCESS)])
+@permissions_required(["assets.basic_access"])
 def requests(request):
     context = {
         "corporation_id": request.user.profile.main_character.corporation_id,
@@ -169,7 +169,7 @@ def requests(request):
 @token_required(
     scopes=["esi-universe.read_structures.v1", "esi-assets.read_corporation_assets.v1"]
 )
-@permissions_required([General.get_perm(General.Permission.MANAGE_CORPORATION)])
+@permissions_required(["assets.manage_corporation"])
 def add_corp(request, token) -> HttpResponse:
     char = get_object_or_404(
         CharacterOwnership, character__character_id=token.character_id
@@ -195,7 +195,7 @@ def add_corp(request, token) -> HttpResponse:
 
 @login_required
 @token_required(scopes=["esi-universe.read_structures.v1", "esi-assets.read_assets.v1"])
-@permissions_required([General.get_perm(General.Permission.BASIC_ACCESS)])
+@permissions_required(["assets.basic_access"])
 def add_char(request, token) -> HttpResponse:
     char = get_object_or_404(
         CharacterOwnership, character__character_id=token.character_id
@@ -214,7 +214,7 @@ def add_char(request, token) -> HttpResponse:
 
 
 @login_required
-@permissions_required([General.get_perm(General.Permission.BASIC_ACCESS)])
+@permissions_required(["assets.basic_access"])
 @require_POST
 def create_order(request, location_id: int, location_flag: str):
     """Render view to create a new order request."""
@@ -335,7 +335,7 @@ def create_order(request, location_id: int, location_flag: str):
 
 
 @login_required
-@permissions_required([General.get_perm(General.Permission.BASIC_ACCESS)])
+@permissions_required(["assets.basic_access"])
 @require_POST
 def mark_request_canceled(request, request_id: int):
     """Render view to mark a order request as canceled."""
@@ -389,7 +389,7 @@ def mark_request_canceled(request, request_id: int):
 
 
 @login_required
-@permissions_required([General.get_perm(General.Permission.MANAGE_REQUESTS)])
+@permissions_required(["assets.manage_requests"])
 @require_POST
 def mark_request_completed(request, request_id: int):
     """Render view to mark a order request as completed."""
@@ -445,7 +445,7 @@ def mark_request_completed(request, request_id: int):
 
 
 @login_required
-@permissions_required([General.get_perm(General.Permission.MANAGE_REQUESTS)])
+@permissions_required(["assets.manage_requests"])
 @require_POST
 def mark_request_open(request, request_id: int):
     """Render view to mark a order request as open."""

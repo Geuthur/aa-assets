@@ -1,8 +1,5 @@
 """Models for assets."""
 
-# Standard Library
-from typing import Any
-
 # Django
 from django.core.validators import MinValueValidator
 from django.db import models, transaction
@@ -82,53 +79,18 @@ def users_with_permission(
 class General(models.Model):
     """General model for app permissions"""
 
-    class Permission(models.TextChoices):
-        BASIC_ACCESS = "basic_access", _("Can access this app")
-        CORPORATION_ACCESS = "corporation_access", _(
-            "Can access own corporation assets"
-        )
-        ADMIN_ACCESS = "admin_access", _("Can access all assets.")
-        MANAGE_CORPORATION = "manage_corporation", _("Can add corporation assets")
-        MANAGE_REQUESTS = "manage_requests", _("Can manage requests")
-
     class Meta:
         managed = False
         verbose_name = "AA-Assets"
         verbose_name_plural = "AA-Assets"
-        default_permissions = ()
-
-    # Inject dynamic permissions
-    Meta.permissions = Permission.choices
-
-    @classmethod
-    def get_perm(cls, perm: "str | Permission") -> str:
-        """Return full permission string 'assets.<codename>'."""
-        codename = perm.value if isinstance(perm, cls.Permission) else perm
-        return f"assets.{codename}"
-
-    @classmethod
-    def has_perm(cls, user: Any, perm: "str | General.Permission") -> bool:
-        """Check if user has permission."""
-        if not user or not hasattr(user, "has_perm"):
-            return False
-        return user.has_perm(cls.get_perm(perm))
-
-    @classmethod
-    def has_any_perm(cls, user: Any, *perms: "str | General.Permission") -> bool:
-        """Return True if user has any of the specified permissions."""
-        if not user or not hasattr(user, "has_perm"):
-            return False
-        return any(user.has_perm(cls.get_perm(p)) for p in perms)
-
-    @classmethod
-    def has_management_access(cls, user: Any) -> bool:
-        """Check if user has any management permission."""
-        return cls.has_any_perm(
-            user,
-            cls.Permission.MANAGE_REQUESTS,
-            cls.Permission.MANAGE_CORPORATION,
-            cls.Permission.ADMIN_ACCESS,
+        permissions = (
+            ("basic_access", "Can access this app"),
+            ("corporation_access", "Can access own corporation assets"),
+            ("admin_access", "Can access all assets."),
+            ("manage_corporation", "Can add corporation assets"),
+            ("manage_requests", "Can manage requests"),
         )
+        default_permissions = ()
 
 
 class EveEntity(models.Model):
@@ -868,7 +830,7 @@ class Request(models.Model):
         self, user: User, status: str, closed: bool, can_requestor_edit: bool = False
     ) -> bool:
         """Change the status of a order request."""
-        admin = General.has_perm(user, General.Permission.MANAGE_REQUESTS)
+        admin = user.has_perm("assets.manage_requests")
 
         if admin or (can_requestor_edit and self.requesting_user == user):
             logger.debug("Success to mark request")
@@ -972,8 +934,7 @@ class Request(models.Model):
     def approvers(cls) -> models.QuerySet[User]:
         """Return queryset of all approvers."""
         permission = Permission.objects.select_related("content_type").get(
-            content_type__app_label=cls._meta.app_label,
-            codename=General.Permission.MANAGE_REQUESTS.value,  # pylint: disable=no-member
+            content_type__app_label=cls._meta.app_label, codename="manage_requests"
         )
         return users_with_permission(permission)
 
