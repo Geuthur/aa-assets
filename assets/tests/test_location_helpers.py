@@ -11,6 +11,7 @@ from evesde_factory.eve_sde import SolarSystemFactory
 from django.core.cache import cache
 
 # AA Assets
+from assets.models import Location
 from assets.task_helpers.location_helpers import (
     fetch_location,
     fetch_parent_location,
@@ -133,6 +134,38 @@ class TestFetchLocation(AuthTestCase):
         # Expected Result
         self.assertIsNone(location)
         self.assertEqual(structure_mock.calls, 0)
+
+    @pook.on
+    def test_should_return_existing_structure_location_when_not_modified(self):
+        # Test Data
+        SolarSystemFactory(id=SOLAR_SYSTEM_ID)
+        existing = Location.objects.create(
+            id=STRUCTURE_ID,
+            name="Test Structure",
+            eve_solar_system_id=SOLAR_SYSTEM_ID,
+        )
+        pook.get(structure_url(STRUCTURE_ID), reply=HTTPStatus.NOT_MODIFIED)
+
+        # Test Action
+        location = fetch_location(
+            STRUCTURE_ID, None, self.user.profile.main_character.character_id
+        )
+
+        # Expected Result
+        self.assertEqual(location, existing)
+
+    @pook.on
+    def test_should_return_none_for_unknown_structure_when_not_modified(self):
+        # Test Data
+        pook.get(structure_url(STRUCTURE_ID), reply=HTTPStatus.NOT_MODIFIED)
+
+        # Test Action
+        location = fetch_location(
+            STRUCTURE_ID, None, self.user.profile.main_character.character_id
+        )
+
+        # Expected Result
+        self.assertIsNone(location)
 
 
 class TestFetchParentLocation(AuthTestCase):
