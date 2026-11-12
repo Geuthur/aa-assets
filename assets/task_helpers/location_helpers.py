@@ -133,7 +133,7 @@ def fetch_location(
         structure: contexts.GetUniverseStructuresStructureIdContext
     except HTTPNotModified:
         logger.debug("No Updates for Location: %s", location_id)
-        return None
+        return existing_location
     except HTTPClientError as e:
         if e.status_code == 403:
             logger.debug("Failed to get location %s due to 403 Forbidden", location_id)
