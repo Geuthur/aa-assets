@@ -833,7 +833,7 @@ class Request(models.Model):
         self, user: User, status: str, closed: bool, can_requestor_edit: bool = False
     ) -> bool:
         """Change the status of a order request."""
-        admin = user.has_perm("assets.manage_requests")
+        admin = GeneralManager.has_manage_requests_access(user)
 
         if admin or (can_requestor_edit and self.requesting_user == user):
             logger.debug("Success to mark request")

@@ -18,6 +18,7 @@ from assets.api.requests.helper import (
     _request_actions,
     _request_list,
 )
+from assets.managers import GeneralManager
 from assets.models import Request, RequestAssets
 
 
@@ -137,12 +138,12 @@ class RequestsApiEndpoints:
             tags=self.tags,
         )
         def get_requests_statistics(request: WSGIRequest):
-            perms = request.user.has_perm("assets.basic_access")
+            perms = GeneralManager.has_basic_access(request.user)
 
             if not perms:
                 return 403, "Permission Denied"
 
-            if request.user.has_perm("assets.manage_requests"):
+            if GeneralManager.has_manage_requests_access(request.user):
                 requests_count = Request.objects.open_requests_total_count()
             else:
                 requests_count = None
@@ -163,7 +164,7 @@ class RequestsApiEndpoints:
         )
         def get_request_order(request: WSGIRequest, request_id: int):
             """Get the order for a request"""
-            perms = request.user.has_perm("assets.basic_access")
+            perms = GeneralManager.has_basic_access(request.user)
 
             if not perms:
                 return 403, "Permission Denied"
