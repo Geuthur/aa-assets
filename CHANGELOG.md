@@ -43,6 +43,7 @@ Section Order:
 
 ### Changed
 
+- `General.Meta.permissions` stays the single place that defines the permissions (plain tuples, texts now translatable); codenames and texts are unchanged and no migration is needed. A new test compares every permission string used in code and templates with it. `General.objects.has_management_access(user)` (`admin_access` or `manage_requests`) replaces the duplicated checks in the `manage_to` querysets
 - New test `test_used_permissions_are_defined` checks that every permission string used in code and templates exists in `General.Meta.permissions`
 - The `304 Not Modified` branch for stations in `get_location_type` returns `(None, None)` explicitly instead of the always-`None` `existing_location`; no change in behavior
 - Tests of `retry_task_on_esi_error` no longer depend on the time of day, they disable the daily downtime check unless they test it

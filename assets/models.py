@@ -34,6 +34,7 @@ from assets.helpers.eveonline import (
 from assets.managers import (
     AssetsManager,
     EveEntityManager,
+    GeneralManager,
     LocationManager,
     OwnerManager,
     RequestManager,
@@ -78,6 +79,8 @@ def users_with_permission(
 
 class General(models.Model):
     """General model for app permissions"""
+
+    objects = GeneralManager()
 
     class Meta:
         managed = False

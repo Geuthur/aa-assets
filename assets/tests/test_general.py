@@ -5,11 +5,12 @@ import re
 from pathlib import Path
 
 # Django
-from django.test import SimpleTestCase
+from django.test import TestCase
 
 # AA Assets
 import assets
 from assets.models import General
+from assets.tests.testdata.factory import UserMainFactory
 
 APP_DIR = Path(assets.__file__).parent
 CODENAMES = {codename for codename, _ in General._meta.permissions}
@@ -20,7 +21,7 @@ PERM_PATTERN = re.compile(
 )
 
 
-class TestGeneralPermissions(SimpleTestCase):
+class TestGeneralPermissions(TestCase):
     def test_codenames_are_unchanged(self):
         """Codenames hang on groups in installations and must not change."""
         self.assertEqual(
@@ -47,3 +48,11 @@ class TestGeneralPermissions(SimpleTestCase):
         self.assertTrue(used)
         unknown = {(name, file) for name, file in used if name not in CODENAMES}
         self.assertEqual(unknown, set())
+
+    def test_has_management_access(self):
+        basic = UserMainFactory()
+        manager = UserMainFactory(permissions__=["assets.manage_requests"])
+        admin = UserMainFactory(permissions__=["assets.admin_access"])
+        self.assertFalse(General.objects.has_management_access(basic))
+        self.assertTrue(General.objects.has_management_access(manager))
+        self.assertTrue(General.objects.has_management_access(admin))
