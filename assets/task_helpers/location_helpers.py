@@ -66,8 +66,10 @@ def get_location_type(location_id) -> tuple[Location | None, Location | None]:
             ).result()
             station: contexts.GetUniverseStationsStationIdContext
         except HTTPNotModified:
+            # Stations (< 64_000_000) already in the DB returned above, so
+            # there is no existing location to hand back here.
             logger.debug("No Updates for Station: %s", location_id)
-            return existing_location, existing_location
+            return None, None
 
         logger.debug("Fetched Station: %s", station)
         return (
