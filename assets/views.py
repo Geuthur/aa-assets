@@ -169,7 +169,7 @@ def requests(request):
 @token_required(
     scopes=["esi-universe.read_structures.v1", "esi-assets.read_corporation_assets.v1"]
 )
-@permissions_required(["assets.add_corporate_owner"])
+@permissions_required(["assets.manage_corporation"])
 def add_corp(request, token) -> HttpResponse:
     char = get_object_or_404(
         CharacterOwnership, character__character_id=token.character_id
@@ -195,7 +195,7 @@ def add_corp(request, token) -> HttpResponse:
 
 @login_required
 @token_required(scopes=["esi-universe.read_structures.v1", "esi-assets.read_assets.v1"])
-@permissions_required(["assets.add_character_owner"])
+@permissions_required(["assets.basic_access"])
 def add_char(request, token) -> HttpResponse:
     char = get_object_or_404(
         CharacterOwnership, character__character_id=token.character_id

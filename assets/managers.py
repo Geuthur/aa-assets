@@ -35,6 +35,20 @@ if TYPE_CHECKING:
     from assets.models import EveEntity as EveEntityContext
 
 
+class GeneralManager(models.Manager):
+    """Manager for General: app rules that Django cannot check itself.
+
+    General is unmanaged, so this manager never queries the database.
+    """
+
+    def has_management_access(self, user: User) -> bool:
+        """True if the user may manage (admin_access or manage_requests)."""
+        return bool(
+            user.has_perm("assets.admin_access")
+            or user.has_perm("assets.manage_requests")
+        )
+
+
 USERAGENT = f"assets v{__version__}"
 EVE_TYPE_ID_SOLAR_SYSTEM = 5
 
@@ -60,7 +74,7 @@ class AssetsQuerySet(models.QuerySet):
             logger.debug("Returning all for superuser %s.", user)
             return self
 
-        if user.has_perm("assets.admin_Access"):
+        if user.has_perm("assets.admin_access"):
             logger.debug("Returning all for Admin %s.", user)
             return self
 
@@ -91,6 +105,10 @@ class AssetsQuerySet(models.QuerySet):
             return self.none()
 
     def manage_to(self, user: User):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         # superusers get all visible
         if user.is_superuser:
             logger.debug(
@@ -99,12 +117,8 @@ class AssetsQuerySet(models.QuerySet):
             )
             return self
 
-        if user.has_perm("assets.admin_Access"):
-            logger.debug("Returning all for Admin %s.", user)
-            return self
-
-        if user.has_perm("assets.manage_requests"):
-            logger.debug("Returning all for request manager %s.", user)
+        if General.objects.has_management_access(user):
+            logger.debug("Returning all for manager %s.", user)
             return self
 
         try:
@@ -229,7 +243,7 @@ class LocationQuerySet(models.QuerySet):
             logger.debug("Returning all for superuser %s.", user)
             return self
 
-        if user.has_perm("assets.admin_Access"):
+        if user.has_perm("assets.admin_access"):
             logger.debug("Returning all for Admin %s.", user)
             return self
 
@@ -257,6 +271,10 @@ class LocationQuerySet(models.QuerySet):
             return self.none()
 
     def manage_to(self, user: User):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         # superusers get all visible
         if user.is_superuser:
             logger.debug(
@@ -265,12 +283,8 @@ class LocationQuerySet(models.QuerySet):
             )
             return self
 
-        if user.has_perm("assets.admin_Access"):
-            logger.debug("Returning all for Admin %s.", user)
-            return self
-
-        if user.has_perm("assets.manage_requests"):
-            logger.debug("Returning all for request manager %s.", user)
+        if General.objects.has_management_access(user):
+            logger.debug("Returning all for manager %s.", user)
             return self
 
         try:
@@ -458,7 +472,7 @@ class OwnerQuerySet(models.QuerySet):
             logger.debug("Returning all for superuser %s.", user)
             return self
 
-        if user.has_perm("assets.admin_Access"):
+        if user.has_perm("assets.admin_access"):
             logger.debug("Returning all for Admin %s.", user)
             return self
 
@@ -488,6 +502,10 @@ class OwnerQuerySet(models.QuerySet):
             return self.none()
 
     def manage_to(self, user: User):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         # superusers get all visible
         if user.is_superuser:
             logger.debug(
@@ -496,12 +514,8 @@ class OwnerQuerySet(models.QuerySet):
             )
             return self
 
-        if user.has_perm("assets.admin_Access"):
-            logger.debug("Returning all for Admin %s.", user)
-            return self
-
-        if user.has_perm("assets.manage_requests"):
-            logger.debug("Returning all for request manager %s.", user)
+        if General.objects.has_management_access(user):
+            logger.debug("Returning all for manager %s.", user)
             return self
 
         try:
