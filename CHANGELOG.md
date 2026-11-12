@@ -43,6 +43,7 @@ Section Order:
 
 ### Changed
 
+- The API, the menu hook and the access querysets (`visible_to`, `manage_to`, `visible_eve_characters`) check permissions only through `GeneralManager`; new methods `has_basic_access`, `has_corporation_access`, `has_manage_requests_access` and `has_admin_access` join `has_management_access`. The Django views keep `@permissions_required`. No change in behavior
 - `General.Meta.permissions` stays the single place that defines the permissions (plain tuples, texts now translatable); codenames and texts are unchanged and no migration is needed. A new test compares every permission string used in code and templates with it. `General.objects.has_management_access(user)` (`admin_access` or `manage_requests`) replaces the duplicated checks in the `manage_to` querysets
 - New test `test_used_permissions_are_defined` checks that every permission string used in code and templates exists in `General.Meta.permissions`
 - The `304 Not Modified` branch for stations in `get_location_type` returns `(None, None)` explicitly instead of the always-`None` `existing_location`; no change in behavior
