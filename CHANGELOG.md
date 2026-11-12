@@ -30,6 +30,8 @@ Section Order:
 
 ### Fixed
 
+- The permission `assets.admin_access` was checked as `assets.admin_Access` in the managers, so it never granted anything to non-superusers; users with `admin_access` now see all assets, locations and requests as the permission text says
+- The views `add_corp` and `add_char` required the permissions `assets.add_corporate_owner` and `assets.add_character_owner`, which no longer exist, so only superusers could use them. They now require `manage_corporation` and `basic_access`, like the menu entries that link to them
 - `Owner.get_esi_scopes()` is now an instance method and returns the character scopes (`esi-assets.read_assets.v1`) for character owners; before, it always returned the corporation scopes, so character owners asked for a token with the wrong scope
 - Solar system locations and structures no longer crash in `get_location_type` and `fetch_location` (`task_helpers/location_helpers.py`): the solar system is looked up with `filter().first()` instead of unpacking the result of `objects.get()`, and an unknown solar system returns `(None, existing_location)` instead of `None`
 - `fetch_parent_location` no longer crashes with `SolarSystem.DoesNotExist` when the solar system of a structure is unknown: the solar system is looked up with `filter().first()` and the function returns `None`
@@ -41,6 +43,7 @@ Section Order:
 
 ### Changed
 
+- `General` has a `Permission` enum (`TextChoices`) with the helpers `get_perm`, `has_perm`, `has_any_perm` and `has_management_access`, like the app template. Views, API, hooks, managers and models check permissions through `General` instead of permission strings. Codenames are unchanged, the new migration only changes the type of `Meta.permissions`
 - The `304 Not Modified` branch for stations in `get_location_type` returns `(None, None)` explicitly instead of the always-`None` `existing_location`; no change in behavior
 - Tests of `retry_task_on_esi_error` no longer depend on the time of day, they disable the daily downtime check unless they test it
 - `retry_task_on_esi_error` follows the app template: ESI outages retry after `DOWNTIME_TIMER` (10 minutes), the daily downtime (11:00-11:15 UTC) is checked (can be disabled with `DISABLE_DAILY_DOWNTIME_CHECK`), new `is_retryable_esi_error` and `DownTimeError`

@@ -10,7 +10,7 @@ from allianceauth.services.hooks import MenuItemHook, UrlHook
 
 # AA Assets
 from assets import app_settings, urls
-from assets.models import Request
+from assets.models import General, Request
 
 
 class AssetsMenuItem(MenuItemHook):
@@ -25,8 +25,8 @@ class AssetsMenuItem(MenuItemHook):
         )
 
     def render(self, request):
-        if request.user.has_perm("assets.basic_access"):
-            if request.user.has_perm("assets.manage_requests"):
+        if General.has_perm(request.user, General.Permission.BASIC_ACCESS):
+            if General.has_perm(request.user, General.Permission.MANAGE_REQUESTS):
                 app_count = Request.objects.open_requests_total_count()
             else:
                 app_count = None

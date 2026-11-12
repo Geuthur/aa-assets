@@ -55,12 +55,16 @@ def get_market_price(item_id: int) -> float:
 
 class AssetsQuerySet(models.QuerySet):
     def visible_to(self, user):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         # superusers get all visible
         if user.is_superuser:
             logger.debug("Returning all for superuser %s.", user)
             return self
 
-        if user.has_perm("assets.admin_Access"):
+        if General.has_perm(user, General.Permission.ADMIN_ACCESS):
             logger.debug("Returning all for Admin %s.", user)
             return self
 
@@ -74,7 +78,7 @@ class AssetsQuerySet(models.QuerySet):
                 "%s queries for user %s visible characters.", len(queries), user
             )
 
-            if user.has_perm("assets.corporation_access"):
+            if General.has_perm(user, General.Permission.CORPORATION_ACCESS):
                 logger.debug(
                     "Returning own corporation for Corporation Manager %s.", user
                 )
@@ -91,6 +95,10 @@ class AssetsQuerySet(models.QuerySet):
             return self.none()
 
     def manage_to(self, user: User):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         # superusers get all visible
         if user.is_superuser:
             logger.debug(
@@ -99,11 +107,11 @@ class AssetsQuerySet(models.QuerySet):
             )
             return self
 
-        if user.has_perm("assets.admin_Access"):
+        if General.has_perm(user, General.Permission.ADMIN_ACCESS):
             logger.debug("Returning all for Admin %s.", user)
             return self
 
-        if user.has_perm("assets.manage_requests"):
+        if General.has_perm(user, General.Permission.MANAGE_REQUESTS):
             logger.debug("Returning all for request manager %s.", user)
             return self
 
@@ -224,12 +232,16 @@ AssetsManager = AssetsManagerBase.from_queryset(AssetsQuerySet)
 
 class LocationQuerySet(models.QuerySet):
     def visible_to(self, user):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         # superusers get all visible
         if user.is_superuser:
             logger.debug("Returning all for superuser %s.", user)
             return self
 
-        if user.has_perm("assets.admin_Access"):
+        if General.has_perm(user, General.Permission.ADMIN_ACCESS):
             logger.debug("Returning all for Admin %s.", user)
             return self
 
@@ -242,7 +254,7 @@ class LocationQuerySet(models.QuerySet):
                 "%s queries for user %s visible characters.", len(queries), user
             )
 
-            if user.has_perm("assets.corporation_access"):
+            if General.has_perm(user, General.Permission.CORPORATION_ACCESS):
                 logger.debug(
                     "Returning own corporation for Corporation Manager %s.", user
                 )
@@ -257,6 +269,10 @@ class LocationQuerySet(models.QuerySet):
             return self.none()
 
     def manage_to(self, user: User):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         # superusers get all visible
         if user.is_superuser:
             logger.debug(
@@ -265,11 +281,11 @@ class LocationQuerySet(models.QuerySet):
             )
             return self
 
-        if user.has_perm("assets.admin_Access"):
+        if General.has_perm(user, General.Permission.ADMIN_ACCESS):
             logger.debug("Returning all for Admin %s.", user)
             return self
 
-        if user.has_perm("assets.manage_requests"):
+        if General.has_perm(user, General.Permission.MANAGE_REQUESTS):
             logger.debug("Returning all for request manager %s.", user)
             return self
 
@@ -453,12 +469,16 @@ LocationManager = LocationManagerBase.from_queryset(LocationQuerySet)
 
 class OwnerQuerySet(models.QuerySet):
     def visible_to(self, user):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         # superusers get all visible
         if user.is_superuser:
             logger.debug("Returning all for superuser %s.", user)
             return self
 
-        if user.has_perm("assets.admin_Access"):
+        if General.has_perm(user, General.Permission.ADMIN_ACCESS):
             logger.debug("Returning all for Admin %s.", user)
             return self
 
@@ -471,7 +491,7 @@ class OwnerQuerySet(models.QuerySet):
                 "%s queries for user %s visible characters.", len(queries), user
             )
 
-            if user.has_perm("assets.corporation_access"):
+            if General.has_perm(user, General.Permission.CORPORATION_ACCESS):
                 logger.debug(
                     "Returning own corporation for Corporation Manager %s.", user
                 )
@@ -488,6 +508,10 @@ class OwnerQuerySet(models.QuerySet):
             return self.none()
 
     def manage_to(self, user: User):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         # superusers get all visible
         if user.is_superuser:
             logger.debug(
@@ -496,11 +520,11 @@ class OwnerQuerySet(models.QuerySet):
             )
             return self
 
-        if user.has_perm("assets.admin_Access"):
+        if General.has_perm(user, General.Permission.ADMIN_ACCESS):
             logger.debug("Returning all for Admin %s.", user)
             return self
 
-        if user.has_perm("assets.manage_requests"):
+        if General.has_perm(user, General.Permission.MANAGE_REQUESTS):
             logger.debug("Returning all for request manager %s.", user)
             return self
 
@@ -528,12 +552,16 @@ class OwnerManagerBase(models.Manager):
 
     @staticmethod
     def visible_eve_characters(user):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         qs = EveCharacter.objects.get_queryset()
         if user.is_superuser:
             logger.debug("Returning all for superuser %s.", user)
             return qs.all()
 
-        if user.has_perm("assets.manage_requests"):
+        if General.has_perm(user, General.Permission.MANAGE_REQUESTS):
             logger.debug("Returning all for Assets Manager %s.", user)
             return qs.all()
 
@@ -564,12 +592,16 @@ OwnerManager = OwnerManagerBase.from_queryset(OwnerQuerySet)
 
 class RequestQuerySet(models.QuerySet):
     def visible_to(self, user):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         # superusers get all visible
         if user.is_superuser:
             logger.debug("Returning all for superuser %s.", user)
             return self
 
-        if user.has_perm("assets.manage_requests"):
+        if General.has_perm(user, General.Permission.MANAGE_REQUESTS):
             logger.debug("Returning all for Assets Manager %s.", user)
             return self
 
@@ -589,6 +621,10 @@ class RequestQuerySet(models.QuerySet):
             return self.none()
 
     def manage_to(self, user):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         # superusers get all visible
         if user.is_superuser:
             logger.debug(
@@ -597,7 +633,7 @@ class RequestQuerySet(models.QuerySet):
             )
             return self
 
-        if user.has_perm("assets.manage_requests"):
+        if General.has_perm(user, General.Permission.MANAGE_REQUESTS):
             logger.debug("Returning all for Assets Manager %s.", user)
             return self
 
@@ -639,12 +675,16 @@ class RequestManagerBase(models.Manager):
 
     @staticmethod
     def visible_eve_characters(user):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         qs = EveCharacter.objects.get_queryset()
         if user.is_superuser:
             logger.debug("Returning all for superuser %s.", user)
             return qs.all()
 
-        if user.has_perm("assets.manage_requests"):
+        if General.has_perm(user, General.Permission.MANAGE_REQUESTS):
             logger.debug("Returning all for Assets Manager %s.", user)
             return qs.all()
 
@@ -665,12 +705,16 @@ class RequestManagerBase(models.Manager):
 
     @staticmethod
     def manage_eve_characters(user):
+        # pylint: disable=import-outside-toplevel
+        # AA Assets
+        from assets.models import General  # circular import
+
         qs = EveCharacter.objects.get_queryset()
         if user.is_superuser:
             logger.debug("Returning all for superuser %s.", user)
             return qs.all()
 
-        if user.has_perm("assets.manage_requests"):
+        if General.has_perm(user, General.Permission.MANAGE_REQUESTS):
             logger.debug("Returning all for Assets Manager %s.", user)
             return qs.all()
 
