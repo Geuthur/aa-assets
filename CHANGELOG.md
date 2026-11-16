@@ -30,6 +30,7 @@ Section Order:
 
 ### Fixed
 
+- Development dependencies: `minimatch` 10.2.6 → 11.0.8 (Dependabot alert, DoS via globparts) through `eslint` 10.15.0; the app itself is not affected
 - The permission `assets.admin_access` was checked as `assets.admin_Access` in the managers, so it never granted anything to non-superusers; users with `admin_access` now see all assets, locations and requests as the permission text says
 - The views `add_corp` and `add_char` required the permissions `assets.add_corporate_owner` and `assets.add_character_owner`, which no longer exist, so only superusers could use them. They now require `manage_corporation` and `basic_access`, like the menu entries that link to them
 - `Owner.get_esi_scopes()` is now an instance method and returns the character scopes (`esi-assets.read_assets.v1`) for character owners; before, it always returned the corporation scopes, so character owners asked for a token with the wrong scope
