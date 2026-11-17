@@ -61,6 +61,17 @@ class TestGetLocationType(AuthTestCase):
         self.assertEqual(location.name, "Asset Safety")
         self.assertIsNone(existing_location)
 
+    def test_should_return_existing_location_for_station_in_db(self):
+        # Test Data
+        existing = Location.objects.create(id=STATION_ID, name="Jita IV - Moon 4")
+
+        # Test Action
+        location, existing_location = get_location_type(STATION_ID)
+
+        # Expected Result
+        self.assertEqual(location, existing)
+        self.assertIsNone(existing_location)
+
 
 class TestFetchLocation(AuthTestCase):
     def setUp(self):
