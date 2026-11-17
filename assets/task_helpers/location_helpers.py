@@ -36,7 +36,7 @@ def get_location_type(location_id) -> tuple[Location | None, Location | None]:
     current_loc = existing_location.exists()
 
     if current_loc and location_id < 64_000_000:
-        return existing_location.first(), existing_location
+        return existing_location.first(), None
 
     existing_location = existing_location.first()
 
