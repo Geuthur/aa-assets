@@ -40,15 +40,17 @@ def get_location_type(location_id) -> tuple[Location | None, Location | None]:
 
     existing_location = existing_location.first()
 
+    # Asset Safety (2004) and solar systems (< 64_000_000) already in the DB
+    # returned above, so there is no existing location to hand back here.
     if location_id == 2004:
         # ASSET SAFETY
-        return Location(id=location_id, name="Asset Safety"), existing_location
+        return Location(id=location_id, name="Asset Safety"), None
     # Location is a Solar System
     if is_solar_system(location_id):
         system = SolarSystem.objects.filter(id=location_id).first()
         logger.debug("Fetched Solar System: %s", system)
         if not system:
-            return None, existing_location
+            return None, None
 
         return (
             Location(
@@ -56,7 +58,7 @@ def get_location_type(location_id) -> tuple[Location | None, Location | None]:
                 name=system.name,
                 eve_solar_system=system,
             ),
-            existing_location,
+            None,
         )
     # Location is a Station
     if is_station(location_id):
