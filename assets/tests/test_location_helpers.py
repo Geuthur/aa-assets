@@ -72,6 +72,41 @@ class TestGetLocationType(AuthTestCase):
         self.assertEqual(location, existing)
         self.assertIsNone(existing_location)
 
+    @pook.on
+    def test_should_return_location_for_station_from_esi(self):
+        # Test Data
+        clear_esi_limits()
+        self.addCleanup(clear_esi_limits)
+        pook.get(
+            station_url(STATION_ID),
+            reply=HTTPStatus.OK,
+            response_json={
+                "max_dockable_ship_volume": 50000000,
+                "name": "Jita IV - Moon 4 - Caldari Navy Assembly Plant",
+                "office_rental_cost": 10000,
+                "owner": 1000035,
+                "position": {"x": 1.0, "y": 2.0, "z": 3.0},
+                "race_id": 1,
+                "reprocessing_efficiency": 0.5,
+                "reprocessing_stations_take": 0.05,
+                "services": ["market"],
+                "station_id": STATION_ID,
+                "system_id": SOLAR_SYSTEM_ID,
+                "type_id": 1531,
+            },
+        )
+
+        # Test Action
+        location, existing_location = get_location_type(STATION_ID)
+
+        # Expected Result
+        self.assertEqual(location.id, STATION_ID)
+        self.assertEqual(
+            location.name, "Jita IV - Moon 4 - Caldari Navy Assembly Plant"
+        )
+        self.assertEqual(location.eve_solar_system_id, SOLAR_SYSTEM_ID)
+        self.assertIsNone(existing_location)
+
 
 class TestFetchLocation(AuthTestCase):
     def setUp(self):

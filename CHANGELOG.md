@@ -50,6 +50,7 @@ Section Order:
 - The `304 Not Modified` branch for stations in `get_location_type` returns `(None, None)` explicitly instead of the always-`None` `existing_location`; no change in behavior
 - The Asset Safety (2004) and solar system branches in `get_location_type` return `None` explicitly instead of the always-`None` `existing_location`; no change in behavior
 - `get_location_type` returns `None` instead of a QuerySet as second value for locations below 64_000_000 already in the database, matching its type hint; no change in behavior
+- The station branch in `get_location_type` returns `None` explicitly instead of the always-`None` `existing_location` after fetching the station from ESI; no change in behavior
 - Tests of `retry_task_on_esi_error` no longer depend on the time of day, they disable the daily downtime check unless they test it
 - `retry_task_on_esi_error` follows the app template: ESI outages retry after `DOWNTIME_TIMER` (10 minutes), the daily downtime (11:00-11:15 UTC) is checked (can be disabled with `DISABLE_DAILY_DOWNTIME_CHECK`), new `is_retryable_esi_error` and `DownTimeError`
 
