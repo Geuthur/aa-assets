@@ -74,13 +74,15 @@ def get_location_type(location_id) -> tuple[Location | None, Location | None]:
             return None, None
 
         logger.debug("Fetched Station: %s", station)
+        # Stations (< 64_000_000) already in the DB returned above, so
+        # there is no existing location to hand back here.
         return (
             Location(
                 id=location_id,
                 name=station.name,
                 eve_solar_system_id=station.system_id,
             ),
-            existing_location,
+            None,
         )
     # Location is a Structure
     return None, existing_location
