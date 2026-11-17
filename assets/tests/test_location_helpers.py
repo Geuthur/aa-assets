@@ -52,6 +52,15 @@ class TestGetLocationType(AuthTestCase):
         self.assertIsNone(location)
         self.assertIsNone(existing_location)
 
+    def test_should_return_location_for_asset_safety(self):
+        # Test Action
+        location, existing_location = get_location_type(2004)
+
+        # Expected Result
+        self.assertEqual(location.id, 2004)
+        self.assertEqual(location.name, "Asset Safety")
+        self.assertIsNone(existing_location)
+
 
 class TestFetchLocation(AuthTestCase):
     def setUp(self):
