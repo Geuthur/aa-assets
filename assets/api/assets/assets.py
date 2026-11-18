@@ -24,7 +24,6 @@ class AssetsApiEndpoints:
             "location/{location_id}/flag/{location_flag}/",
             response={200: schema.Assets, 403: str},
             tags=self.tags,
-            auth=None,
         )
         def get_assets(request, location_id: int, location_flag):
             perms, asset_obj = get_asset(request, location_id)
@@ -83,7 +82,6 @@ class AssetsApiEndpoints:
             "location/",
             response={200: Any, 403: str},
             tags=self.tags,
-            auth=None,
         )
         def get_locations(request):
             """
