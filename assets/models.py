@@ -859,9 +859,12 @@ class Request(models.Model):
         """Notify approvers that a Order request has been created."""
         users = list(self.approvers())
 
-        title = _(f"{self.requesting_user} has Requested a Order")
-        msg = _(
-            f"{self.requesting_user} has requested the following items:{self.convert_order_to_notifiy()}\n"
+        title = _("{requesting_user} has Requested a Order").format(
+            requesting_user=self.requesting_user
+        )
+        msg = _("{requesting_user} has requested the following items:{items}\n").format(
+            requesting_user=self.requesting_user,
+            items=self.convert_order_to_notifiy(),
         )
 
         for approver in users:
@@ -876,10 +879,15 @@ class Request(models.Model):
     def notify_request_completed(self) -> None:
         """Notify requestor that a Order marked as completed."""
         title = _(
-            f"{self.approver_user} has completed the Order for {self.requesting_user} ID: {self.pk}."
+            "{approver} has completed the Order for {requestor} ID: {request_id}."
+        ).format(
+            approver=self.approver_user,
+            requestor=self.requesting_user,
+            request_id=self.pk,
         )
-        msg = _(
-            f"{self.approver_user} has completed the following items:{self.convert_order_to_notifiy()}\n"
+        msg = _("{approver} has completed the following items:{items}\n").format(
+            approver=self.approver_user,
+            items=self.convert_order_to_notifiy(),
         )
 
         send_user_notification.delay(
@@ -901,10 +909,15 @@ class Request(models.Model):
             users += [self.requesting_user]
 
         title = _(
-            f"{canceler} has canceled the Order for {self.requesting_user} ID: {self.pk}."
+            "{canceler} has canceled the Order for {requestor} ID: {request_id}."
+        ).format(
+            canceler=canceler,
+            requestor=self.requesting_user,
+            request_id=self.pk,
         )
-        msg = _(
-            f"{canceler} has canceled the following items:{self.convert_order_to_notifiy()}\n"
+        msg = _("{canceler} has canceled the following items:{items}\n").format(
+            canceler=canceler,
+            items=self.convert_order_to_notifiy(),
         )
 
         for approver in users:
@@ -919,10 +932,15 @@ class Request(models.Model):
     def notify_request_open(self, request) -> None:
         """Notify requestor that a Order marked as reopened."""
         title = _(
-            f"{request.user} has reopened the Order for {self.requesting_user} ID: {self.pk}."
+            "{user} has reopened the Order for {requestor} ID: {request_id}."
+        ).format(
+            user=request.user,
+            requestor=self.requesting_user,
+            request_id=self.pk,
         )
-        msg = _(
-            f"{request.user} has reopened the following items:{self.convert_order_to_notifiy()}\n"
+        msg = _("{user} has reopened the following items:{items}\n").format(
+            user=request.user,
+            items=self.convert_order_to_notifiy(),
         )
 
         send_user_notification.delay(

@@ -10,6 +10,12 @@ class Message(Schema):
     message: str
 
 
+class ErrorSchema(Schema):
+    """Error response of an endpoint, e.g. for 403 and 404."""
+
+    error: str
+
+
 class Character(Schema):
     character_name: str
     character_id: int
