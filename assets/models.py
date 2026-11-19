@@ -25,25 +25,22 @@ from eve_sde.models.types import ItemType
 
 # AA Assets
 from assets import contexts
-from assets.errors import HTTPGatewayTimeoutError
 from assets.helpers.discord import send_user_notification
 from assets.helpers.eveonline import (
     get_alliance_logo_url,
     get_character_portrait_url,
     get_corporation_logo_url,
 )
-from assets.hooks import get_extension_logger
 from assets.managers import (
     AssetsManager,
     EveEntityManager,
+    GeneralManager,
     LocationManager,
     OwnerManager,
     RequestManager,
     get_market_price,
 )
-from assets.providers import esi
-
-logger = get_extension_logger(__name__)
+from assets.providers import esi, logger
 
 
 def get_or_create_location(location_id: int) -> "Location":
@@ -83,16 +80,18 @@ def users_with_permission(
 class General(models.Model):
     """General model for app permissions"""
 
+    objects = GeneralManager()
+
     class Meta:
         managed = False
         verbose_name = "AA-Assets"
         verbose_name_plural = "AA-Assets"
         permissions = (
-            ("basic_access", "Can access this app"),
-            ("corporation_access", "Can access own corporation assets"),
-            ("admin_access", "Can access all assets."),
-            ("manage_corporation", "Can add corporation assets"),
-            ("manage_requests", "Can manage requests"),
+            ("basic_access", _("Can access this app")),
+            ("corporation_access", _("Can access own corporation assets")),
+            ("admin_access", _("Can access all assets.")),
+            ("manage_corporation", _("Can add corporation assets")),
+            ("manage_requests", _("Can manage requests")),
         )
         default_permissions = ()
 
@@ -281,10 +280,9 @@ class Owner(models.Model):
             raise ValueError("No character defined")
         return self.character.character
 
-    @classmethod
-    def get_esi_scopes(cls) -> list[str]:
+    def get_esi_scopes(self) -> list[str]:
         """Return the required ESI scopes for this owner."""
-        if cls.corporation:
+        if self.corporation:
             return [
                 "esi-universe.read_structures.v1",
                 "esi-assets.read_corporation_assets.v1",
@@ -342,9 +340,6 @@ class Owner(models.Model):
             items = self.process_assets(assets)
         except HTTPNotModified:
             logger.info("No new Assets for: %s", self.name)
-            return
-        except HTTPGatewayTimeoutError:
-            logger.info("Gateway Timeout for: %s", self.name)
             return
         except HTTPClientError as e:
             logger.error("Failed to fetch assets for %s: %s", self.name, e)
@@ -838,7 +833,7 @@ class Request(models.Model):
         self, user: User, status: str, closed: bool, can_requestor_edit: bool = False
     ) -> bool:
         """Change the status of a order request."""
-        admin = user.has_perm("assets.manage_requests")
+        admin = GeneralManager.has_manage_requests_access(user)
 
         if admin or (can_requestor_edit and self.requesting_user == user):
             logger.debug("Success to mark request")
@@ -864,9 +859,12 @@ class Request(models.Model):
         """Notify approvers that a Order request has been created."""
         users = list(self.approvers())
 
-        title = _(f"{self.requesting_user} has Requested a Order")
-        msg = _(
-            f"{self.requesting_user} has requested the following items:{self.convert_order_to_notifiy()}\n"
+        title = _("{requesting_user} has Requested a Order").format(
+            requesting_user=self.requesting_user
+        )
+        msg = _("{requesting_user} has requested the following items:{items}\n").format(
+            requesting_user=self.requesting_user,
+            items=self.convert_order_to_notifiy(),
         )
 
         for approver in users:
@@ -881,10 +879,15 @@ class Request(models.Model):
     def notify_request_completed(self) -> None:
         """Notify requestor that a Order marked as completed."""
         title = _(
-            f"{self.approver_user} has completed the Order for {self.requesting_user} ID: {self.pk}."
+            "{approver} has completed the Order for {requestor} ID: {request_id}."
+        ).format(
+            approver=self.approver_user,
+            requestor=self.requesting_user,
+            request_id=self.pk,
         )
-        msg = _(
-            f"{self.approver_user} has completed the following items:{self.convert_order_to_notifiy()}\n"
+        msg = _("{approver} has completed the following items:{items}\n").format(
+            approver=self.approver_user,
+            items=self.convert_order_to_notifiy(),
         )
 
         send_user_notification.delay(
@@ -906,10 +909,15 @@ class Request(models.Model):
             users += [self.requesting_user]
 
         title = _(
-            f"{canceler} has canceled the Order for {self.requesting_user} ID: {self.pk}."
+            "{canceler} has canceled the Order for {requestor} ID: {request_id}."
+        ).format(
+            canceler=canceler,
+            requestor=self.requesting_user,
+            request_id=self.pk,
         )
-        msg = _(
-            f"{canceler} has canceled the following items:{self.convert_order_to_notifiy()}\n"
+        msg = _("{canceler} has canceled the following items:{items}\n").format(
+            canceler=canceler,
+            items=self.convert_order_to_notifiy(),
         )
 
         for approver in users:
@@ -924,10 +932,15 @@ class Request(models.Model):
     def notify_request_open(self, request) -> None:
         """Notify requestor that a Order marked as reopened."""
         title = _(
-            f"{request.user} has reopened the Order for {self.requesting_user} ID: {self.pk}."
+            "{user} has reopened the Order for {requestor} ID: {request_id}."
+        ).format(
+            user=request.user,
+            requestor=self.requesting_user,
+            request_id=self.pk,
         )
-        msg = _(
-            f"{request.user} has reopened the following items:{self.convert_order_to_notifiy()}\n"
+        msg = _("{user} has reopened the following items:{items}\n").format(
+            user=request.user,
+            items=self.convert_order_to_notifiy(),
         )
 
         send_user_notification.delay(

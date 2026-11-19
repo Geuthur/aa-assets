@@ -1,4 +1,5 @@
 # Standard Library
+from http import HTTPStatus
 from typing import Any
 
 # Third Party
@@ -8,6 +9,7 @@ from ninja import NinjaAPI
 from django.core.handlers.wsgi import WSGIRequest
 from django.shortcuts import render
 from django.utils import timezone
+from django.utils.translation import gettext
 from django.utils.translation import gettext_lazy as _
 
 # AA Assets
@@ -18,10 +20,8 @@ from assets.api.requests.helper import (
     _request_actions,
     _request_list,
 )
-from assets.hooks import get_extension_logger
+from assets.managers import GeneralManager
 from assets.models import Request, RequestAssets
-
-logger = get_extension_logger(__name__)
 
 
 class RequestsApiEndpoints:
@@ -30,14 +30,11 @@ class RequestsApiEndpoints:
     def __init__(self, api: NinjaAPI):
         @api.get(
             "requests/",
-            response={200: list[schema.Requests], 403: str},
+            response={200: list[schema.Requests], 403: schema.ErrorSchema},
             tags=self.tags,
         )
         def get_requests(request: WSGIRequest):
             requests_data = Request.objects.visible_to(request.user)
-
-            if requests_data is None:
-                return 403, "Permission Denied"
 
             perm = get_character_permission(request)
             admin = get_manage_permission(request)
@@ -84,14 +81,11 @@ class RequestsApiEndpoints:
 
         @api.get(
             "requests/myrequests/",
-            response={200: list[schema.Requests], 403: str},
+            response={200: list[schema.Requests], 403: schema.ErrorSchema},
             tags=self.tags,
         )
         def get_my_requests(request):
             requests_data = Request.objects.visible_to(request.user)
-
-            if requests_data is None:
-                return 403, "Permission Denied"
 
             requests_data = requests_data.filter(requesting_user=request.user)
 
@@ -136,16 +130,11 @@ class RequestsApiEndpoints:
 
         @api.get(
             "requests/statistics/",
-            response={200: Any, 403: str},
+            response={200: Any, 403: schema.ErrorSchema},
             tags=self.tags,
         )
         def get_requests_statistics(request: WSGIRequest):
-            perms = request.user.has_perm("assets.basic_access")
-
-            if not perms:
-                return 403, "Permission Denied"
-
-            if request.user.has_perm("assets.manage_requests"):
+            if GeneralManager.has_manage_requests_access(request.user):
                 requests_count = Request.objects.open_requests_total_count()
             else:
                 requests_count = None
@@ -161,22 +150,19 @@ class RequestsApiEndpoints:
 
         @api.get(
             "requests/order/{request_id}/",
-            response={200: Any, 403: str},
+            response={200: Any, 403: schema.ErrorSchema},
             tags=self.tags,
         )
         def get_request_order(request: WSGIRequest, request_id: int):
             """Get the order for a request"""
-            perms = request.user.has_perm("assets.basic_access")
-
-            if not perms:
-                return 403, "Permission Denied"
-
             try:
                 request_user = Request.objects.get(
                     pk=request_id,
                 )
             except Request.DoesNotExist:
-                return 403, "Request does not exist"
+                return HTTPStatus.FORBIDDEN, {
+                    "error": gettext("Request does not exist")
+                }
 
             orders = RequestAssets.objects.filter(
                 request__pk=request_id,

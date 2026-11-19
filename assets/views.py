@@ -21,7 +21,7 @@ from esi.decorators import token_required
 
 # AA Assets
 from assets import forms
-from assets.hooks import add_info_to_context, get_extension_logger
+from assets.hooks import add_info_to_context
 from assets.models import Assets, Owner, Request, RequestAssets
 from assets.tasks import (
     clear_all_etags,
@@ -30,8 +30,6 @@ from assets.tasks import (
     update_all_parent_locations,
     update_assets_for_owner,
 )
-
-logger = get_extension_logger(__name__)
 
 
 def build_apr_cooldown_cache_tag(user, request_id, mode):
@@ -168,10 +166,11 @@ def requests(request):
 
 
 @login_required
+@permissions_required(["assets.basic_access"])
+@permissions_required(["assets.manage_corporation"])
 @token_required(
     scopes=["esi-universe.read_structures.v1", "esi-assets.read_corporation_assets.v1"]
 )
-@permissions_required(["assets.add_corporate_owner"])
 def add_corp(request, token) -> HttpResponse:
     char = get_object_or_404(
         CharacterOwnership, character__character_id=token.character_id
@@ -196,8 +195,8 @@ def add_corp(request, token) -> HttpResponse:
 
 
 @login_required
+@permissions_required(["assets.basic_access"])
 @token_required(scopes=["esi-universe.read_structures.v1", "esi-assets.read_assets.v1"])
-@permissions_required(["assets.add_character_owner"])
 def add_char(request, token) -> HttpResponse:
     char = get_object_or_404(
         CharacterOwnership, character__character_id=token.character_id
@@ -391,6 +390,7 @@ def mark_request_canceled(request, request_id: int):
 
 
 @login_required
+@permissions_required(["assets.basic_access"])
 @permissions_required(["assets.manage_requests"])
 @require_POST
 def mark_request_completed(request, request_id: int):
@@ -447,6 +447,7 @@ def mark_request_completed(request, request_id: int):
 
 
 @login_required
+@permissions_required(["assets.basic_access"])
 @permissions_required(["assets.manage_requests"])
 @require_POST
 def mark_request_open(request, request_id: int):

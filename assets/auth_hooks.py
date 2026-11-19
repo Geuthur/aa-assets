@@ -1,7 +1,6 @@
 """Hook into Alliance Auth"""
 
 # Django
-# Django
 from django.utils.translation import gettext_lazy as _
 
 # Alliance Auth
@@ -10,6 +9,7 @@ from allianceauth.services.hooks import MenuItemHook, UrlHook
 
 # AA Assets
 from assets import app_settings, urls
+from assets.managers import GeneralManager
 from assets.models import Request
 
 
@@ -25,8 +25,8 @@ class AssetsMenuItem(MenuItemHook):
         )
 
     def render(self, request):
-        if request.user.has_perm("assets.basic_access"):
-            if request.user.has_perm("assets.manage_requests"):
+        if GeneralManager.has_basic_access(request.user):
+            if GeneralManager.has_manage_requests_access(request.user):
                 app_count = Request.objects.open_requests_total_count()
             else:
                 app_count = None

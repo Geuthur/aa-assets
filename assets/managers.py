@@ -28,14 +28,51 @@ from assets.app_settings import (
     STORAGE_BASE_KEY,
 )
 from assets.errors import ObjectNotFound
-from assets.hooks import get_extension_logger
-from assets.providers import esi
+from assets.providers import esi, logger
 
 if TYPE_CHECKING:
     # AA Assets
     from assets.models import EveEntity as EveEntityContext
 
-logger = get_extension_logger(__name__)
+
+class GeneralManager(models.Manager):
+    """Manager for General: the app's own permission rules.
+
+    The API, its helpers and the menu hook check permissions only through this
+    manager; the Django views keep `@permissions_required("assets.<perm>")`.
+    The querysets call it instead of checking permissions themselves.
+    General is unmanaged, so this manager never queries the database.
+    """
+
+    @staticmethod
+    def has_basic_access(user: User) -> bool:
+        """Users with `basic_access` may use the app."""
+        return bool(user.has_perm("assets.basic_access"))
+
+    @staticmethod
+    def has_corporation_access(user: User) -> bool:
+        """Users with `corporation_access` also see their corporation's data."""
+        return bool(user.has_perm("assets.corporation_access"))
+
+    @staticmethod
+    def has_manage_requests_access(user: User) -> bool:
+        """Superusers and users with `manage_requests` manage all requests."""
+        return bool(user.is_superuser or user.has_perm("assets.manage_requests"))
+
+    @staticmethod
+    def has_admin_access(user: User) -> bool:
+        """Superusers and users with `admin_access` see everything."""
+        return bool(user.is_superuser or user.has_perm("assets.admin_access"))
+
+    @staticmethod
+    def has_management_access(user: User) -> bool:
+        """Superusers, `admin_access` and `manage_requests` may manage."""
+        return bool(
+            user.is_superuser
+            or user.has_perm("assets.admin_access")
+            or user.has_perm("assets.manage_requests")
+        )
+
 
 USERAGENT = f"assets v{__version__}"
 EVE_TYPE_ID_SOLAR_SYSTEM = 5
@@ -57,13 +94,8 @@ def get_market_price(item_id: int) -> float:
 
 class AssetsQuerySet(models.QuerySet):
     def visible_to(self, user):
-        # superusers get all visible
-        if user.is_superuser:
-            logger.debug("Returning all for superuser %s.", user)
-            return self
-
-        if user.has_perm("assets.admin_Access"):
-            logger.debug("Returning all for Admin %s.", user)
+        if GeneralManager.has_admin_access(user):
+            logger.debug("Returning all for admin %s.", user)
             return self
 
         try:
@@ -76,7 +108,7 @@ class AssetsQuerySet(models.QuerySet):
                 "%s queries for user %s visible characters.", len(queries), user
             )
 
-            if user.has_perm("assets.corporation_access"):
+            if GeneralManager.has_corporation_access(user):
                 logger.debug(
                     "Returning own corporation for Corporation Manager %s.", user
                 )
@@ -93,20 +125,8 @@ class AssetsQuerySet(models.QuerySet):
             return self.none()
 
     def manage_to(self, user: User):
-        # superusers get all visible
-        if user.is_superuser:
-            logger.debug(
-                "Returning all for superuser %s.",
-                user,
-            )
-            return self
-
-        if user.has_perm("assets.admin_Access"):
-            logger.debug("Returning all for Admin %s.", user)
-            return self
-
-        if user.has_perm("assets.manage_requests"):
-            logger.debug("Returning all for request manager %s.", user)
+        if GeneralManager.has_management_access(user):
+            logger.debug("Returning all for manager %s.", user)
             return self
 
         try:
@@ -226,13 +246,8 @@ AssetsManager = AssetsManagerBase.from_queryset(AssetsQuerySet)
 
 class LocationQuerySet(models.QuerySet):
     def visible_to(self, user):
-        # superusers get all visible
-        if user.is_superuser:
-            logger.debug("Returning all for superuser %s.", user)
-            return self
-
-        if user.has_perm("assets.admin_Access"):
-            logger.debug("Returning all for Admin %s.", user)
+        if GeneralManager.has_admin_access(user):
+            logger.debug("Returning all for admin %s.", user)
             return self
 
         try:
@@ -244,7 +259,7 @@ class LocationQuerySet(models.QuerySet):
                 "%s queries for user %s visible characters.", len(queries), user
             )
 
-            if user.has_perm("assets.corporation_access"):
+            if GeneralManager.has_corporation_access(user):
                 logger.debug(
                     "Returning own corporation for Corporation Manager %s.", user
                 )
@@ -259,20 +274,8 @@ class LocationQuerySet(models.QuerySet):
             return self.none()
 
     def manage_to(self, user: User):
-        # superusers get all visible
-        if user.is_superuser:
-            logger.debug(
-                "Returning all for superuser %s.",
-                user,
-            )
-            return self
-
-        if user.has_perm("assets.admin_Access"):
-            logger.debug("Returning all for Admin %s.", user)
-            return self
-
-        if user.has_perm("assets.manage_requests"):
-            logger.debug("Returning all for request manager %s.", user)
+        if GeneralManager.has_management_access(user):
+            logger.debug("Returning all for manager %s.", user)
             return self
 
         try:
@@ -455,13 +458,8 @@ LocationManager = LocationManagerBase.from_queryset(LocationQuerySet)
 
 class OwnerQuerySet(models.QuerySet):
     def visible_to(self, user):
-        # superusers get all visible
-        if user.is_superuser:
-            logger.debug("Returning all for superuser %s.", user)
-            return self
-
-        if user.has_perm("assets.admin_Access"):
-            logger.debug("Returning all for Admin %s.", user)
+        if GeneralManager.has_admin_access(user):
+            logger.debug("Returning all for admin %s.", user)
             return self
 
         try:
@@ -473,7 +471,7 @@ class OwnerQuerySet(models.QuerySet):
                 "%s queries for user %s visible characters.", len(queries), user
             )
 
-            if user.has_perm("assets.corporation_access"):
+            if GeneralManager.has_corporation_access(user):
                 logger.debug(
                     "Returning own corporation for Corporation Manager %s.", user
                 )
@@ -490,20 +488,8 @@ class OwnerQuerySet(models.QuerySet):
             return self.none()
 
     def manage_to(self, user: User):
-        # superusers get all visible
-        if user.is_superuser:
-            logger.debug(
-                "Returning all for superuser %s.",
-                user,
-            )
-            return self
-
-        if user.has_perm("assets.admin_Access"):
-            logger.debug("Returning all for Admin %s.", user)
-            return self
-
-        if user.has_perm("assets.manage_requests"):
-            logger.debug("Returning all for request manager %s.", user)
+        if GeneralManager.has_management_access(user):
+            logger.debug("Returning all for manager %s.", user)
             return self
 
         try:
@@ -531,11 +517,7 @@ class OwnerManagerBase(models.Manager):
     @staticmethod
     def visible_eve_characters(user):
         qs = EveCharacter.objects.get_queryset()
-        if user.is_superuser:
-            logger.debug("Returning all for superuser %s.", user)
-            return qs.all()
-
-        if user.has_perm("assets.manage_requests"):
+        if GeneralManager.has_manage_requests_access(user):
             logger.debug("Returning all for Assets Manager %s.", user)
             return qs.all()
 
@@ -566,12 +548,7 @@ OwnerManager = OwnerManagerBase.from_queryset(OwnerQuerySet)
 
 class RequestQuerySet(models.QuerySet):
     def visible_to(self, user):
-        # superusers get all visible
-        if user.is_superuser:
-            logger.debug("Returning all for superuser %s.", user)
-            return self
-
-        if user.has_perm("assets.manage_requests"):
+        if GeneralManager.has_manage_requests_access(user):
             logger.debug("Returning all for Assets Manager %s.", user)
             return self
 
@@ -591,15 +568,7 @@ class RequestQuerySet(models.QuerySet):
             return self.none()
 
     def manage_to(self, user):
-        # superusers get all visible
-        if user.is_superuser:
-            logger.debug(
-                "Returning all corps for superuser %s.",
-                user,
-            )
-            return self
-
-        if user.has_perm("assets.manage_requests"):
+        if GeneralManager.has_manage_requests_access(user):
             logger.debug("Returning all for Assets Manager %s.", user)
             return self
 
@@ -642,11 +611,7 @@ class RequestManagerBase(models.Manager):
     @staticmethod
     def visible_eve_characters(user):
         qs = EveCharacter.objects.get_queryset()
-        if user.is_superuser:
-            logger.debug("Returning all for superuser %s.", user)
-            return qs.all()
-
-        if user.has_perm("assets.manage_requests"):
+        if GeneralManager.has_manage_requests_access(user):
             logger.debug("Returning all for Assets Manager %s.", user)
             return qs.all()
 
@@ -668,11 +633,7 @@ class RequestManagerBase(models.Manager):
     @staticmethod
     def manage_eve_characters(user):
         qs = EveCharacter.objects.get_queryset()
-        if user.is_superuser:
-            logger.debug("Returning all for superuser %s.", user)
-            return qs.all()
-
-        if user.has_perm("assets.manage_requests"):
+        if GeneralManager.has_manage_requests_access(user):
             logger.debug("Returning all for Assets Manager %s.", user)
             return qs.all()
 

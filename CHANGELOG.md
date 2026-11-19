@@ -28,10 +28,46 @@ Section Order:
 
 <!-- Your changes go here -->
 
+> [!IMPORTANT]
+> Basic access is only granted by `basic_access`. Users with higher permissions (`corporation_access`, `manage_requests`, `manage_corporation`, `admin_access`) but without `basic_access` lose access to the API and to the pages to add a corporation and to complete or reopen requests. Grant `basic_access` to these users or groups.
+
 ### Fixed
 
-- Tests no longer share the Redis cache with other processes: `testauth/settings/development/local.py` gives each test run its own random cache `KEY_PREFIX`, like `testauth/settings/local.py` on master. Before, ESI responses cached by a running testauth instance on the same Redis were returned instead of the pook responses. Redis stays the cache backend because Alliance Auth needs `django_redis`
+- Tests no longer share the Redis cache with other processes in the AA 6 development settings (`testauth/settings/development/local.py`): each test run gets its own random cache `KEY_PREFIX`, like on master. Before, ESI responses cached by a running testauth instance on the same Redis were returned instead of the pook responses. Redis stays the cache backend because Alliance Auth needs `django_redis`
 - Django 6 compatibility: `format_html()` calls without arguments (raising `TypeError`) replaced by `mark_safe()` in request/asset API helpers and notification messages
+- The order notification texts in `Request` (new request, completed, canceled, reopened) are filled with `.format()` instead of f-strings inside `_()`, so they can be translated; existing translations of the old texts no longer match until Weblate updates them
+- The API endpoints `location/` and `location/{location_id}/flag/{location_flag}/` no longer set `auth=None`; the login check of the API applies to them like to all other endpoints
+- Development dependencies: `minimatch` 10.2.6 → 11.0.8 (Dependabot alert, DoS via globparts) through `eslint` 10.15.0; the app itself is not affected
+- The permission `assets.admin_access` was checked as `assets.admin_Access` in the managers, so it never granted anything to non-superusers; users with `admin_access` now see all assets, locations and requests as the permission text says
+- The views `add_corp` and `add_char` required the permissions `assets.add_corporate_owner` and `assets.add_character_owner`, which no longer exist, so only superusers could use them. They now require `manage_corporation` and `basic_access`, like the menu entries that link to them
+- `Owner.get_esi_scopes()` is now an instance method and returns the character scopes (`esi-assets.read_assets.v1`) for character owners; before, it always returned the corporation scopes, so character owners asked for a token with the wrong scope
+- Solar system locations and structures no longer crash in `get_location_type` and `fetch_location` (`task_helpers/location_helpers.py`): the solar system is looked up with `filter().first()` instead of unpacking the result of `objects.get()`, and an unknown solar system returns `(None, existing_location)` instead of `None`
+- `fetch_parent_location` no longer crashes with `SolarSystem.DoesNotExist` when the solar system of a structure is unknown: the solar system is looked up with `filter().first()` and the function returns `None`
+- `fetch_location` and `fetch_parent_location` no longer request a structure from ESI when the location ID belongs to an unknown solar system, they return `None`
+- `fetch_location` and `fetch_parent_location` no longer request a structure from ESI for a station that ESI answers with `304 Not Modified` while the station is not yet in the database, they return `None`
+- `fetch_location` returns the existing location from the database when ESI answers a structure with `304 Not Modified`, like `fetch_parent_location` already did; before, it returned `None`
+- Tests no longer share the Redis cache with other processes: `testauth/settings/local.py` gives each test run its own random cache `KEY_PREFIX`. Before, ESI responses cached by a running testauth instance on the same Redis were returned instead of the pook responses. Redis stays the cache backend because Alliance Auth needs `django_redis`
+- ESI tasks (`update_assets_for_owner`, `update_location`, `update_parent_location`, `update_all_parent_locations`) now retry on ESI outages and limits through `retry_task_on_esi_error` (HTTP 502/503/504, error limit, bucket limit, request errors, daily downtime)
+
+### Changed
+
+- Uniform error format of the API: every error response of an endpoint is an `ErrorSchema` (`{"error": "<text>"}`) instead of a plain string, and every endpoint lists its 403 in the OpenAPI schema. Status codes are unchanged. The order modal shows the message of the API.
+- Removed the unreachable `basic_access` checks in `get_requests_statistics` and `get_request_order` and the dead `is None` checks in `get_requests` and `get_my_requests`; the decorator of the API already answers 403
+- Every URL of the API requires `basic_access` (403 otherwise). `add_corp`, `mark_request_completed` and `mark_request_open` require it in addition to their own permission, and `add_corp` and `add_char` check the permissions before the SSO step
+- The API, the menu hook and the access querysets (`visible_to`, `manage_to`, `visible_eve_characters`) check permissions only through `GeneralManager`; new methods `has_basic_access`, `has_corporation_access`, `has_manage_requests_access` and `has_admin_access` join `has_management_access`. The Django views keep `@permissions_required`. No change in behavior
+- `General.Meta.permissions` stays the single place that defines the permissions (plain tuples, texts now translatable); codenames and texts are unchanged and no migration is needed. A new test compares every permission string used in code and templates with it. `General.objects.has_management_access(user)` (`admin_access` or `manage_requests`) replaces the duplicated checks in the `manage_to` querysets
+- New test `test_used_permissions_are_defined` checks that every permission string used in code and templates exists in `General.Meta.permissions`
+- The `304 Not Modified` branch for stations in `get_location_type` returns `(None, None)` explicitly instead of the always-`None` `existing_location`; no change in behavior
+- The Asset Safety (2004) and solar system branches in `get_location_type` return `None` explicitly instead of the always-`None` `existing_location`; no change in behavior
+- `get_location_type` returns `None` instead of a QuerySet as second value for locations below 64_000_000 already in the database, matching its type hint; no change in behavior
+- The station branch in `get_location_type` returns `None` explicitly instead of the always-`None` `existing_location` after fetching the station from ESI; no change in behavior
+- Tests of `retry_task_on_esi_error` no longer depend on the time of day, they disable the daily downtime check unless they test it
+- `retry_task_on_esi_error` follows the app template: ESI outages retry after `DOWNTIME_TIMER` (10 minutes), the daily downtime (11:00-11:15 UTC) is checked (can be disabled with `DISABLE_DAILY_DOWNTIME_CHECK`), new `is_retryable_esi_error` and `DownTimeError`
+
+### Removed
+
+- Unused `HTTPGatewayTimeoutError` (`assets/errors.py`) and its dead `except` branch in `Owner.update_assets_esi`
+- Own HTTP 420 retry in `update_location` and `update_parent_location`: django-esi raises `ESIErrorLimitException` for HTTP 420, so this code path was never reached
 
 ### Added
 
@@ -45,6 +81,7 @@ Section Order:
 
 ### Changed
 
+- The `AppLogger` is created only once in `assets/providers.py`. `managers.py`, `models.py`, `tasks.py`, `api/__init__.py`, `helpers/discord.py` and `task_helpers/location_helpers.py` import it with `from assets.providers import logger` instead of building their own logger; unused loggers in `decorators.py`, `views.py`, `api/helpers.py`, `api/assets/assets.py`, `api/assets/helper.py` and `api/requests/requests.py` were removed, as was the custom `get_extension_logger` in `assets/hooks.py`. Log records now carry the logger name `assets.providers` and the `[Assets]` prefix, and all of them go to the `extensions.assets` logger described in the README (the former `assets/hooks.py` loggers sent them to a separate `assets` logger).
 - CI: workflows aligned with the aa-example template (`pypi.yml`, `autotester.yml` with the current Redis action). `.isort.cfg` moved to the repository root. This repository has no `release.yml`.
 - Dropped Python 3.10 (end of life): `requires-python` is now `>=3.11`, classifier and tox environment removed, Python 3.10 removed from the CI matrix
 - Replaced `pook` with `pookx` in the test dependencies.

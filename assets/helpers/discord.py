@@ -14,9 +14,7 @@ from allianceauth.notifications import notify
 # AA Assets
 from assets import __title__
 from assets.constants import DISCORD_EMBED_COLOR_MAP
-from assets.hooks import get_extension_logger
-
-logger = get_extension_logger(__name__)
+from assets.providers import logger
 
 
 def allianceauth_discordbot_installed() -> bool:

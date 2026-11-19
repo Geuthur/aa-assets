@@ -1,4 +1,5 @@
 # Standard Library
+from http import HTTPStatus
 from typing import Any
 
 # Third Party
@@ -7,16 +8,14 @@ from ninja import NinjaAPI
 # Django
 from django.urls import reverse
 from django.utils.safestring import mark_safe
+from django.utils.translation import gettext
 
 # AA Assets
 from assets.api import schema
 from assets.api.assets.helper import update_asset_object
 from assets.api.helpers import get_asset, get_owner
 from assets.constants import CORPORATION_FLAGS, LOCATION_FLAGS
-from assets.hooks import get_extension_logger
 from assets.models import Assets, Location
-
-logger = get_extension_logger(__name__)
 
 
 class AssetsApiEndpoints:
@@ -25,15 +24,14 @@ class AssetsApiEndpoints:
     def __init__(self, api: NinjaAPI):
         @api.get(
             "location/{location_id}/flag/{location_flag}/",
-            response={200: schema.Assets, 403: str},
+            response={200: schema.Assets, 403: schema.ErrorSchema},
             tags=self.tags,
-            auth=None,
         )
         def get_assets(request, location_id: int, location_flag):
             perms, asset_obj = get_asset(request, location_id)
 
             if not perms:
-                return 403, "Permission Denied"
+                return HTTPStatus.FORBIDDEN, {"error": gettext("Permission Denied")}
 
             # Store original location_flag for response
             response_location_flag = location_flag
@@ -84,9 +82,8 @@ class AssetsApiEndpoints:
 
         @api.get(
             "location/",
-            response={200: Any, 403: str},
+            response={200: Any, 403: schema.ErrorSchema},
             tags=self.tags,
-            auth=None,
         )
         def get_locations(request):
             """
@@ -95,7 +92,7 @@ class AssetsApiEndpoints:
 
             perm, owner = get_owner(request)
             if not perm:
-                return 403, "Permission Denied"
+                return HTTPStatus.FORBIDDEN, {"error": gettext("Permission Denied")}
 
             locations_ids = (
                 Assets.objects.filter(
