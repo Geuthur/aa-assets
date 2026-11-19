@@ -105,11 +105,10 @@ class TestApiAuth(AuthTestCase):
                     # Test Action
                     response = self._request(method, url)
 
-                    # Expected Result: the endpoint itself answers (200, 404, 422, ...).
-                    # Endpoints may answer 403 on their own (`403: str`, another text)
+                    # Expected Result: the endpoint itself answers (200, 403, 404, 422, ...)
                     self.assertNotEqual(response.status_code, HTTPStatus.UNAUTHORIZED)
                     if response.status_code == HTTPStatus.FORBIDDEN:
-                        self.assertNotEqual(response.json(), DENIED)
+                        self.assertIn("error", response.json())
 
     def test_api_root_should_return_403_without_basic_access(self):
         # The decorator sits on the URLs, so it also covers the root, schema and docs
@@ -141,3 +140,28 @@ class TestApiAuth(AuthTestCase):
                 # Expected Result
                 self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
                 self.assertEqual(response.json(), {"detail": "CSRF check Failed"})
+
+
+class TestApiErrorFormat(AuthTestCase):
+    """Every error response of the API is an `ErrorSchema` (`{"error": "<text>"}`)."""
+
+    def test_every_endpoint_should_declare_403_and_errors_as_error_schema(self):
+        # Test Data
+        error_schema = {"$ref": "#/components/schemas/ErrorSchema"}
+        paths = api.get_openapi_schema()["paths"]
+        self.assertTrue(paths)
+
+        for path, operations in paths.items():
+            for method, operation in operations.items():
+                responses = operation["responses"]
+                with self.subTest(method=method.upper(), path=path):
+                    # Expected Result: the answer of `basic_access_required` is documented
+                    self.assertIn(HTTPStatus.FORBIDDEN, responses)
+                    for status, response in responses.items():
+                        if int(status) < HTTPStatus.BAD_REQUEST:
+                            continue
+                        self.assertEqual(
+                            response["content"]["application/json"]["schema"],
+                            error_schema,
+                            msg=f"{status} is not an ErrorSchema",
+                        )

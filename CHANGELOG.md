@@ -48,6 +48,7 @@ Section Order:
 
 ### Changed
 
+- Uniform error format of the API: every error response of an endpoint is an `ErrorSchema` (`{"error": "<text>"}`) instead of a plain string, and every endpoint lists its 403 in the OpenAPI schema. Status codes are unchanged. The order modal shows the message of the API.
 - Every URL of the API requires `basic_access` (403 otherwise). `add_corp`, `mark_request_completed` and `mark_request_open` require it in addition to their own permission, and `add_corp` and `add_char` check the permissions before the SSO step
 - The API, the menu hook and the access querysets (`visible_to`, `manage_to`, `visible_eve_characters`) check permissions only through `GeneralManager`; new methods `has_basic_access`, `has_corporation_access`, `has_manage_requests_access` and `has_admin_access` join `has_management_access`. The Django views keep `@permissions_required`. No change in behavior
 - `General.Meta.permissions` stays the single place that defines the permissions (plain tuples, texts now translatable); codenames and texts are unchanged and no migration is needed. A new test compares every permission string used in code and templates with it. `General.objects.has_management_access(user)` (`admin_access` or `manage_requests`) replaces the duplicated checks in the `manage_to` querysets
