@@ -33,6 +33,7 @@ Section Order:
 
 ### Fixed
 
+- The order notification texts in `Request` (new request, completed, canceled, reopened) are filled with `.format()` instead of f-strings inside `_()`, so they can be translated; existing translations of the old texts no longer match until Weblate updates them
 - The API endpoints `location/` and `location/{location_id}/flag/{location_flag}/` no longer set `auth=None`; the login check of the API applies to them like to all other endpoints
 - Development dependencies: `minimatch` 10.2.6 → 11.0.8 (Dependabot alert, DoS via globparts) through `eslint` 10.15.0; the app itself is not affected
 - The permission `assets.admin_access` was checked as `assets.admin_Access` in the managers, so it never granted anything to non-superusers; users with `admin_access` now see all assets, locations and requests as the permission text says
@@ -49,6 +50,7 @@ Section Order:
 ### Changed
 
 - Uniform error format of the API: every error response of an endpoint is an `ErrorSchema` (`{"error": "<text>"}`) instead of a plain string, and every endpoint lists its 403 in the OpenAPI schema. Status codes are unchanged. The order modal shows the message of the API.
+- Removed the unreachable `basic_access` checks in `get_requests_statistics` and `get_request_order` and the dead `is None` checks in `get_requests` and `get_my_requests`; the decorator of the API already answers 403
 - Every URL of the API requires `basic_access` (403 otherwise). `add_corp`, `mark_request_completed` and `mark_request_open` require it in addition to their own permission, and `add_corp` and `add_char` check the permissions before the SSO step
 - The API, the menu hook and the access querysets (`visible_to`, `manage_to`, `visible_eve_characters`) check permissions only through `GeneralManager`; new methods `has_basic_access`, `has_corporation_access`, `has_manage_requests_access` and `has_admin_access` join `has_management_access`. The Django views keep `@permissions_required`. No change in behavior
 - `General.Meta.permissions` stays the single place that defines the permissions (plain tuples, texts now translatable); codenames and texts are unchanged and no migration is needed. A new test compares every permission string used in code and templates with it. `General.objects.has_management_access(user)` (`admin_access` or `manage_requests`) replaces the duplicated checks in the `manage_to` querysets
