@@ -36,9 +36,6 @@ class RequestsApiEndpoints:
         def get_requests(request: WSGIRequest):
             requests_data = Request.objects.visible_to(request.user)
 
-            if requests_data is None:
-                return HTTPStatus.FORBIDDEN, {"error": gettext("Permission Denied")}
-
             perm = get_character_permission(request)
             admin = get_manage_permission(request)
 
@@ -90,9 +87,6 @@ class RequestsApiEndpoints:
         def get_my_requests(request):
             requests_data = Request.objects.visible_to(request.user)
 
-            if requests_data is None:
-                return HTTPStatus.FORBIDDEN, {"error": gettext("Permission Denied")}
-
             requests_data = requests_data.filter(requesting_user=request.user)
 
             perm = get_character_permission(request)
@@ -140,11 +134,6 @@ class RequestsApiEndpoints:
             tags=self.tags,
         )
         def get_requests_statistics(request: WSGIRequest):
-            perms = GeneralManager.has_basic_access(request.user)
-
-            if not perms:
-                return HTTPStatus.FORBIDDEN, {"error": gettext("Permission Denied")}
-
             if GeneralManager.has_manage_requests_access(request.user):
                 requests_count = Request.objects.open_requests_total_count()
             else:
@@ -166,11 +155,6 @@ class RequestsApiEndpoints:
         )
         def get_request_order(request: WSGIRequest, request_id: int):
             """Get the order for a request"""
-            perms = GeneralManager.has_basic_access(request.user)
-
-            if not perms:
-                return HTTPStatus.FORBIDDEN, {"error": gettext("Permission Denied")}
-
             try:
                 request_user = Request.objects.get(
                     pk=request_id,
