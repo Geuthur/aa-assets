@@ -7,7 +7,6 @@
 import requests
 
 # Django
-from django.contrib.auth.models import User
 from django.core.cache import cache
 from django.db import models
 from django.db.models import Case, F, Q, Value, When
@@ -58,28 +57,6 @@ class AssetsQuerySet(models.QuerySet):
                 queries.append(
                     models.Q(owner__corporation__corporation_id=char.corporation_id)
                 )
-
-            query = queries.pop()
-            for q in queries:
-                query |= q
-            return self.filter(query)
-        except AssertionError:
-            logger.debug("User %s has no main character. Nothing visible.", user)
-            return self.none()
-
-    def manage_to(self, user: User):
-        if GeneralManager.has_management_access(user):
-            logger.debug("Returning all for manager %s.", user)
-            return self
-
-        try:
-            char = user.profile.main_character
-            assert char
-            queries = [models.Q(owner__user=user)]
-
-            logger.debug(
-                "%s queries for user %s visible chracters.", len(queries), user
-            )
 
             query = queries.pop()
             for q in queries:
@@ -179,9 +156,6 @@ class AssetsManagerBase(models.Manager):
 
     def visible_to(self, user):
         return self.get_queryset().visible_to(user)
-
-    def manage_to(self, user: User):
-        return self.get_queryset().manage_to(user)
 
 
 AssetsManager = AssetsManagerBase.from_queryset(AssetsQuerySet)

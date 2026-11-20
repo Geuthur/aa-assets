@@ -81,6 +81,7 @@ Section Order:
 
 ### Removed
 
+- Unused and broken `manage_to` of `Assets`, `Location` and `Request` querysets, plus the copies of `visible_eve_characters` and `manage_eve_characters` in the `Request` manager; `Owner.objects.visible_eve_characters` stays the only one
 - The old Django pages (locations, assets, requests), their order and status views, templates, jQuery/DataTables scripts and `forms.py`, plus the HTML fields `order`/`actions` of `requests/`, the field `view` of `location/` and the endpoint `requests/order/{id}/`
 - Unused `HTTPGatewayTimeoutError` (`assets/errors.py`) and its dead `except` branch in `Owner.update_assets_esi`
 - Own HTTP 420 retry in `update_location` and `update_parent_location`: django-esi raises `ESIErrorLimitException` for HTTP 420, so this code path was never reached
