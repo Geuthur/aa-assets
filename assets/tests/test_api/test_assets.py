@@ -6,6 +6,7 @@ from http import HTTPStatus
 # AA Assets
 from assets import __app_name__
 from assets.tests import AuthTestCase
+from assets.tests.testdata.factory import UserMainFactory
 from assets.tests.testdata.orders import (
     LOCATION_ID,
     create_asset,
@@ -13,6 +14,7 @@ from assets.tests.testdata.orders import (
 )
 
 API = f"/{__app_name__}/api"
+OTHER_LOCATION_ID = 60008494
 
 
 class TestAssetsApi(AuthTestCase):
@@ -20,6 +22,10 @@ class TestAssetsApi(AuthTestCase):
     def setUpClass(cls):
         super().setUpClass()
         cls.asset = create_asset(create_owner(cls.user), quantity=7)
+        cls.other_user = UserMainFactory()
+        other_owner = create_owner(cls.other_user)
+        cls.other_asset = create_asset(other_owner, item_id=2)
+        create_asset(other_owner, item_id=3, location_id=OTHER_LOCATION_ID)
 
     def setUp(self):
         self.client.force_login(self.user)
@@ -47,3 +53,45 @@ class TestAssetsApi(AuthTestCase):
         row = response.json()[0]
         self.assertEqual(row["location_id"], LOCATION_ID)
         self.assertIn("View Assets", row["view"])
+
+    def test_get_assets_should_return_only_visible_assets(self):
+        # Test Action
+        response = self.client.get(f"{API}/location/{LOCATION_ID}/flag/all/")
+
+        # Expected Result
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        asset_pks = [row["asset_pk"] for row in response.json()["assets"]]
+        self.assertEqual(asset_pks, [self.asset.pk])
+
+    def test_get_assets_should_return_forbidden_without_visible_asset(self):
+        # Test Data
+        user = UserMainFactory()
+        self.client.force_login(user)
+
+        # Test Action
+        response = self.client.get(f"{API}/location/{LOCATION_ID}/flag/all/")
+
+        # Expected Result
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
+        self.assertEqual(response.json(), {"error": "Permission Denied"})
+
+    def test_get_locations_should_return_only_visible_locations(self):
+        # Test Action
+        response = self.client.get(f"{API}/location/")
+
+        # Expected Result
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        location_ids = [row["location_id"] for row in response.json()]
+        self.assertEqual(location_ids, [LOCATION_ID])
+
+    def test_get_locations_should_return_forbidden_without_visible_owner(self):
+        # Test Data
+        user = UserMainFactory()
+        self.client.force_login(user)
+
+        # Test Action
+        response = self.client.get(f"{API}/location/")
+
+        # Expected Result
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
+        self.assertEqual(response.json(), {"error": "Permission Denied"})

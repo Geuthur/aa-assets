@@ -33,7 +33,7 @@ class RequestOrder(forms.Form):
 class RequestMultiOrder(forms.Form):
     """Form for Multi-Ordering."""
 
-    def __init__(self, *args, location_flag=None, location_id=None, **kwargs):
+    def __init__(self, *args, user, location_flag=None, location_id=None, **kwargs):
         super().__init__(*args, **kwargs)
         self.asset_fields = []  # Liste der dynamisch hinzugefügten Felder
         if location_id is not None:
@@ -44,9 +44,12 @@ class RequestMultiOrder(forms.Form):
                 location_flag = [location_flag]
 
             # Dynamisch Felder für jedes Asset mit der gegebenen location_id hinzufügen
-            for asset in Assets.objects.filter(
-                location_flag__in=location_flag, location_id=location_id
-            ).order_by("eve_type__name"):
+            # Only assets the user may see
+            for asset in (
+                Assets.objects.visible_to(user)
+                .filter(location_flag__in=location_flag, location_id=location_id)
+                .order_by("eve_type__name")
+            ):
                 asset = update_asset_object(asset)
                 if asset is False:
                     continue

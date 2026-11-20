@@ -17,10 +17,15 @@ def create_owner(user) -> Owner:
     )
 
 
-def create_asset(owner: Owner, quantity: int = 10, item_id: int = 1) -> Assets:
+def create_asset(
+    owner: Owner,
+    quantity: int = 10,
+    item_id: int = 1,
+    location_id: int = LOCATION_ID,
+) -> Assets:
     """One asset of the owner in a station hangar."""
     location, _ = Location.objects.get_or_create(
-        id=LOCATION_ID, defaults={"name": "Jita IV - Moon 4"}
+        id=location_id, defaults={"name": f"Station {location_id}"}
     )
     return Assets.objects.create(
         item_id=item_id,

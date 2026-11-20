@@ -1,5 +1,6 @@
 # Django
 from django.core.exceptions import ObjectDoesNotExist
+from django.db.models import QuerySet
 from django.template.loader import render_to_string
 from django.utils.html import format_html
 from django.utils.safestring import mark_safe
@@ -60,28 +61,13 @@ def get_manage_permission(request) -> bool:
     return perms
 
 
-def get_asset(request, location_id: int) -> tuple[bool, Assets]:
-    """Get the Assets object for the request user."""
-    perms = True
-
-    asset = Assets.objects.filter(location_id=location_id)
-
-    visible = Assets.objects.visible_to(request.user)
-    if not asset.intersection(visible).exists():
-        perms = False
-    return perms, asset
+def get_asset(request, location_id: int) -> tuple[bool, QuerySet[Assets]]:
+    """Get the assets in the location that the request user may see."""
+    asset = Assets.objects.visible_to(request.user).filter(location_id=location_id)
+    return asset.exists(), asset
 
 
-def get_owner(request) -> tuple[bool, Owner | None]:
-    """Get the owner object for the request user."""
-    perms = True
-
-    try:
-        owner = Owner.objects.all()
-    except Owner.DoesNotExist:
-        return None, None
-
-    visible = Owner.objects.visible_to(request.user)
-    if not owner.intersection(visible).exists():
-        perms = False
-    return perms, owner
+def get_owner(request) -> tuple[bool, QuerySet[Owner]]:
+    """Get the owners that the request user may see."""
+    owner = Owner.objects.visible_to(request.user)
+    return owner.exists(), owner
