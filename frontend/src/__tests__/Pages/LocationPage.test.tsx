@@ -19,8 +19,8 @@ vi.mock("@/Api/calls/requests", async (importOriginal) => {
   return { ...actual, createOrder: vi.fn() };
 });
 
-const renderLocation = (id = "60003760") =>
-  renderPage(<LocationPage />, `location/${id}/`, "location/:locationId/");
+const renderLocation = (id = "60003760", search = "") =>
+  renderPage(<LocationPage />, `location/${id}/${search}`, "location/:locationId/");
 
 describe("LocationPage", () => {
   beforeEach(() => {
@@ -30,6 +30,38 @@ describe("LocationPage", () => {
       location_flag: "all",
       assets: [asset, secondAsset],
     });
+  });
+
+  it("should prefilter the location flag from the query parameter", async () => {
+    // Test Data
+    vi.mocked(assetsApi.loadAssets).mockResolvedValue({
+      location_id: 60003760,
+      location_flag: "all",
+      assets: [asset, { ...secondAsset, location_flag: "CorpSAG5" }],
+    });
+
+    // Test Action
+    renderLocation("60003760", "?flag=CorpSAG5");
+
+    // Expected Result
+    expect(await screen.findByText("Reaper")).toBeInTheDocument();
+    expect(screen.queryByText("Rifter")).not.toBeInTheDocument();
+  });
+
+  it("should not filter the location flag without the query parameter", async () => {
+    // Test Data
+    vi.mocked(assetsApi.loadAssets).mockResolvedValue({
+      location_id: 60003760,
+      location_flag: "all",
+      assets: [asset, { ...secondAsset, location_flag: "CorpSAG5" }],
+    });
+
+    // Test Action
+    renderLocation();
+
+    // Expected Result
+    expect(await screen.findByText("Reaper")).toBeInTheDocument();
+    expect(screen.getByText("Rifter")).toBeInTheDocument();
   });
 
   it("should list the assets of the location", async () => {

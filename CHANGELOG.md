@@ -33,6 +33,7 @@ Section Order:
 - User settings with the option to disable notifications, readable and editable through the API (`settings/`)
 - API endpoints to create orders and to cancel, complete or reopen them, plus `menu/`, `user/`, `owners/` (update status), `requests/{id}/` and `admin/tasks/` for the coming React frontend
 - React frontend for locations, assets with single and multi order, requests, administration and settings, with the update status of every owner
+- The location page prefills the location flag filter from `?flag=<flag>` (e.g. `/assets/location/<id>/?flag=CorpSAG5`)
 
 > [!IMPORTANT]
 > Basic access is only granted by `basic_access`. Users with higher permissions (`corporation_access`, `manage_requests`, `manage_corporation`, `admin_access`) but without `basic_access` lose access to the API and to the pages to add a corporation and to complete or reopen requests. Grant `basic_access` to these users or groups.
