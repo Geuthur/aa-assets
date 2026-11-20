@@ -42,7 +42,8 @@ export const RequestsPage = () => {
   const mine = useQuery({
     queryKey: requestQueryKeys.mine,
     queryFn: loadMyRequests,
-    enabled: tab === "mine",
+    // Wait for the user, managers start on the other tab
+    enabled: !userQuery.isLoading && tab === "mine",
   });
 
   const actionMutation = useMutation({

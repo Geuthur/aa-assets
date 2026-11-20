@@ -1,5 +1,5 @@
 // Third Party
-import { screen, within } from "@testing-library/react";
+import { screen, waitForElementToBeRemoved, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -104,7 +104,7 @@ describe("LocationPage", () => {
     expect(requestsApi.createOrder).not.toHaveBeenCalled();
   });
 
-  it("should show the message of a failed order", async () => {
+  it("should close the modal and show the message of a failed order", async () => {
     // Test Data
     const user = userEvent.setup();
     vi.mocked(requestsApi.createOrder).mockRejectedValue(new Error("Requested amount exceeds available quantity."));
@@ -117,6 +117,8 @@ describe("LocationPage", () => {
     await user.click(within(dialog).getByRole("button", { name: "Confirm" }));
 
     // Expected Result
-    expect(await within(dialog).findByRole("alert")).toHaveTextContent("Requested amount exceeds available quantity.");
+    expect(await screen.findByRole("alert")).toHaveTextContent("Requested amount exceeds available quantity.");
+    await waitForElementToBeRemoved(() => screen.queryByRole("dialog"));
+    expect(assetsApi.loadAssets).toHaveBeenCalledTimes(2);
   });
 });

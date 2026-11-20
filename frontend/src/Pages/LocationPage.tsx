@@ -15,6 +15,7 @@ import { createOrder, requestQueryKeys } from "@/Api/calls/requests";
 import type { AssetSchema, OrderItemRequest } from "@/Api/schema";
 import { AssetsTable } from "@/Components/Assets/AssetsTable";
 import { OrderModal } from "@/Components/Assets/OrderModal";
+import { ProjectName } from "@/constants";
 
 /** The assets of one location with single and multi order. */
 export const LocationPage = () => {
@@ -34,9 +35,10 @@ export const LocationPage = () => {
 
   const orderMutation = useMutation({
     mutationFn: (items: OrderItemRequest[]) => createOrder(items),
-    onSuccess: () => setShowOrder(false),
     onSettled: () => {
-      // A partial order is stored even when the API answers 409
+      // A partial order is stored even when the API answers 409, so the modal closes either way
+      // and the reloaded assets show the remaining quantities
+      setShowOrder(false);
       queryClient.invalidateQueries({ queryKey: assetsQueryKeys.assets(id) });
       queryClient.invalidateQueries({ queryKey: requestQueryKeys.all });
       queryClient.invalidateQueries({ queryKey: queryKeys.Menu });
@@ -63,7 +65,7 @@ export const LocationPage = () => {
   return (
     <Card className="border-0 bg-transparent">
       <BaseSectionHeader name={t("Assets in {{location}}", { location: locationName })}>
-        <Link className="btn btn-sm btn-secondary" to="../../">
+        <Link className="btn btn-sm btn-secondary" to={`/${ProjectName}/`}>
           <ArrowLeft size={14} /> {t("Locations")}
         </Link>
       </BaseSectionHeader>
@@ -71,6 +73,11 @@ export const LocationPage = () => {
       {orderMutation.isSuccess && (
         <Alert variant="success" role="status" dismissible onClose={() => orderMutation.reset()}>
           {orderMutation.data.message}
+        </Alert>
+      )}
+      {orderMutation.isError && (
+        <Alert variant="danger" role="alert" dismissible onClose={() => orderMutation.reset()}>
+          {orderMutation.error.message}
         </Alert>
       )}
       {isError && (
@@ -103,7 +110,6 @@ export const LocationPage = () => {
         onHide={() => setShowOrder(false)}
         onSubmit={(items) => orderMutation.mutate(items)}
         isPending={orderMutation.isPending}
-        errorMessage={orderMutation.isError ? orderMutation.error.message : null}
       />
     </Card>
   );

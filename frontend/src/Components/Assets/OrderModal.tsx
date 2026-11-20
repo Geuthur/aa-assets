@@ -17,12 +17,10 @@ export interface OrderModalProps {
   /** Called with the items that have an amount above zero. */
   onSubmit: (items: OrderItemRequest[]) => void;
   isPending?: boolean;
-  /** Message of a failed order. */
-  errorMessage?: string | null;
 }
 
 /** Order one or more assets: one amount field per asset, limited to the available quantity. */
-export const OrderModal = ({ assets, show, onHide, onSubmit, isPending = false, errorMessage }: OrderModalProps) => {
+export const OrderModal = ({ assets, show, onHide, onSubmit, isPending = false }: OrderModalProps) => {
   const { t } = useTranslation();
   const [amounts, setAmounts] = useState<Record<number, string>>({});
   const [showRequired, setShowRequired] = useState(false);
@@ -72,11 +70,6 @@ export const OrderModal = ({ assets, show, onHide, onSubmit, isPending = false, 
         </>
       }
     >
-      {errorMessage && (
-        <Alert variant="danger" role="alert">
-          {errorMessage}
-        </Alert>
-      )}
       {showRequired && (
         <Alert variant="warning" role="alert">
           {t("Enter an amount of at least 1 for one asset.")}
