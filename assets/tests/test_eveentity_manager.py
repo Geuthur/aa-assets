@@ -1,19 +1,13 @@
 # Standard Library
-from unittest.mock import patch
+from http import HTTPStatus
+
+# Third Party
+import pook
 
 # AA Assets
 from assets.models import EveEntity
 from assets.tests import NoSocketsTestCase
-from assets.tests.testdata.esi_stub_openapi import (
-    EsiEndpoint,
-    create_esi_client_stub,
-)
-
-MODULE_PATH = "assets.managers"
-
-ASSETS_EVE_ENTITY_ENDPOINTS = [
-    EsiEndpoint("Universe", "PostUniverseNames", "ids"),
-]
+from assets.tests.testdata.esi_urls import clear_esi_limits, universe_names_url
 
 
 class TestGeneralManager(NoSocketsTestCase):
@@ -22,8 +16,13 @@ class TestGeneralManager(NoSocketsTestCase):
         super().setUpClass()
         cls.manager = EveEntity.objects
 
-    @patch(MODULE_PATH + ".esi")
-    def test_get_or_create_esi_existing(self, mock_esi):
+    def setUp(self):
+        super().setUp()
+        clear_esi_limits()
+        self.addCleanup(clear_esi_limits)
+
+    @pook.on
+    def test_get_or_create_esi_existing(self):
         """
         Test retrieving an existing EveEntity from the database.
 
@@ -35,6 +34,7 @@ class TestGeneralManager(NoSocketsTestCase):
         - EveEntity is retrieved correctly.
         - Entity has correct id.
         - Created flag is False.
+        - No ESI request is made.
         """
         # Test Data
         entity = EveEntity.objects.create(
@@ -47,9 +47,10 @@ class TestGeneralManager(NoSocketsTestCase):
         # Expected Results
         self.assertEqual(result, entity)
         self.assertFalse(created)
+        self.assertEqual(pook.unmatched_requests(), [])
 
-    @patch(MODULE_PATH + ".esi")
-    def test_get_or_create_esi_new(self, mock_esi):
+    @pook.on
+    def test_get_or_create_esi_new(self):
         """
         Test creating a new EveEntity from ESI data.
 
@@ -63,18 +64,26 @@ class TestGeneralManager(NoSocketsTestCase):
         - Created flag is True.
         """
         # Test Data
-        mock_esi.client = create_esi_client_stub(endpoints=ASSETS_EVE_ENTITY_ENDPOINTS)
+        mock = pook.post(
+            universe_names_url(),
+            json=[9996],
+            reply=HTTPStatus.OK,
+            response_json=[
+                {"id": 9996, "name": "Create Character", "category": "character"}
+            ],
+        )
 
         # Test Action
         result, created = self.manager.get_or_create_esi(eve_id=9996)
 
         # Expected Results
+        self.assertTrue(mock.isdone())
         self.assertEqual(result.id, 9996)
         self.assertEqual(result.name, "Create Character")
         self.assertTrue(created)
 
-    @patch(MODULE_PATH + ".esi")
-    def test_create_bulk_from_esi(self, mock_esi):
+    @pook.on
+    def test_create_bulk_from_esi(self):
         """
         Test bulk creation of EveEntity objects from ESI data.
 
@@ -87,18 +96,27 @@ class TestGeneralManager(NoSocketsTestCase):
         - Entities with specified eve_ids exist in the database.
         """
         # Test Data
-        mock_esi.client = create_esi_client_stub(endpoints=ASSETS_EVE_ENTITY_ENDPOINTS)
+        mock = pook.post(
+            universe_names_url(),
+            json=[9997, 9998],
+            reply=HTTPStatus.OK,
+            response_json=[
+                {"id": 9997, "name": "Bulk Character", "category": "character"},
+                {"id": 9998, "name": "Bulk Character 2", "category": "character"},
+            ],
+        )
 
         # Test Action
         result = self.manager.create_bulk_from_esi([9997, 9998])
 
         # Expected Results
+        self.assertTrue(mock.isdone())
         self.assertTrue(result)
         self.assertTrue(EveEntity.objects.filter(id=9997).exists())
         self.assertTrue(EveEntity.objects.filter(id=9998).exists())
 
-    @patch(MODULE_PATH + ".esi")
-    def test_update_or_create_esi(self, mock_esi):
+    @pook.on
+    def test_update_or_create_esi(self):
         """
         Test updating or creating an EveEntity from ESI data.
 
@@ -112,12 +130,20 @@ class TestGeneralManager(NoSocketsTestCase):
         - Created flag is True.
         """
         # Test Data
-        mock_esi.client = create_esi_client_stub(endpoints=ASSETS_EVE_ENTITY_ENDPOINTS)
+        mock = pook.post(
+            universe_names_url(),
+            json=[9999],
+            reply=HTTPStatus.OK,
+            response_json=[
+                {"id": 9999, "name": "New Test Character", "category": "character"}
+            ],
+        )
 
         # Test Action
         result, created = self.manager.update_or_create_esi(eve_id=9999)
 
         # Expected Results
+        self.assertTrue(mock.isdone())
         self.assertEqual(result.id, 9999)
         self.assertEqual(result.name, "New Test Character")
         self.assertTrue(created)

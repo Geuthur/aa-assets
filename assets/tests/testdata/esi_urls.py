@@ -21,6 +21,11 @@ def structure_url(structure_id: int) -> str:
     return f"{ESI_BASE_URL}/universe/structures/{structure_id}"
 
 
+def universe_names_url() -> str:
+    """Return the ESI URL to resolve IDs to names."""
+    return f"{ESI_BASE_URL}/universe/names"
+
+
 def clear_esi_limits() -> None:
     """Remove the ESI error limit from the cache."""
     cache.delete("esi_error_limit_reset")
