@@ -18,4 +18,5 @@ __operations__ = [
     # Universe operations
     "GetUniverseStationsStationId",
     "GetUniverseStructuresStructureId",
+    "PostUniverseNames",
 ]
