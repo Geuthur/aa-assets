@@ -159,11 +159,17 @@ class Owner(UpdateManagerMixin, models.Model):
             self.update_order_assets(orders)
 
     def get_open_orders(self) -> list[RequestAssets]:
-        """Return the open orders of assets of this owner."""
+        """
+        Return the open orders of assets of this owner.
+
+        Orders whose asset no longer exists are included, so they are linked
+        again when this owner holds a matching asset.
+        """
+        own_assets = Assets.objects.filter(owner=self).values("pk")
+        all_assets = Assets.objects.values("pk")
         return list(
-            RequestAssets.objects.filter(
-                request__status=Request.STATUS_OPEN,
-                asset_pk__in=Assets.objects.filter(owner=self).values("pk"),
+            RequestAssets.objects.filter(request__status=Request.STATUS_OPEN).filter(
+                models.Q(asset_pk__in=own_assets) | ~models.Q(asset_pk__in=all_assets)
             )
         )
 

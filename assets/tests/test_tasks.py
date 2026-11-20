@@ -417,19 +417,33 @@ class TestUpdateAssetsForOwnerOrders(EsiTaskTestCase):
         self.assertEqual(other_order.asset_pk, other_asset.pk)
 
     @pook.on
-    def test_should_not_link_orders_of_other_owners(self):
-        # Test Data: the order belongs to an asset of the other owner
-        other_order = self._order(self._asset(self.other_owner).pk)
-        Assets.objects.filter(owner=self.other_owner).delete()
+    def test_should_link_orders_without_existing_asset(self):
+        # Test Data: the asset of the order is gone, e.g. after an earlier update
+        lost_asset = self._asset(self.owner)
+        order = self._order(lost_asset.pk)
+        lost_asset.delete()
         self._esi_assets()
 
         # Test Action
         tasks.update_assets_for_owner(self.owner.pk, force_refresh=True)
 
         # Expected Result
-        old_asset_pk = other_order.asset_pk
+        order.refresh_from_db()
+        self.assertEqual(order.asset_pk, Assets.objects.get(owner=self.owner).pk)
+
+    @pook.on
+    def test_should_not_touch_orders_of_existing_assets_of_other_owners(self):
+        # Test Data: the other owner holds the asset in another hangar
+        other_asset = self._asset(self.other_owner)
+        other_order = self._order(other_asset.pk)
+        self._esi_assets()
+
+        # Test Action
+        tasks.update_assets_for_owner(self.owner.pk, force_refresh=True)
+
+        # Expected Result
         other_order.refresh_from_db()
-        self.assertEqual(other_order.asset_pk, old_asset_pk)
+        self.assertEqual(other_order.asset_pk, other_asset.pk)
 
     @pook.on
     def test_should_update_owners_without_status_and_record_success(self):
