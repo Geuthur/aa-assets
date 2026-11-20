@@ -44,6 +44,28 @@ class TestAssetsApi(AuthTestCase):
         self.assertEqual(row["name"], self.asset.eve_type.name)
         self.assertEqual(row["quantity"], 7)
 
+    def test_get_assets_should_return_total_price(self):
+        # Test Data
+        self.asset.price = 2.5
+        self.asset.save()
+
+        # Test Action
+        response = self.client.get(f"{API}/location/{LOCATION_ID}/flag/all/")
+
+        # Expected Result
+        self.assertEqual(response.json()["assets"][0]["price"], 17.5)
+
+    def test_get_assets_should_return_null_price_without_price(self):
+        # Test Data
+        self.asset.price = None
+        self.asset.save()
+
+        # Test Action
+        response = self.client.get(f"{API}/location/{LOCATION_ID}/flag/all/")
+
+        # Expected Result
+        self.assertIsNone(response.json()["assets"][0]["price"])
+
     def test_get_locations_should_return_location(self):
         # Test Action
         response = self.client.get(f"{API}/location/")
@@ -52,7 +74,7 @@ class TestAssetsApi(AuthTestCase):
         self.assertEqual(response.status_code, HTTPStatus.OK)
         row = response.json()[0]
         self.assertEqual(row["location_id"], LOCATION_ID)
-        self.assertIn("View Assets", row["view"])
+        self.assertNotIn("view", row)
 
     def test_get_assets_should_return_only_visible_assets(self):
         # Test Action

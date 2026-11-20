@@ -5,8 +5,6 @@ from http import HTTPStatus
 from ninja import NinjaAPI
 
 # Django
-from django.urls import reverse
-from django.utils.html import format_html
 from django.utils.translation import gettext
 
 # AA Assets
@@ -54,10 +52,9 @@ class AssetsApiEndpoints:
                 if asset is False:
                     continue
 
-                try:
-                    price = asset.price * asset.quantity
-                except TypeError:
-                    price = "N/A"
+                price = (
+                    asset.price * asset.quantity if asset.price is not None else None
+                )
                 assets.append(
                     {
                         "asset_pk": asset.pk,
@@ -114,18 +111,11 @@ class AssetsApiEndpoints:
             output = []
 
             for location in locations:
-                url = reverse(
-                    viewname="assets:assets",
-                    kwargs={"location_id": location.id, "location_flag": "all"},
-                )
-                html = f"<a href='{url}'><button class='btn btn-primary'>View Assets</button></a>"
-
                 output.append(
                     {
                         "location_id": location.id,
                         "name": location.location_name,
                         "solar_system": location.system_name,
-                        "view": format_html(html),
                     }
                 )
 

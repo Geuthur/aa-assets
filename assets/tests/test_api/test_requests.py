@@ -361,28 +361,6 @@ class TestGetRequest(AuthTestCase):
         self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
         self.assertEqual(response.json(), {"error": "Permission Denied"})
 
-    def test_get_request_order_should_return_items_of_own_order(self):
-        # Test Data
-        self.client.force_login(self.user)
-
-        # Test Action
-        response = self.client.get(f"{API}/requests/order/{self.order.pk}/")
-
-        # Expected Result
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        self.assertContains(response, self.asset.eve_type.name)
-
-    def test_get_request_order_should_return_403_for_order_of_other_user(self):
-        # Test Data
-        self.client.force_login(self.other_user)
-
-        # Test Action
-        response = self.client.get(f"{API}/requests/order/{self.order.pk}/")
-
-        # Expected Result
-        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
-        self.assertEqual(response.json(), {"error": "Request does not exist"})
-
     def test_get_request_should_return_404_for_unknown_order(self):
         # Test Data
         self.client.force_login(self.user)
@@ -435,3 +413,22 @@ class TestRequestListPermissions(AuthTestCase):
         # Expected Result
         self.assertEqual(flags[self.open_order.pk], (True, True, False))
         self.assertEqual(flags[self.cancelled_order.pk], (False, False, True))
+
+    def test_requests_should_return_no_html_fields(self):
+        for user, url in (
+            (self.manager, f"{API}/requests/"),
+            (self.user, f"{API}/requests/myrequests/"),
+        ):
+            with self.subTest(url=url):
+                # Test Data
+                self.client.force_login(user)
+
+                # Test Action
+                row = self.client.get(url).json()[0]
+
+                # Expected Result
+                self.assertNotIn("order", row)
+                self.assertNotIn("actions", row)
+                self.assertIn(
+                    row["action"], (Request.STATUS_OPEN, Request.STATUS_CANCELLED)
+                )

@@ -64,7 +64,7 @@ export const AssetsTable = ({
       columnHelper.accessor("location_flag", {
         header: t("Location Flag"),
       }),
-      columnHelper.accessor((row) => (typeof row.price === "number" ? row.price : null), {
+      columnHelper.accessor((row) => row.price ?? null, {
         id: "price",
         header: t("Price"),
         meta: { align: "right" },

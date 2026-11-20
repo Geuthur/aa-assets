@@ -1,5 +1,4 @@
 # Standard Library
-from http import HTTPStatus
 from typing import Any
 
 # Third Party
@@ -7,22 +6,13 @@ from ninja import NinjaAPI
 
 # Django
 from django.core.handlers.wsgi import WSGIRequest
-from django.shortcuts import render
 from django.utils import timezone
-from django.utils.translation import gettext
-from django.utils.translation import gettext_lazy as _
 
 # AA Assets
 from assets.api import schema
-from assets.api.helpers import get_character_permission, get_manage_permission
-from assets.api.requests.helper import (
-    _my_request_actions,
-    _request_actions,
-    _request_list,
-    request_permissions,
-)
+from assets.api.requests.helper import request_permissions
 from assets.managers import GeneralManager
-from assets.models import Request, RequestAssets
+from assets.models import Request
 
 
 class RequestsApiEndpoints:
@@ -36,9 +26,6 @@ class RequestsApiEndpoints:
         )
         def get_requests(request: WSGIRequest):
             requests_data = Request.objects.visible_to(request.user)
-
-            perm = get_character_permission(request)
-            admin = get_manage_permission(request)
 
             skip_old_entrys = timezone.now() - timezone.timedelta(days=3)
 
@@ -58,11 +45,6 @@ class RequestsApiEndpoints:
                     {
                         "id": req.pk,
                         "status": req.get_status_display(),
-                        "order": _request_list(
-                            req,
-                            perm,
-                            request,
-                        ),
                         "action": req.status,
                         "created": req.created_at,
                         "closed": req.closed_at,
@@ -70,11 +52,6 @@ class RequestsApiEndpoints:
                             req.approver_user.username if req.approver_user else None
                         ),
                         "requestor": req.requesting_user.username,
-                        "actions": _request_actions(
-                            req,
-                            admin,
-                            request,
-                        ),
                         **request_permissions(req, request.user),
                     }
                 )
@@ -91,9 +68,6 @@ class RequestsApiEndpoints:
 
             requests_data = requests_data.filter(requesting_user=request.user)
 
-            perm = get_character_permission(request)
-            admin = get_manage_permission(request)
-
             skip_old_entrys = timezone.now() - timezone.timedelta(days=3)
 
             # Skip old entries older then 3 days
@@ -108,11 +82,6 @@ class RequestsApiEndpoints:
                     {
                         "id": req.pk,
                         "status": req.get_status_display(),
-                        "order": _request_list(
-                            req,
-                            perm,
-                            request,
-                        ),
                         "action": req.status,
                         "created": req.created_at,
                         "closed": req.closed_at,
@@ -120,11 +89,6 @@ class RequestsApiEndpoints:
                             req.approver_user.username if req.approver_user else None
                         ),
                         "requestor": req.requesting_user.username,
-                        "actions": _my_request_actions(
-                            req,
-                            admin,
-                            request,
-                        ),
                         **request_permissions(req, request.user),
                     }
                 )
@@ -150,45 +114,3 @@ class RequestsApiEndpoints:
             }
 
             return output
-
-        @api.get(
-            "requests/order/{request_id}/",
-            response={200: Any, 403: schema.ErrorSchema},
-            tags=self.tags,
-        )
-        def get_request_order(request: WSGIRequest, request_id: int):
-            """Get the order for a request"""
-            try:
-                request_user = Request.objects.visible_to(request.user).get(
-                    pk=request_id,
-                )
-            except Request.DoesNotExist:
-                return HTTPStatus.FORBIDDEN, {
-                    "error": gettext("Request does not exist")
-                }
-
-            orders = RequestAssets.objects.filter(
-                request__pk=request_id,
-            )
-
-            output = []
-
-            for order in orders:
-                output.append(
-                    {
-                        "item_id": order.eve_type.id,
-                        "name": order.eve_type.name,
-                        "quantity": order.quantity,
-                    }
-                )
-
-            context = {
-                "request_id": request_id,
-                "orders": output,
-                "title": _("Order for {requestor} - ID: {request_id}").format(
-                    requestor=request_user.requesting_user.username,
-                    request_id=request_id,
-                ),
-            }
-
-            return render(request, "assets/partials/modal/view-order.html", context)

@@ -223,54 +223,6 @@
         ]
       }
     },
-    "/assets/api/requests/order/{request_id}/": {
-      "get": {
-        "operationId": "assets_api_requests_requests_get_request_order",
-        "summary": "Get Request Order",
-        "parameters": [
-          {
-            "in": "path",
-            "name": "request_id",
-            "schema": {
-              "title": "Request Id",
-              "type": "integer"
-            },
-            "required": true
-          }
-        ],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorSchema"
-                }
-              }
-            }
-          }
-        },
-        "description": "Get the order for a request",
-        "tags": [
-          "Requests"
-        ],
-        "security": [
-          {
-            "SessionAuth": []
-          }
-        ]
-      }
-    },
     "/assets/api/requests/{request_id}/": {
       "get": {
         "operationId": "assets_api_requests_orders_get_request",
@@ -977,7 +929,7 @@
                 "type": "number"
               },
               {
-                "type": "string"
+                "type": "null"
               }
             ],
             "title": "Price"
@@ -990,8 +942,7 @@
           "name",
           "quantity",
           "location_id",
-          "location_flag",
-          "price"
+          "location_flag"
         ],
         "title": "AssetSchema",
         "type": "object"
@@ -1063,15 +1014,10 @@
               }
             ],
             "title": "Solar System"
-          },
-          "view": {
-            "title": "View",
-            "type": "string"
           }
         },
         "required": [
-          "location_id",
-          "view"
+          "location_id"
         ],
         "title": "LocationSchema",
         "type": "object"
@@ -1085,9 +1031,6 @@
           "status": {
             "title": "Status",
             "type": "string"
-          },
-          "order": {
-            "title": "Order"
           },
           "action": {
             "title": "Action",
@@ -1122,9 +1065,6 @@
           "requestor": {
             "title": "Requestor"
           },
-          "actions": {
-            "title": "Actions"
-          },
           "can_cancel": {
             "default": false,
             "title": "Can Cancel",
@@ -1144,12 +1084,10 @@
         "required": [
           "id",
           "status",
-          "order",
           "action",
           "created",
           "approver",
-          "requestor",
-          "actions"
+          "requestor"
         ],
         "title": "Requests",
         "type": "object"

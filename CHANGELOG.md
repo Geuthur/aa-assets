@@ -60,7 +60,8 @@ Section Order:
 
 ### Changed
 
-- The app opens the React frontend; the old start and administration pages are removed, the other old pages are removed in a follow-up
+- The app opens the React frontend; the old Django pages are removed
+- The menu badge of open requests pulses (`has_errors` in `menu/`); `price` of an asset is `null` instead of `"N/A"` without a price
 - The asset update of an owner runs through the `UpdateManager` of the app template: a new `OwnerUpdateStatus` keeps success, errors and token errors per owner and section (section `assets`), replacing `Owner.last_update` (migration `0004_owner_update_status`). Existing owners are updated on the next run. New setting `ASSETS_STALE_TYPES` (default: `ASSETS_UPDATE_PERIOD`)
 - `models.py` and `managers.py` are split into the packages `assets/models/` and `assets/managers/` (one module per model, like aa-example); imports from `assets.models` and `assets.managers` keep working, no new migration, no change in behavior
 - Uniform error format of the API: every error response of an endpoint is an `ErrorSchema` (`{"error": "<text>"}`) instead of a plain string, and every endpoint lists its 403 in the OpenAPI schema. Status codes are unchanged. The order modal shows the message of the API.
@@ -79,6 +80,7 @@ Section Order:
 
 ### Removed
 
+- The old Django pages (locations, assets, requests), their order and status views, templates, jQuery/DataTables scripts and `forms.py`, plus the HTML fields `order`/`actions` of `requests/`, the field `view` of `location/` and the endpoint `requests/order/{id}/`
 - Unused `HTTPGatewayTimeoutError` (`assets/errors.py`) and its dead `except` branch in `Owner.update_assets_esi`
 - Own HTTP 420 retry in `update_location` and `update_parent_location`: django-esi raises `ESIErrorLimitException` for HTTP 420, so this code path was never reached
 
