@@ -1,6 +1,6 @@
 // React
 import { useCallback, useState } from "react";
-import { Link, useParams } from "react-router-dom";
+import { Link, useParams, useSearchParams } from "react-router-dom";
 
 // Third Party
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -22,6 +22,8 @@ export const LocationPage = () => {
   const { t } = useTranslation();
   const queryClient = useQueryClient();
   const { locationId } = useParams();
+  const [searchParams] = useSearchParams();
+  const initialFlag = searchParams.get("flag") ?? undefined;
   const id = Number(locationId);
   const validId = Number.isInteger(id) && id > 0;
   const [orderAssets, setOrderAssets] = useState<AssetSchema[]>([]);
@@ -92,6 +94,7 @@ export const LocationPage = () => {
         isFetching={isFetching}
         isError={isError}
         onOrder={handleOrder}
+        initialFlag={initialFlag}
         toolbar={
           <Button
             size="sm"

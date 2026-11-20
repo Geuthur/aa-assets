@@ -27,6 +27,8 @@ export interface AssetsTableProps {
   onOrder: (asset: AssetSchema) => void;
   /** Slot above the table, e.g. the button of the multi order. */
   toolbar?: React.ReactNode;
+  /** Prefills the filter of the location flag column, e.g. `CorpSAG5`. */
+  initialFlag?: string;
 }
 
 /** Lists the assets of a location with price and an order button per row. */
@@ -37,6 +39,7 @@ export const AssetsTable = ({
   isError = false,
   onOrder,
   toolbar,
+  initialFlag,
 }: AssetsTableProps) => {
   const { t } = useTranslation();
 
@@ -93,6 +96,11 @@ export const AssetsTable = ({
     [t, onOrder],
   );
 
+  const initialState = useMemo(
+    () => (initialFlag ? { columnFilters: [{ id: "location_flag", value: initialFlag }] } : undefined),
+    [initialFlag],
+  );
+
   return (
     <BaseTable
       columns={columns}
@@ -101,6 +109,7 @@ export const AssetsTable = ({
       isFetching={isFetching}
       isError={isError}
       toolbar={toolbar}
+      initialState={initialState}
       loadingText={t("Loading assets...")}
       emptyText={t("No assets found at this location.")}
       exportFileName="assets.csv"
