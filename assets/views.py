@@ -181,7 +181,7 @@ def create_order(request, location_id: int, location_flag: str):
         asset_pk = request.POST.get("asset_pk")
 
         try:
-            asset = Assets.objects.get(pk=asset_pk)
+            asset = Assets.objects.visible_to(request.user).get(pk=asset_pk)
         except Assets.DoesNotExist:
             return JsonResponse(
                 {"success": False, "message": "The asset does not exist."},
@@ -219,7 +219,7 @@ def create_order(request, location_id: int, location_flag: str):
                 continue
 
             try:
-                asset = Assets.objects.get(pk=asset_pk)
+                asset = Assets.objects.visible_to(request.user).get(pk=asset_pk)
             except Assets.DoesNotExist:
                 return JsonResponse(
                     {"success": False, "message": "The asset does not exist."},

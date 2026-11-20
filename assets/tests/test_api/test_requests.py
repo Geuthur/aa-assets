@@ -361,6 +361,28 @@ class TestGetRequest(AuthTestCase):
         self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
         self.assertEqual(response.json(), {"error": "Permission Denied"})
 
+    def test_get_request_order_should_return_items_of_own_order(self):
+        # Test Data
+        self.client.force_login(self.user)
+
+        # Test Action
+        response = self.client.get(f"{API}/requests/order/{self.order.pk}/")
+
+        # Expected Result
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertContains(response, self.asset.eve_type.name)
+
+    def test_get_request_order_should_return_403_for_order_of_other_user(self):
+        # Test Data
+        self.client.force_login(self.other_user)
+
+        # Test Action
+        response = self.client.get(f"{API}/requests/order/{self.order.pk}/")
+
+        # Expected Result
+        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
+        self.assertEqual(response.json(), {"error": "Request does not exist"})
+
     def test_get_request_should_return_404_for_unknown_order(self):
         # Test Data
         self.client.force_login(self.user)

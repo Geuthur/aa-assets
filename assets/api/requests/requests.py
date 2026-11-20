@@ -159,7 +159,7 @@ class RequestsApiEndpoints:
         def get_request_order(request: WSGIRequest, request_id: int):
             """Get the order for a request"""
             try:
-                request_user = Request.objects.get(
+                request_user = Request.objects.visible_to(request.user).get(
                     pk=request_id,
                 )
             except Request.DoesNotExist:
