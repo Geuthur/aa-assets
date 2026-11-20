@@ -6,8 +6,6 @@ from http import HTTPStatus
 # Django
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
-from django.core.cache import cache
-from django.db import transaction
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
@@ -21,57 +19,20 @@ from esi.decorators import token_required
 
 # AA Assets
 from assets import forms
-from assets.hooks import add_info_to_context
-from assets.models import Assets, Owner, Request, RequestAssets
-from assets.tasks import (
-    clear_all_etags,
-    update_all_assets,
-    update_all_locations,
-    update_all_parent_locations,
-    update_assets_for_owner,
+from assets.helpers.admin import queue_admin_tasks
+from assets.helpers.orders import (
+    MODE_CANCELED,
+    MODE_COMPLETED,
+    MODE_OPEN,
+    change_request_status,
+    cooldown_message,
+    exceeds_message,
+    get_apr_cooldown,
 )
-
-
-def build_apr_cooldown_cache_tag(user, request_id, mode):
-    return f"cooldown_request_{user}_{request_id}_{mode}"
-
-
-def get_apr_cooldown(request, request_id, mode):
-    if cache.get(build_apr_cooldown_cache_tag(request.user, request_id, mode), False):
-        return True
-    return False
-
-
-def set_apr_cooldown(user, request_id, mode):
-    """Set a 60 sec cooldown forthe Approver"""
-    return cache.set(build_apr_cooldown_cache_tag(user, request_id, mode), True, (60))
-
-
-def validate_asset_quantity(asset: Assets, amount: int) -> tuple[bool, str]:
-    """Validates if the requested amount exceeds the available quantity."""
-    requests_obj = RequestAssets.objects.filter(
-        asset_pk=asset.pk,
-        eve_type=asset.eve_type,
-        request__status=Request.STATUS_OPEN,
-    ).values_list("quantity", flat=True)
-    if requests_obj and sum(requests_obj) + amount > asset.quantity:
-        return False
-    return True
-
-
-def create_request_asset_object(
-    user_request: Request, asset: Assets, amount: int
-) -> RequestAssets:
-    """Create a RequestAssets Object."""
-    return RequestAssets(
-        name=asset.eve_type.name,
-        request=user_request,
-        asset_pk=asset.pk,
-        asset_location_id=asset.location.id,
-        asset_location_flag=asset.location_flag,
-        eve_type=asset.eve_type,
-        quantity=amount,
-    )
+from assets.helpers.orders import create_order as create_order_for_user
+from assets.hooks import add_info_to_context
+from assets.models import Assets, Owner, Request
+from assets.tasks import update_assets_for_owner
 
 
 @login_required
@@ -94,27 +55,17 @@ def admin(request):
         return redirect("assets:index")
 
     if request.method == "POST":
-        force_refresh = False
-        if request.POST.get("force_refresh", False):
-            force_refresh = True
-        if request.POST.get("run_clear_etag"):
-            messages.info(request, _("Queued Clear All ETags"))
-            clear_all_etags.apply_async(priority=1)
-        if request.POST.get("run_update_all_assets"):
-            messages.info(request, _("Queued Update All Assets"))
-            update_all_assets.apply_async(
-                kwargs={"force_refresh": force_refresh}, priority=7
-            )
-        if request.POST.get("run_update_all_locations"):
-            messages.info(request, _("Queued Update All Locations"))
-            update_all_locations.apply_async(
-                kwargs={"force_refresh": force_refresh}, priority=7
-            )
-        if request.POST.get("run_update_all_parent_locations"):
-            messages.info(request, _("Queued Update All Parent Locations"))
-            update_all_parent_locations.apply_async(
-                kwargs={"force_refresh": force_refresh}, priority=7
-            )
+        queued = queue_admin_tasks(
+            force_refresh=bool(request.POST.get("force_refresh", False)),
+            clear_etags=bool(request.POST.get("run_clear_etag")),
+            update_assets=bool(request.POST.get("run_update_all_assets")),
+            update_locations=bool(request.POST.get("run_update_all_locations")),
+            update_parent_locations=bool(
+                request.POST.get("run_update_all_parent_locations")
+            ),
+        )
+        for msg in queued:
+            messages.info(request, msg)
     return render(request, "assets/admin.html")
 
 
@@ -228,7 +179,6 @@ def create_order(request, location_id: int, location_flag: str):
     if form.is_valid():
         amount = int(form.cleaned_data["amount"])
         asset_pk = request.POST.get("asset_pk")
-        user = request.user
 
         try:
             asset = Assets.objects.get(pk=asset_pk)
@@ -239,8 +189,8 @@ def create_order(request, location_id: int, location_flag: str):
                 safe=False,
             )
 
-        is_valid = validate_asset_quantity(asset, amount)
-        if not is_valid:
+        user_request, _exceeds = create_order_for_user(request.user, [(asset, amount)])
+        if user_request is None:
             return JsonResponse(
                 {
                     "success": False,
@@ -249,20 +199,6 @@ def create_order(request, location_id: int, location_flag: str):
                 status=HTTPStatus.FORBIDDEN,
                 safe=False,
             )
-
-        # Create Request object
-        user_request = Request(
-            requesting_user=user,
-            status=Request.STATUS_OPEN,
-        )
-
-        # Create RequestAssets object
-        # and save it to the database
-        with transaction.atomic():
-            asset_request = create_request_asset_object(user_request, asset, amount)
-            user_request.save()
-            asset_request.save()
-            user_request.notify_new_request()
         return JsonResponse(
             {"success": True, "message": "Order created successfully."},
             status=HTTPStatus.OK,
@@ -277,16 +213,7 @@ def create_order(request, location_id: int, location_flag: str):
             if key.startswith("item_id_")
         ]
 
-        user = request.user
-
-        # Create Request object
-        user_request = Request(
-            requesting_user=user,
-            status=Request.STATUS_OPEN,
-        )
-
-        exceeds_items = []
-        assets_items = []
+        items = []
         for asset_pk, amount in asset_data:
             if amount is None:
                 continue
@@ -299,26 +226,13 @@ def create_order(request, location_id: int, location_flag: str):
                     status=HTTPStatus.NOT_FOUND,
                     safe=False,
                 )
+            items.append((asset, amount))
 
-            is_valid = validate_asset_quantity(asset, amount)
-            if is_valid:
-                assets_items.append(
-                    create_request_asset_object(user_request, asset, amount)
-                )
-            else:
-                exceeds_items.append(asset.eve_type.name)
-
-        if assets_items:
-            with transaction.atomic():
-                user_request.save()
-                for asset_request in assets_items:
-                    asset_request.save()
-                user_request.notify_new_request()
+        _user_request, exceeds_items = create_order_for_user(request.user, items)
 
         if exceeds_items:
-            error_message = f"The following items exceeds the available quantity {', '.join(exceeds_items)} and are not included in your order."
             return JsonResponse(
-                {"success": False, "message": error_message},
+                {"success": False, "message": exceeds_message(exceeds_items)},
                 status=HTTPStatus.CONFLICT,
                 safe=False,
             )
@@ -335,58 +249,30 @@ def create_order(request, location_id: int, location_flag: str):
     )
 
 
-@login_required
-@permissions_required(["assets.basic_access"])
-@require_POST
-def mark_request_canceled(request, request_id: int):
-    """Render view to mark a order request as canceled."""
-    # Check Cooldown
-    cooldown = get_apr_cooldown(request, request_id, "canceled")
-    if cooldown:
-        msg = _("You are on cooldown. Please wait 60 seconds before trying again.")
+def _mark_request(request, request_id: int, mode: str, cooldown_success: bool):
+    """Answer a status change of an order like the views always did."""
+    if get_apr_cooldown(request.user, request_id, mode):
         return JsonResponse(
-            {"success": True, "message": msg},
+            {"success": cooldown_success, "message": cooldown_message()},
             status=HTTPStatus.FORBIDDEN,
             safe=False,
         )
 
     user_request = get_object_or_404(Request, pk=request_id)
-    is_completed = user_request.mark_request(
-        user=request.user,
-        status=Request.STATUS_CANCELLED,
-        closed=True,
-        can_requestor_edit=True,
-    )
-
-    if is_completed:
-        # Set Cooldown
-        set_apr_cooldown(request.user, request_id, "canceled")
-        msg = _(
-            "The request for Order {user_request_pk} from {user_request_requesting_user} has been closed as cancelled."
-        ).format(
-            user_request_pk=user_request.pk,
-            user_request_requesting_user=user_request.requesting_user,
-        )
-
-        user_request.notify_request_canceled(user=request.user)
-
-        return JsonResponse(
-            {"success": True, "message": msg},
-            status=HTTPStatus.OK,
-            safe=False,
-        )
-    msg = _(
-        "The request for Order {user_request_pk} from {user_request_requesting_user} has failed."
-    ).format(
-        user_request_pk=user_request.pk,
-        user_request_requesting_user=user_request.requesting_user,
-    )
-
+    is_changed, msg = change_request_status(request.user, user_request, mode)
     return JsonResponse(
-        {"success": False, "message": msg},
-        status=HTTPStatus.BAD_REQUEST,
+        {"success": is_changed, "message": msg},
+        status=HTTPStatus.OK if is_changed else HTTPStatus.BAD_REQUEST,
         safe=False,
     )
+
+
+@login_required
+@permissions_required(["assets.basic_access"])
+@require_POST
+def mark_request_canceled(request, request_id: int):
+    """Render view to mark a order request as canceled."""
+    return _mark_request(request, request_id, MODE_CANCELED, cooldown_success=True)
 
 
 @login_required
@@ -395,55 +281,7 @@ def mark_request_canceled(request, request_id: int):
 @require_POST
 def mark_request_completed(request, request_id: int):
     """Render view to mark a order request as completed."""
-    # Check Cooldown
-    cooldown = get_apr_cooldown(request, request_id, "completed")
-    if cooldown:
-        return JsonResponse(
-            {
-                "success": False,
-                "message": _(
-                    "You are on cooldown. Please wait 60 seconds before trying again."
-                ),
-            },
-            status=HTTPStatus.FORBIDDEN,
-            safe=False,
-        )
-
-    user_request = get_object_or_404(Request, pk=request_id)
-    is_completed = user_request.mark_request(
-        user=request.user,
-        status=Request.STATUS_COMPLETED,
-        closed=True,
-        can_requestor_edit=False,
-    )
-
-    if is_completed:
-        # Set Cooldown
-        set_apr_cooldown(request.user, request_id, "completed")
-        msg = _(
-            "The request for Order {user_request_pk} from {user_request_requesting_user} has been closed as completed."
-        ).format(
-            user_request_pk=user_request.pk,
-            user_request_requesting_user=user_request.requesting_user,
-        )
-        user_request.notify_request_completed()
-        return JsonResponse(
-            {"success": True, "message": msg},
-            status=HTTPStatus.OK,
-            safe=False,
-        )
-    msg = _(
-        "The request for Order {user_request_pk} from {user_request_requesting_user} has failed."
-    ).format(
-        user_request_pk=user_request.pk,
-        user_request_requesting_user=user_request.requesting_user,
-    )
-
-    return JsonResponse(
-        {"success": False, "message": msg},
-        status=HTTPStatus.BAD_REQUEST,
-        safe=False,
-    )
+    return _mark_request(request, request_id, MODE_COMPLETED, cooldown_success=False)
 
 
 @login_required
@@ -452,47 +290,4 @@ def mark_request_completed(request, request_id: int):
 @require_POST
 def mark_request_open(request, request_id: int):
     """Render view to mark a order request as open."""
-    # Check Cooldown
-    cooldown = get_apr_cooldown(request, request_id, "open")
-    if cooldown:
-        msg = _("You are on cooldown. Please wait 60 seconds before trying again.")
-        return JsonResponse(
-            {"success": True, "message": msg},
-            status=HTTPStatus.FORBIDDEN,
-            safe=False,
-        )
-
-    user_request = get_object_or_404(Request, pk=request_id)
-    is_completed = user_request.mark_request(
-        user=request.user,
-        status=Request.STATUS_OPEN,
-        closed=False,
-    )
-
-    if is_completed:
-        # Set Cooldown
-        set_apr_cooldown(request.user, request_id, "open")
-        msg = _(
-            "The request for Order {user_request_pk} from {user_request_requesting_user} has been reopened."
-        ).format(
-            user_request_pk=user_request.pk,
-            user_request_requesting_user=user_request.requesting_user,
-        )
-        user_request.notify_request_open(request)
-        return JsonResponse(
-            {"success": True, "message": msg},
-            status=HTTPStatus.OK,
-            safe=False,
-        )
-    msg = _(
-        "The request for Order {user_request_pk} from {user_request_requesting_user} has failed."
-    ).format(
-        user_request_pk=user_request.pk,
-        user_request_requesting_user=user_request.requesting_user,
-    )
-
-    return JsonResponse(
-        {"success": False, "message": msg},
-        status=HTTPStatus.BAD_REQUEST,
-        safe=False,
-    )
+    return _mark_request(request, request_id, MODE_OPEN, cooldown_success=True)

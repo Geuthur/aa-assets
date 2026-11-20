@@ -1,7 +1,7 @@
 """Tests for the models."""
 
 # Standard Library
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 # Third Party
 from evesde_factory.allianceauth import EveCorporationInfoFactory
@@ -122,11 +122,8 @@ class TestRequestNotifications(AuthTestCase):
     def test_notify_request_open_should_fill_title_and_message(
         self, _items, _approvers, send
     ):
-        # Test Data
-        request = Mock(user=self.approver)
-
         # Test Action
-        self.order.notify_request_open(request)
+        self.order.notify_request_open(self.approver)
 
         # Expected Result
         sent = self._sent(send)

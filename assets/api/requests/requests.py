@@ -19,6 +19,7 @@ from assets.api.requests.helper import (
     _my_request_actions,
     _request_actions,
     _request_list,
+    request_permissions,
 )
 from assets.managers import GeneralManager
 from assets.models import Request, RequestAssets
@@ -74,6 +75,7 @@ class RequestsApiEndpoints:
                             admin,
                             request,
                         ),
+                        **request_permissions(req, request.user),
                     }
                 )
 
@@ -123,6 +125,7 @@ class RequestsApiEndpoints:
                             admin,
                             request,
                         ),
+                        **request_permissions(req, request.user),
                     }
                 )
 

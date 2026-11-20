@@ -222,17 +222,17 @@ class Request(models.Model):
                 level="danger",
             )
 
-    def notify_request_open(self, request) -> None:
+    def notify_request_open(self, user: User) -> None:
         """Notify requestor that a Order marked as reopened."""
         title = _(
             "{user} has reopened the Order for {requestor} ID: {request_id}."
         ).format(
-            user=request.user,
+            user=user,
             requestor=self.requesting_user,
             request_id=self.pk,
         )
         msg = _("{user} has reopened the following items:{items}\n").format(
-            user=request.user,
+            user=user,
             items=self.convert_order_to_notifiy(),
         )
 

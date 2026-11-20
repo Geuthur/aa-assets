@@ -6,7 +6,7 @@ from ninja.security import django_auth
 from django.conf import settings
 
 # AA Assets
-from assets.api import assets, general, requests
+from assets.api import assets, general, owners, requests
 from assets.providers import logger
 
 api = NinjaAPI(
@@ -23,3 +23,5 @@ assets.setup(api)
 requests.setup(api)
 # Add the general endpoints
 general.setup(api)
+# Add the owner endpoints
+owners.setup(api)
