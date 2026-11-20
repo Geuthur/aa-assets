@@ -1,8 +1,11 @@
-"""General model: the app's permissions."""
+"""General models: the app's permissions and the user settings."""
 
 # Django
 from django.db import models
 from django.utils.translation import gettext_lazy as _
+
+# Alliance Auth
+from allianceauth.authentication.models import User
 
 # AA Assets
 from assets.managers.general import GeneralManager
@@ -25,3 +28,18 @@ class General(models.Model):
             ("manage_requests", _("Can manage requests")),
         )
         default_permissions = ()
+
+
+class UserSettings(models.Model):
+    """Settings of a user for this app."""
+
+    class Meta:
+        default_permissions = ()
+
+    user = models.OneToOneField(
+        User,
+        on_delete=models.CASCADE,
+        related_name="assets_settings",
+    )
+
+    disable_notifications = models.BooleanField(default=False)
