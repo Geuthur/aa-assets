@@ -14,6 +14,7 @@ from allianceauth.notifications import notify
 # AA Assets
 from assets import __title__
 from assets.constants import DISCORD_EMBED_COLOR_MAP
+from assets.models.general import UserSettings
 from assets.providers import logger
 
 
@@ -109,6 +110,10 @@ def send_user_notification(
         logger.warning(
             "User with ID %s does not exist. Notification not sent.", user_id
         )
+        return
+
+    if UserSettings.objects.filter(user=user, disable_notifications=True).exists():
+        logger.info("Notifications are disabled for user %s; skipping delivery.", user)
         return
 
     getattr(notify, level)(user=user, title=title, message=message)

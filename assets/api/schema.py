@@ -16,6 +16,14 @@ class ErrorSchema(Schema):
     error: str
 
 
+class UserSettingsSchema(Schema):
+    disable_notifications: bool
+
+
+class UserSettingsUpdateRequest(Schema):
+    disable_notifications: bool
+
+
 class Character(Schema):
     character_name: str
     character_id: int

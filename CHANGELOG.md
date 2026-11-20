@@ -28,6 +28,10 @@ Section Order:
 
 <!-- Your changes go here -->
 
+### Added
+
+- User settings with the option to disable notifications, readable and editable through the API (`settings/`)
+
 > [!IMPORTANT]
 > Basic access is only granted by `basic_access`. Users with higher permissions (`corporation_access`, `manage_requests`, `manage_corporation`, `admin_access`) but without `basic_access` lose access to the API and to the pages to add a corporation and to complete or reopen requests. Grant `basic_access` to these users or groups.
 
