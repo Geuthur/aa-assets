@@ -7,7 +7,7 @@ from django.core.cache import cache
 from django.urls import reverse
 
 # AA Assets
-from assets import views
+from assets import forms, views
 from assets.helpers.orders import set_apr_cooldown
 from assets.models import Request, RequestAssets
 from assets.tests import AuthTestCase
@@ -255,9 +255,10 @@ class TestOrderViews(AuthTestCase):
 
         # Expected Result
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertEqual(response.json()["message"], "The asset does not exist.")
         self.assertFalse(Request.objects.filter(requesting_user=self.user).exists())
 
-    def test_create_order_should_return_404_for_multi_asset_of_other_user(self, send):
+    def test_create_order_should_not_order_multi_asset_of_other_user(self, send):
         # Test Data
         other_asset = create_asset(
             create_owner(UserMainFactory()), quantity=10, item_id=2
@@ -265,11 +266,26 @@ class TestOrderViews(AuthTestCase):
         self.client.force_login(self.user)
 
         # Test Action
-        response = self.client.post(self.url, data={f"item_id_{other_asset.pk}": 1})
+        self.client.post(self.url, data={f"item_id_{other_asset.pk}": 1})
 
         # Expected Result
-        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
         self.assertFalse(Request.objects.filter(requesting_user=self.user).exists())
+        send.assert_not_called()
+
+    def test_multi_order_form_should_list_only_visible_assets(self, send):
+        # Test Data
+        other_asset = create_asset(
+            create_owner(UserMainFactory()), quantity=10, item_id=2
+        )
+
+        # Test Action
+        form = forms.RequestMultiOrder(
+            user=self.user, location_flag="all", location_id=LOCATION_ID
+        )
+
+        # Expected Result
+        self.assertEqual(form.asset_fields, [f"item_id_{self.asset.pk}"])
+        self.assertNotIn(f"item_id_{other_asset.pk}", form.fields)
 
     def test_mark_request_canceled_should_cancel_own_order(self, send):
         # Test Data

@@ -38,7 +38,7 @@ Section Order:
 
 ### Fixed
 
-- Users only see and order assets they may see: `location/`, `location/{location_id}/flag/{location_flag}/`, `requests/order/{request_id}/` and the `create_order` view no longer return or accept assets, locations and orders of other owners and users
+- Users only see and order assets they may see: `location/`, `location/{location_id}/flag/{location_flag}/`, `requests/order/{request_id}/`, the multi order form of the assets page and the `create_order` view no longer show or accept assets, locations and orders of other owners and users
 - Users without corporation or admin access see the assets of their own characters again (`View Assets` answered 403)
 - Orders can no longer exceed the available quantity of an asset when it has no other open orders
 - The asset update links open orders only to the new assets of their own owner (orders whose asset is gone are linked again too); before, it took the open orders of all owners and stopped with `MultipleObjectsReturned` when two assets matched an order

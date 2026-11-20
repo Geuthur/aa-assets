@@ -94,7 +94,7 @@ def assets(request, location_id: int, location_flag: str):
         "forms": {
             "single_request": forms.RequestOrder(),
             "multi_request": forms.RequestMultiOrder(
-                location_flag=location_flag, location_id=location_id
+                user=request.user, location_flag=location_flag, location_id=location_id
             ),
         },
     }
@@ -173,7 +173,10 @@ def create_order(request, location_id: int, location_flag: str):
     # Check Permission
     form = forms.RequestOrder(request.POST)
     form_multi = forms.RequestMultiOrder(
-        request.POST, location_flag=location_flag, location_id=location_id
+        request.POST,
+        user=request.user,
+        location_flag=location_flag,
+        location_id=location_id,
     )
 
     if form.is_valid():
