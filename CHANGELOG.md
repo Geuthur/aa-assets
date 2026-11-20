@@ -32,6 +32,7 @@ Section Order:
 
 - User settings with the option to disable notifications, readable and editable through the API (`settings/`)
 - API endpoints to create orders and to cancel, complete or reopen them, plus `menu/`, `user/`, `owners/` (update status), `requests/{id}/` and `admin/tasks/` for the coming React frontend
+- React frontend for locations, assets with single and multi order, requests, administration and settings, with the update status of every owner
 
 > [!IMPORTANT]
 > Basic access is only granted by `basic_access`. Users with higher permissions (`corporation_access`, `manage_requests`, `manage_corporation`, `admin_access`) but without `basic_access` lose access to the API and to the pages to add a corporation and to complete or reopen requests. Grant `basic_access` to these users or groups.
@@ -59,6 +60,7 @@ Section Order:
 
 ### Changed
 
+- The app opens the React frontend; the old start and administration pages are removed, the other old pages are removed in a follow-up
 - The asset update of an owner runs through the `UpdateManager` of the app template: a new `OwnerUpdateStatus` keeps success, errors and token errors per owner and section (section `assets`), replacing `Owner.last_update` (migration `0004_owner_update_status`). Existing owners are updated on the next run. New setting `ASSETS_STALE_TYPES` (default: `ASSETS_UPDATE_PERIOD`)
 - `models.py` and `managers.py` are split into the packages `assets/models/` and `assets/managers/` (one module per model, like aa-example); imports from `assets.models` and `assets.managers` keep working, no new migration, no change in behavior
 - Uniform error format of the API: every error response of an endpoint is an `ErrorSchema` (`{"error": "<text>"}`) instead of a plain string, and every endpoint lists its 403 in the OpenAPI schema. Status codes are unchanged. The order modal shows the message of the API.
