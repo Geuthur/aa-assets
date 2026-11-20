@@ -463,6 +463,29 @@ class TestUpdateAssetsForOwnerOrders(EsiTaskTestCase):
         self.assertIsNotNone(status.last_update_finished_at)
 
     @pook.on
+    def test_should_remove_old_assets_on_empty_esi_response(self):
+        # Test Data: the owner sold or moved everything
+        self._asset(self.owner)
+        other_asset = self._asset(self.other_owner)
+        pook.get(
+            character_assets_url(self.character.character_id),
+            reply=200,
+            response_json=[],
+        )
+
+        # Test Action
+        result = tasks.update_assets_for_owner(self.owner.pk, force_refresh=True)
+
+        # Expected Result
+        self.assertTrue(result)
+        self.assertFalse(Assets.objects.filter(owner=self.owner).exists())
+        self.assertTrue(Assets.objects.filter(pk=other_asset.pk).exists())
+        status = OwnerUpdateStatus.objects.get(
+            owner=self.owner, section=OwnerUpdateSection.ASSETS
+        )
+        self.assertTrue(status.is_success)
+
+    @pook.on
     def test_should_fetch_corporation_assets(self):
         # Test Data
         corporation = EveCorporationInfoFactory()
