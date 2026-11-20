@@ -118,6 +118,14 @@ class TestPostOrder(AuthTestCase):
         )
         self.assertFalse(Request.objects.filter(requesting_user=self.user).exists())
 
+    def test_post_order_should_return_409_above_stock_without_open_orders(self, send):
+        # Test Action
+        response = self._post([{"asset_pk": self.asset.pk, "amount": 11}])
+
+        # Expected Result
+        self.assertEqual(response.status_code, HTTPStatus.CONFLICT)
+        self.assertFalse(Request.objects.exists())
+
     def test_post_order_should_create_partial_order_and_return_409(self, send):
         # Test Data
         create_order(self.other_user, self.asset, quantity=9)

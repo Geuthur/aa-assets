@@ -39,6 +39,7 @@ Section Order:
 ### Fixed
 
 - Users without corporation or admin access see the assets of their own characters again (`View Assets` answered 403)
+- Orders can no longer exceed the available quantity of an asset when it has no other open orders
 - The asset update links open orders only to the new assets of their own owner (orders whose asset is gone are linked again too); before, it took the open orders of all owners and stopped with `MultipleObjectsReturned` when two assets matched an order
 - The ESI operation `PostUniverseNames` is added to `__operations__`; without it the ESI client did not know the operation and resolving an unknown station owner (`EveEntity` manager) crashed the asset update with an `AttributeError`
 - The order notification texts in `Request` (new request, completed, canceled, reopened) are filled with `.format()` instead of f-strings inside `_()`, so they can be translated; existing translations of the old texts no longer match until Weblate updates them

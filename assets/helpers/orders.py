@@ -46,7 +46,7 @@ def validate_asset_quantity(asset: Assets, amount: int) -> bool:
         eve_type=asset.eve_type,
         request__status=Request.STATUS_OPEN,
     ).values_list("quantity", flat=True)
-    if requests_obj and sum(requests_obj) + amount > asset.quantity:
+    if sum(requests_obj) + amount > asset.quantity:
         return False
     return True
 
