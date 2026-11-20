@@ -1,5 +1,5 @@
 // Third Party
-import { screen, waitForElementToBeRemoved, within } from "@testing-library/react";
+import { screen, waitFor, within } from "@testing-library/react";
 import userEvent from "@testing-library/user-event";
 import { beforeEach, describe, expect, it, vi } from "vitest";
 
@@ -118,7 +118,7 @@ describe("LocationPage", () => {
 
     // Expected Result
     expect(await screen.findByRole("alert")).toHaveTextContent("Requested amount exceeds available quantity.");
-    await waitForElementToBeRemoved(() => screen.queryByRole("dialog"));
+    await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
     expect(assetsApi.loadAssets).toHaveBeenCalledTimes(2);
   });
 });
