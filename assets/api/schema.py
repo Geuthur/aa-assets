@@ -49,13 +49,11 @@ class EveName(Schema):
 class Requests(Schema):
     id: int
     status: str
-    order: Any
     action: str
     created: datetime
     closed: datetime | None = None
     approver: Any | None
     requestor: Any
-    actions: Any
     can_cancel: bool = False
     can_complete: bool = False
     can_reopen: bool = False
@@ -166,7 +164,6 @@ class LocationSchema(Schema):
     location_id: int
     name: str | None = None
     solar_system: str | None = None
-    view: str
 
 
 class AssetSchema(Schema):
@@ -178,7 +175,7 @@ class AssetSchema(Schema):
     location_id: int
     location: str | None = None
     location_flag: str
-    price: float | str
+    price: float | None = None
 
 
 class Assets(Schema):

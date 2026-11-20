@@ -32,7 +32,6 @@ export const location: LocationSchema = {
   location_id: 60003760,
   name: "Jita IV - Moon 4",
   solar_system: "Jita",
-  view: "",
 };
 
 export const asset: AssetSchema = {
@@ -54,19 +53,17 @@ export const secondAsset: AssetSchema = {
   type_id: 588,
   name: "Reaper",
   quantity: 2,
-  price: "N/A",
+  price: null,
 };
 
 export const request: RequestSchema = {
   id: 7,
   status: "Open",
-  order: "",
   action: "OP",
   created: "2026-11-20T10:00:00Z",
   closed: null,
   approver: null,
   requestor: "alice",
-  actions: "",
   can_cancel: true,
   can_complete: true,
   can_reopen: false,

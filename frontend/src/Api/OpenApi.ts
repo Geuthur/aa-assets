@@ -92,26 +92,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/assets/api/requests/order/{request_id}/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /**
-         * Get Request Order
-         * @description Get the order for a request
-         */
-        get: operations["assets_api_requests_requests_get_request_order"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/assets/api/requests/{request_id}/": {
         parameters: {
             query?: never;
@@ -323,7 +303,7 @@ export interface components {
             /** Location Flag */
             location_flag: string;
             /** Price */
-            price: number | string;
+            price?: number | null;
         };
         /** Assets */
         Assets: {
@@ -350,8 +330,6 @@ export interface components {
             name?: string | null;
             /** Solar System */
             solar_system?: string | null;
-            /** View */
-            view: string;
         };
         /** Requests */
         Requests: {
@@ -359,8 +337,6 @@ export interface components {
             id: number;
             /** Status */
             status: string;
-            /** Order */
-            order: unknown;
             /** Action */
             action: string;
             /**
@@ -374,8 +350,6 @@ export interface components {
             approver: unknown | null;
             /** Requestor */
             requestor: unknown;
-            /** Actions */
-            actions: unknown;
             /**
              * Can Cancel
              * @default false
@@ -780,37 +754,6 @@ export interface operations {
             query?: never;
             header?: never;
             path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorSchema"];
-                };
-            };
-        };
-    };
-    assets_api_requests_requests_get_request_order: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path: {
-                request_id: number;
-            };
             cookie?: never;
         };
         requestBody?: never;

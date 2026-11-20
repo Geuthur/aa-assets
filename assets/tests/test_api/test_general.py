@@ -117,6 +117,7 @@ class TestMenuApi(AuthTestCase):
             self._names(data["left_links"]), ["Locations", "My Requests", "Settings"]
         )
         self.assertEqual(self._names(data["right_links"]), ["Add Character"])
+        self.assertFalse(data["left_links"][1]["has_errors"])
         self.assertEqual(data["right_links"][0]["link"], reverse("assets:add_char"))
         self.assertTrue(data["right_links"][0]["is_external"])
 
@@ -134,6 +135,7 @@ class TestMenuApi(AuthTestCase):
             self._names(data["left_links"]), ["Locations", "Requests", "Settings"]
         )
         self.assertEqual(data["left_links"][1]["badge"], 1)
+        self.assertTrue(data["left_links"][1]["has_errors"])
         self.assertEqual(
             self._names(data["right_links"]), ["Add Character", "Add Corporation"]
         )

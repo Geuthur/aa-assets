@@ -42,6 +42,7 @@ class GeneralApiEndpoints:
                         name=_("Requests"),
                         link="/requests/",
                         badge=open_requests or None,
+                        has_errors=bool(open_requests),
                     )
                 )
             else:

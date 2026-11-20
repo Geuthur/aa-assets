@@ -33,10 +33,3 @@ class TestApiErrorResponses(AuthTestCase):
 
         # Expected Result
         self._assert_denied(response, "Permission Denied")
-
-    def test_get_request_order_should_return_error_body_for_unknown_request(self):
-        # Test Action
-        response = self.client.get(f"{API}/requests/order/999999/")
-
-        # Expected Result: the status code stays 403
-        self._assert_denied(response, "Request does not exist")
