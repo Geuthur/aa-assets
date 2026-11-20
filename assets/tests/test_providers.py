@@ -33,6 +33,7 @@ class TestEsiClient(NoSocketsTestCase):
         client = esi.client
         # then
         self.assertTrue(hasattr(client.Universe, "GetUniverseStructuresStructureId"))
+        self.assertTrue(hasattr(client.Universe, "PostUniverseNames"))
         self.assertTrue(hasattr(client.Assets, "GetCharactersCharacterIdAssets"))
 
 
