@@ -31,12 +31,14 @@ Section Order:
 ### Added
 
 - User settings with the option to disable notifications, readable and editable through the API (`settings/`)
+- API endpoints to create orders and to cancel, complete or reopen them, plus `menu/`, `user/`, `owners/` (update status), `requests/{id}/` and `admin/tasks/` for the coming React frontend
 
 > [!IMPORTANT]
 > Basic access is only granted by `basic_access`. Users with higher permissions (`corporation_access`, `manage_requests`, `manage_corporation`, `admin_access`) but without `basic_access` lose access to the API and to the pages to add a corporation and to complete or reopen requests. Grant `basic_access` to these users or groups.
 
 ### Fixed
 
+- Users without corporation or admin access see the assets of their own characters again (`View Assets` answered 403)
 - The asset update links open orders only to the new assets of their own owner (orders whose asset is gone are linked again too); before, it took the open orders of all owners and stopped with `MultipleObjectsReturned` when two assets matched an order
 - The ESI operation `PostUniverseNames` is added to `__operations__`; without it the ESI client did not know the operation and resolving an unknown station owner (`EveEntity` manager) crashed the asset update with an `AttributeError`
 - The order notification texts in `Request` (new request, completed, canceled, reopened) are filled with `.format()` instead of f-strings inside `_()`, so they can be translated; existing translations of the old texts no longer match until Weblate updates them

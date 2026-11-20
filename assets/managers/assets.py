@@ -45,8 +45,7 @@ class AssetsQuerySet(models.QuerySet):
         try:
             char = user.profile.main_character
             assert char
-            queries = [models.Q(owner__character__character_id=char.character_id)]
-            logger.debug(queries)
+            queries = [models.Q(owner__character__user=user)]
 
             logger.debug(
                 "%s queries for user %s visible characters.", len(queries), user

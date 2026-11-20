@@ -25,6 +25,11 @@ class GeneralManager(models.Manager):
         return bool(user.has_perm("assets.corporation_access"))
 
     @staticmethod
+    def has_manage_corporation_access(user: User) -> bool:
+        """Users with `manage_corporation` may add corporations."""
+        return bool(user.has_perm("assets.manage_corporation"))
+
+    @staticmethod
     def has_manage_requests_access(user: User) -> bool:
         """Superusers and users with `manage_requests` manage all requests."""
         return bool(user.is_superuser or user.has_perm("assets.manage_requests"))

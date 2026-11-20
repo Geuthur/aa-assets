@@ -1,6 +1,5 @@
 # Standard Library
 from http import HTTPStatus
-from typing import Any
 
 # Third Party
 from ninja import NinjaAPI
@@ -63,6 +62,7 @@ class AssetsApiEndpoints:
                     {
                         "asset_pk": asset.pk,
                         "item_id": asset.item_id,
+                        "type_id": asset.eve_type.id,
                         "name": asset.eve_type.name,
                         "quantity": asset.quantity,
                         "location_id": asset.location.id,
@@ -82,7 +82,7 @@ class AssetsApiEndpoints:
 
         @api.get(
             "location/",
-            response={200: Any, 403: schema.ErrorSchema},
+            response={200: list[schema.LocationSchema], 403: schema.ErrorSchema},
             tags=self.tags,
         )
         def get_locations(request):
