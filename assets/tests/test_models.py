@@ -45,7 +45,7 @@ class TestOwnerGetEsiScopes(AuthTestCase):
         )
 
 
-@patch("assets.models.send_user_notification")
+@patch("assets.models.request.send_user_notification")
 @patch.object(Request, "approvers")
 @patch.object(Request, "convert_order_to_notifiy", return_value="\nTritanium x 5")
 class TestRequestNotifications(AuthTestCase):
