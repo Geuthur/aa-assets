@@ -50,6 +50,7 @@ Section Order:
 
 ### Changed
 
+- `models.py` and `managers.py` are split into the packages `assets/models/` and `assets/managers/` (one module per model, like aa-example); imports from `assets.models` and `assets.managers` keep working, no new migration, no change in behavior
 - Uniform error format of the API: every error response of an endpoint is an `ErrorSchema` (`{"error": "<text>"}`) instead of a plain string, and every endpoint lists its 403 in the OpenAPI schema. Status codes are unchanged. The order modal shows the message of the API.
 - Removed the unreachable `basic_access` checks in `get_requests_statistics` and `get_request_order` and the dead `is None` checks in `get_requests` and `get_my_requests`; the decorator of the API already answers 403
 - Every URL of the API requires `basic_access` (403 otherwise). `add_corp`, `mark_request_completed` and `mark_request_open` require it in addition to their own permission, and `add_corp` and `add_char` check the permissions before the SSO step
