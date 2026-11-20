@@ -11,6 +11,11 @@ def character_assets_url(character_id: int) -> str:
     return f"{ESI_BASE_URL}/characters/{character_id}/assets"
 
 
+def corporation_assets_url(corporation_id: int) -> str:
+    """Return the ESI URL of the assets of a corporation."""
+    return f"{ESI_BASE_URL}/corporations/{corporation_id}/assets"
+
+
 def station_url(station_id: int) -> str:
     """Return the ESI URL of a station."""
     return f"{ESI_BASE_URL}/universe/stations/{station_id}"
