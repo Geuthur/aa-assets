@@ -25,16 +25,38 @@ class TestViews(AuthTestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-    def test_index_view(self):
+    def test_react_base_should_serve_the_react_app(self):
         # Test Data
         request = self.factory.get(reverse("assets:index"))
         request.user = self.superuser
 
         # Test Action
-        response = views.index(request)
+        response = views.react_base(request)
 
         # Expected Result
         self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertContains(response, 'id="aa-assets-root"')
+
+    def test_react_routes_should_serve_the_react_app(self):
+        # Test Data
+        self.client.force_login(self.superuser)
+
+        # Test Action
+        response = self.client.get(f"{reverse('assets:index')}location/1/")
+
+        # Expected Result
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertContains(response, 'id="aa-assets-root"')
+
+    def test_react_base_should_require_basic_access(self):
+        # Test Data
+        self.client.force_login(UserMainFactory(permissions__=[]))
+
+        # Test Action
+        response = self.client.get(reverse("assets:index"))
+
+        # Expected Result
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
 
 class TestViewsRequireBasicAccess(AuthTestCase):
@@ -360,24 +382,3 @@ class TestOrderViews(AuthTestCase):
         order.refresh_from_db()
         self.assertEqual(order.status, Request.STATUS_OPEN)
         self.assertIsNone(order.closed_at)
-
-
-@patch("assets.helpers.admin.update_all_assets")
-@patch("assets.helpers.admin.clear_all_etags")
-class TestAdminView(AuthTestCase):
-    def test_admin_should_queue_selected_tasks(self, clear_etags, update_assets):
-        # Test Data
-        self.client.force_login(self.superuser)
-
-        # Test Action
-        response = self.client.post(
-            reverse("assets:admin"),
-            data={"force_refresh": "on", "run_update_all_assets": "on"},
-        )
-
-        # Expected Result
-        self.assertEqual(response.status_code, HTTPStatus.OK)
-        update_assets.apply_async.assert_called_once_with(
-            kwargs={"force_refresh": True}, priority=7
-        )
-        clear_etags.apply_async.assert_not_called()

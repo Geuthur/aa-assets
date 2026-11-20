@@ -20,8 +20,6 @@ api_patterns = decorate_url_patterns(
 )[0]
 
 urlpatterns = [
-    path("", views.index, name="index"),
-    path("admin/", views.admin, name="admin"),
     path("location/", views.location, name="location"),
     path("<int:location_id>/flag/<str:location_flag>", views.assets, name="assets"),
     path("add_corp/", views.add_corp, name="add_corp"),
@@ -49,4 +47,7 @@ urlpatterns = [
     ),
     # -- API System
     re_path(r"^api/", (api_patterns, api_app_name, api_namespace)),
+    # -- React Frontend, all other routes are handled by the router
+    path("", views.react_base, name="index"),
+    re_path(r"^(?!api/).*$", views.react_base, name="react_base"),
 ]

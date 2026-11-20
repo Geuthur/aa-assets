@@ -6,6 +6,7 @@ from http import HTTPStatus
 # Django
 from django.contrib import messages
 from django.contrib.auth.decorators import login_required
+from django.core.handlers.wsgi import WSGIRequest
 from django.http import HttpResponse, JsonResponse
 from django.shortcuts import get_object_or_404, redirect, render
 from django.utils.translation import gettext_lazy as _
@@ -18,8 +19,7 @@ from allianceauth.eveonline.models import EveCorporationInfo
 from esi.decorators import token_required
 
 # AA Assets
-from assets import forms
-from assets.helpers.admin import queue_admin_tasks
+from assets import __app_name__, __version__, forms
 from assets.helpers.orders import (
     MODE_CANCELED,
     MODE_COMPLETED,
@@ -37,36 +37,10 @@ from assets.tasks import update_assets_for_owner
 
 @login_required
 @permissions_required(["assets.basic_access"])
-def index(request):
-    context = {
-        "corporation_id": request.user.profile.main_character.corporation_id,
-        "title": _("Assets"),
-    }
-    context = add_info_to_context(request, context)
-
-    return render(request, "assets/index.html", context=context)
-
-
-@login_required
-@permissions_required(["assets.basic_access"])
-def admin(request):
-    if not request.user.is_superuser:
-        messages.error(request, _("You do not have permission to access this page."))
-        return redirect("assets:index")
-
-    if request.method == "POST":
-        queued = queue_admin_tasks(
-            force_refresh=bool(request.POST.get("force_refresh", False)),
-            clear_etags=bool(request.POST.get("run_clear_etag")),
-            update_assets=bool(request.POST.get("run_update_all_assets")),
-            update_locations=bool(request.POST.get("run_update_all_locations")),
-            update_parent_locations=bool(
-                request.POST.get("run_update_all_parent_locations")
-            ),
-        )
-        for msg in queued:
-            messages.info(request, msg)
-    return render(request, "assets/admin.html")
+def react_base(request: WSGIRequest):
+    """Serve the React app; routing and permissions of the pages are handled by the API."""
+    context = {"version": __version__, "app_name": __app_name__}
+    return render(request, "assets/react_base.html", context=context)
 
 
 @login_required
