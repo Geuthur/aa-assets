@@ -1,8 +1,14 @@
 {
     "extends": "stylelint-config-standard",
-    "ignoreFiles": ["**/billboards_dark.css"],
+    "ignoreFiles": ["**/libs/**/*.css", "**/libs/**/*.js", "**/react/**/*.css"],
     "rules": {
         "color-no-hex": true,
-        "no-descending-specificity": null
+        "no-descending-specificity": null,
+        "selector-pseudo-class-no-unknown": [
+            true,
+            {
+                "ignorePseudoClasses": ["global"]
+            }
+        ]
     }
 }

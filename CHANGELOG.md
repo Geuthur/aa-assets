@@ -28,13 +28,25 @@ Section Order:
 
 <!-- Your changes go here -->
 
+### Added
+
+- User settings with the option to disable notifications, readable and editable through the API (`settings/`)
+- API endpoints to create orders and to cancel, complete or reopen them, plus `menu/`, `user/`, `owners/` (update status), `requests/{id}/` and `admin/tasks/` for the coming React frontend
+- React frontend for locations, assets with single and multi order, requests, administration and settings, with the update status of every owner
+- The location page prefills the location flag filter from `?flag=<flag>` (e.g. `/assets/location/<id>/?flag=CorpSAG5`)
+
 > [!IMPORTANT]
 > Basic access is only granted by `basic_access`. Users with higher permissions (`corporation_access`, `manage_requests`, `manage_corporation`, `admin_access`) but without `basic_access` lose access to the API and to the pages to add a corporation and to complete or reopen requests. Grant `basic_access` to these users or groups.
 
 ### Fixed
 
 - Tests no longer share the Redis cache with other processes in the AA 6 development settings (`testauth/settings/development/local.py`): each test run gets its own random cache `KEY_PREFIX`, like on master. Before, ESI responses cached by a running testauth instance on the same Redis were returned instead of the pook responses. Redis stays the cache backend because Alliance Auth needs `django_redis`
-- Django 6 compatibility: `format_html()` calls without arguments (raising `TypeError`) replaced by `mark_safe()` in request/asset API helpers and notification messages
+- Django 6 compatibility: `format_html()` calls without arguments (raising `TypeError`) replaced by `mark_safe()` in the order notification messages
+- Users only see and order assets they may see: `location/`, `location/{location_id}/flag/{location_flag}/`, `requests/order/{request_id}/`, the multi order form of the assets page and the `create_order` view no longer show or accept assets, locations and orders of other owners and users
+- Users without corporation or admin access see the assets of their own characters again (`View Assets` answered 403)
+- Orders can no longer exceed the available quantity of an asset when it has no other open orders
+- The asset update links open orders only to the new assets of their own owner (orders whose asset is gone are linked again too); before, it took the open orders of all owners and stopped with `MultipleObjectsReturned` when two assets matched an order
+- The ESI operation `PostUniverseNames` is added to `__operations__`; without it the ESI client did not know the operation and resolving an unknown station owner (`EveEntity` manager) crashed the asset update with an `AttributeError`
 - The order notification texts in `Request` (new request, completed, canceled, reopened) are filled with `.format()` instead of f-strings inside `_()`, so they can be translated; existing translations of the old texts no longer match until Weblate updates them
 - The API endpoints `location/` and `location/{location_id}/flag/{location_flag}/` no longer set `auth=None`; the login check of the API applies to them like to all other endpoints
 - Development dependencies: `minimatch` 10.2.6 → 11.0.8 (Dependabot alert, DoS via globparts) through `eslint` 10.15.0; the app itself is not affected
@@ -51,6 +63,10 @@ Section Order:
 
 ### Changed
 
+- The app opens the React frontend; the old Django pages are removed
+- The menu badge of open requests pulses (`has_errors` in `menu/`); `price` of an asset is `null` instead of `"N/A"` without a price
+- The asset update of an owner runs through the `UpdateManager` of the app template: a new `OwnerUpdateStatus` keeps success, errors and token errors per owner and section (section `assets`), replacing `Owner.last_update` (migration `0004_owner_update_status`). Existing owners are updated on the next run. New setting `ASSETS_STALE_TYPES` (default: `ASSETS_UPDATE_PERIOD`)
+- `models.py` and `managers.py` are split into the packages `assets/models/` and `assets/managers/` (one module per model, like aa-example); imports from `assets.models` and `assets.managers` keep working, no new migration, no change in behavior
 - Uniform error format of the API: every error response of an endpoint is an `ErrorSchema` (`{"error": "<text>"}`) instead of a plain string, and every endpoint lists its 403 in the OpenAPI schema. Status codes are unchanged. The order modal shows the message of the API.
 - Removed the unreachable `basic_access` checks in `get_requests_statistics` and `get_request_order` and the dead `is None` checks in `get_requests` and `get_my_requests`; the decorator of the API already answers 403
 - Every URL of the API requires `basic_access` (403 otherwise). `add_corp`, `mark_request_completed` and `mark_request_open` require it in addition to their own permission, and `add_corp` and `add_char` check the permissions before the SSO step
@@ -60,12 +76,14 @@ Section Order:
 - The `304 Not Modified` branch for stations in `get_location_type` returns `(None, None)` explicitly instead of the always-`None` `existing_location`; no change in behavior
 - The Asset Safety (2004) and solar system branches in `get_location_type` return `None` explicitly instead of the always-`None` `existing_location`; no change in behavior
 - `get_location_type` returns `None` instead of a QuerySet as second value for locations below 64_000_000 already in the database, matching its type hint; no change in behavior
+- Tests of the `EveEntity` manager run against pook responses under the real ESI URL instead of the own ESI client stub; the stub (`esi_stub_openapi.py`, `esi_test_data.json`) is removed
 - The station branch in `get_location_type` returns `None` explicitly instead of the always-`None` `existing_location` after fetching the station from ESI; no change in behavior
 - Tests of `retry_task_on_esi_error` no longer depend on the time of day, they disable the daily downtime check unless they test it
 - `retry_task_on_esi_error` follows the app template: ESI outages retry after `DOWNTIME_TIMER` (10 minutes), the daily downtime (11:00-11:15 UTC) is checked (can be disabled with `DISABLE_DAILY_DOWNTIME_CHECK`), new `is_retryable_esi_error` and `DownTimeError`
 
 ### Removed
 
+- The old Django pages (locations, assets, requests), their order and status views, templates, jQuery/DataTables scripts and `forms.py`, plus the HTML fields `order`/`actions` of `requests/`, the field `view` of `location/` and the endpoint `requests/order/{id}/`
 - Unused `HTTPGatewayTimeoutError` (`assets/errors.py`) and its dead `except` branch in `Owner.update_assets_esi`
 - Own HTTP 420 retry in `update_location` and `update_parent_location`: django-esi raises `ESIErrorLimitException` for HTTP 420, so this code path was never reached
 

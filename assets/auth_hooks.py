@@ -20,7 +20,7 @@ class AssetsMenuItem(MenuItemHook):
         super().__init__(
             f"{app_settings.ASSETS_APP_NAME}",
             "fas fa-building-user fa-fw",
-            "assets:location",
+            "assets:index",
             navactive=["assets:"],
         )
 

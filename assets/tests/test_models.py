@@ -1,15 +1,17 @@
 """Tests for the models."""
 
 # Standard Library
-from unittest.mock import Mock, patch
+from unittest.mock import patch
 
 # Third Party
 from evesde_factory.allianceauth import EveCorporationInfoFactory
 
 # AA Assets
 from assets.models import Owner, Request
+from assets.models.helpers.update_manager import OwnerUpdateSection, UpdateStatus
 from assets.tests import AuthTestCase
 from assets.tests.testdata.factory import UserMainFactory
+from assets.tests.testdata.owner import OwnerUpdateStatusFactory
 
 
 class TestOwnerGetEsiScopes(AuthTestCase):
@@ -45,7 +47,7 @@ class TestOwnerGetEsiScopes(AuthTestCase):
         )
 
 
-@patch("assets.models.send_user_notification")
+@patch("assets.models.request.send_user_notification")
 @patch.object(Request, "approvers")
 @patch.object(Request, "convert_order_to_notifiy", return_value="\nTritanium x 5")
 class TestRequestNotifications(AuthTestCase):
@@ -120,11 +122,8 @@ class TestRequestNotifications(AuthTestCase):
     def test_notify_request_open_should_fill_title_and_message(
         self, _items, _approvers, send
     ):
-        # Test Data
-        request = Mock(user=self.approver)
-
         # Test Action
-        self.order.notify_request_open(request)
+        self.order.notify_request_open(self.approver)
 
         # Expected Result
         sent = self._sent(send)
@@ -136,3 +135,55 @@ class TestRequestNotifications(AuthTestCase):
             sent["message"],
             f"{self.approver} has reopened the following items:\nTritanium x 5\n",
         )
+
+
+class TestOwnerUpdateStatus(AuthTestCase):
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        cls.owner = Owner.objects.create(
+            character=cls.user.profile.main_character.character_ownership
+        )
+
+    def test_get_status_should_be_incomplete_without_status_rows(self):
+        # Test Action & Expected Result
+        self.assertEqual(self.owner.get_status, UpdateStatus.INCOMPLETE)
+
+    def test_get_status_should_be_ok_when_all_sections_succeeded(self):
+        # Test Data
+        OwnerUpdateStatusFactory(
+            owner=self.owner, section=OwnerUpdateSection.ASSETS, is_success=True
+        )
+
+        # Test Action & Expected Result
+        self.assertEqual(self.owner.get_status, UpdateStatus.OK)
+
+    def test_get_status_should_be_token_error_when_a_section_has_one(self):
+        # Test Data
+        OwnerUpdateStatusFactory(
+            owner=self.owner,
+            section=OwnerUpdateSection.ASSETS,
+            is_success=False,
+            has_token_error=True,
+        )
+
+        # Test Action & Expected Result
+        self.assertEqual(self.owner.get_status, UpdateStatus.TOKEN_ERROR)
+
+    def test_get_status_should_be_disabled_for_inactive_owners(self):
+        # Test Data
+        owner = Owner.objects.create(
+            corporation=EveCorporationInfoFactory(), is_active=False
+        )
+
+        # Test Action & Expected Result
+        self.assertEqual(owner.get_status, UpdateStatus.DISABLED)
+
+    def test_update_status_str_should_name_owner_and_section(self):
+        # Test Data
+        status = OwnerUpdateStatusFactory(
+            owner=self.owner, section=OwnerUpdateSection.ASSETS
+        )
+
+        # Test Action & Expected Result
+        self.assertEqual(str(status), f"{self.owner} - assets")

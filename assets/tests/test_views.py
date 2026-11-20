@@ -15,16 +15,38 @@ class TestViews(AuthTestCase):
     def setUpClass(cls):
         super().setUpClass()
 
-    def test_index_view(self):
+    def test_react_base_should_serve_the_react_app(self):
         # Test Data
         request = self.factory.get(reverse("assets:index"))
         request.user = self.superuser
 
         # Test Action
-        response = views.index(request)
+        response = views.react_base(request)
 
         # Expected Result
         self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertContains(response, 'id="aa-assets-root"')
+
+    def test_react_routes_should_serve_the_react_app(self):
+        # Test Data
+        self.client.force_login(self.superuser)
+
+        # Test Action
+        response = self.client.get(f"{reverse('assets:index')}location/1/")
+
+        # Expected Result
+        self.assertEqual(response.status_code, HTTPStatus.OK)
+        self.assertContains(response, 'id="aa-assets-root"')
+
+    def test_react_base_should_require_basic_access(self):
+        # Test Data
+        self.client.force_login(UserMainFactory(permissions__=[]))
+
+        # Test Action
+        response = self.client.get(reverse("assets:index"))
+
+        # Expected Result
+        self.assertEqual(response.status_code, HTTPStatus.FOUND)
 
 
 class TestViewsRequireBasicAccess(AuthTestCase):
@@ -107,39 +129,3 @@ class TestViewsRequireBasicAccess(AuthTestCase):
 
         # Expected Result
         self._assert_reaches_token_decorator(response)
-
-    def test_mark_request_views_should_redirect_to_login_without_basic_access(self):
-        # Test Data
-        self.client.force_login(self.only_manage_requests)
-
-        for name in ("assets:request_completed", "assets:request_open"):
-            with self.subTest(view=name):
-                # Test Action
-                response = self.client.post(reverse(name, kwargs={"request_id": 1}))
-
-                # Expected Result
-                self._assert_login_redirect(response)
-
-    def test_mark_request_views_should_redirect_to_login_without_manage_requests(self):
-        # Test Data
-        self.client.force_login(self.basic_only)
-
-        for name in ("assets:request_completed", "assets:request_open"):
-            with self.subTest(view=name):
-                # Test Action
-                response = self.client.post(reverse(name, kwargs={"request_id": 1}))
-
-                # Expected Result
-                self._assert_login_redirect(response)
-
-    def test_mark_request_views_should_run_with_both_permissions(self):
-        # Test Data
-        self.client.force_login(self.basic_manage_requests)
-
-        for name in ("assets:request_completed", "assets:request_open"):
-            with self.subTest(view=name):
-                # Test Action
-                response = self.client.post(reverse(name, kwargs={"request_id": 1}))
-
-                # Expected Result: the view runs and finds no such request
-                self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)

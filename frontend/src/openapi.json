@@ -1,0 +1,1668 @@
+{
+  "openapi": "3.1.0",
+  "info": {
+    "title": "Geuthur API",
+    "version": "0.1.0",
+    "description": ""
+  },
+  "paths": {
+    "/assets/api/location/{location_id}/flag/{location_flag}/": {
+      "get": {
+        "operationId": "assets_api_assets_assets_get_assets",
+        "summary": "Get Assets",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "location_id",
+            "schema": {
+              "title": "Location Id",
+              "type": "integer"
+            },
+            "required": true
+          },
+          {
+            "in": "path",
+            "name": "location_flag",
+            "schema": {
+              "title": "Location Flag",
+              "type": "string"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/Assets"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Assets"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/location/": {
+      "get": {
+        "operationId": "assets_api_assets_assets_get_locations",
+        "summary": "Get Locations",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/LocationSchema"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "description": "Get all locations for the user.",
+        "tags": [
+          "Assets"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/requests/": {
+      "get": {
+        "operationId": "assets_api_requests_requests_get_requests",
+        "summary": "Get Requests",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Requests"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Requests"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/requests/myrequests/": {
+      "get": {
+        "operationId": "assets_api_requests_requests_get_my_requests",
+        "summary": "Get My Requests",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/Requests"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Requests"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/requests/statistics/": {
+      "get": {
+        "operationId": "assets_api_requests_requests_get_requests_statistics",
+        "summary": "Get Requests Statistics",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "title": "Response"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Requests"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/requests/{request_id}/": {
+      "get": {
+        "operationId": "assets_api_requests_orders_get_request",
+        "summary": "Get an order with its items",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "schema": {
+              "title": "Request Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/RequestDetailSchema"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Requests"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/orders/": {
+      "post": {
+        "operationId": "assets_api_requests_orders_post_order",
+        "summary": "Create an order of one or more assets",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Requests"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/OrderCreateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/requests/{request_id}/cancel/": {
+      "post": {
+        "operationId": "assets_api_requests_orders_cancel_request",
+        "summary": "Cancel an open order (requestor or manager)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "schema": {
+              "title": "Request Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Requests"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/requests/{request_id}/complete/": {
+      "post": {
+        "operationId": "assets_api_requests_orders_complete_request",
+        "summary": "Mark an order as completed (manager)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "schema": {
+              "title": "Request Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Requests"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/requests/{request_id}/reopen/": {
+      "post": {
+        "operationId": "assets_api_requests_orders_reopen_request",
+        "summary": "Reopen an order (manager)",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "request_id",
+            "schema": {
+              "title": "Request Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "429": {
+            "description": "Too Many Requests",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Requests"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/menu/": {
+      "get": {
+        "operationId": "assets_api_general_general_get_menu",
+        "summary": "Get Assets navigation menu",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/MenuSchema"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "General"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/user/": {
+      "get": {
+        "operationId": "assets_api_general_general_get_user",
+        "summary": "Get the current user and their rights",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserData"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "General"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/admin/tasks/": {
+      "post": {
+        "operationId": "assets_api_general_general_queue_tasks",
+        "summary": "Queue administration tasks (superusers only)",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ActionResponse"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "General"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/AdminTasksRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/settings/": {
+      "get": {
+        "operationId": "assets_api_general_general_get_user_settings",
+        "summary": "Get current user's settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSettingsSchema"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "General"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      },
+      "put": {
+        "operationId": "assets_api_general_general_update_user_settings",
+        "summary": "Update current user's settings",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserSettingsSchema"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "General"
+        ],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserSettingsUpdateRequest"
+              }
+            }
+          },
+          "required": true
+        },
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/owners/": {
+      "get": {
+        "operationId": "assets_api_owners_owners_list_owners",
+        "summary": "List the owners visible to the user with their update status",
+        "parameters": [],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "items": {
+                    "$ref": "#/components/schemas/OwnerSchema"
+                  },
+                  "title": "Response",
+                  "type": "array"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Owners"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    },
+    "/assets/api/owners/{owner_id}/": {
+      "get": {
+        "operationId": "assets_api_owners_owners_get_owner",
+        "summary": "Get an owner with the update status of its sections",
+        "parameters": [
+          {
+            "in": "path",
+            "name": "owner_id",
+            "schema": {
+              "title": "Owner Id",
+              "type": "integer"
+            },
+            "required": true
+          }
+        ],
+        "responses": {
+          "200": {
+            "description": "OK",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/OwnerDetailSchema"
+                }
+              }
+            }
+          },
+          "403": {
+            "description": "Forbidden",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          },
+          "404": {
+            "description": "Not Found",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/ErrorSchema"
+                }
+              }
+            }
+          }
+        },
+        "tags": [
+          "Owners"
+        ],
+        "security": [
+          {
+            "SessionAuth": []
+          }
+        ]
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "AssetSchema": {
+        "properties": {
+          "asset_pk": {
+            "title": "Asset Pk",
+            "type": "integer"
+          },
+          "item_id": {
+            "title": "Item Id",
+            "type": "integer"
+          },
+          "type_id": {
+            "title": "Type Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "quantity": {
+            "title": "Quantity",
+            "type": "integer"
+          },
+          "location_id": {
+            "title": "Location Id",
+            "type": "integer"
+          },
+          "location": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Location"
+          },
+          "location_flag": {
+            "title": "Location Flag",
+            "type": "string"
+          },
+          "price": {
+            "anyOf": [
+              {
+                "type": "number"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Price"
+          }
+        },
+        "required": [
+          "asset_pk",
+          "item_id",
+          "type_id",
+          "name",
+          "quantity",
+          "location_id",
+          "location_flag"
+        ],
+        "title": "AssetSchema",
+        "type": "object"
+      },
+      "Assets": {
+        "properties": {
+          "location_id": {
+            "title": "Location Id",
+            "type": "integer"
+          },
+          "location_flag": {
+            "title": "Location Flag",
+            "type": "string"
+          },
+          "assets": {
+            "items": {
+              "$ref": "#/components/schemas/AssetSchema"
+            },
+            "title": "Assets",
+            "type": "array"
+          }
+        },
+        "required": [
+          "location_id",
+          "location_flag",
+          "assets"
+        ],
+        "title": "Assets",
+        "type": "object"
+      },
+      "ErrorSchema": {
+        "description": "Error response of an endpoint, e.g. for 403 and 404.",
+        "properties": {
+          "error": {
+            "title": "Error",
+            "type": "string"
+          }
+        },
+        "required": [
+          "error"
+        ],
+        "title": "ErrorSchema",
+        "type": "object"
+      },
+      "LocationSchema": {
+        "properties": {
+          "location_id": {
+            "title": "Location Id",
+            "type": "integer"
+          },
+          "name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Name"
+          },
+          "solar_system": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Solar System"
+          }
+        },
+        "required": [
+          "location_id"
+        ],
+        "title": "LocationSchema",
+        "type": "object"
+      },
+      "Requests": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "action": {
+            "title": "Action",
+            "type": "string"
+          },
+          "created": {
+            "format": "date-time",
+            "title": "Created",
+            "type": "string"
+          },
+          "closed": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed"
+          },
+          "approver": {
+            "anyOf": [
+              {},
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approver"
+          },
+          "requestor": {
+            "title": "Requestor"
+          },
+          "can_cancel": {
+            "default": false,
+            "title": "Can Cancel",
+            "type": "boolean"
+          },
+          "can_complete": {
+            "default": false,
+            "title": "Can Complete",
+            "type": "boolean"
+          },
+          "can_reopen": {
+            "default": false,
+            "title": "Can Reopen",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "action",
+          "created",
+          "approver",
+          "requestor"
+        ],
+        "title": "Requests",
+        "type": "object"
+      },
+      "RequestDetailSchema": {
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "status": {
+            "title": "Status",
+            "type": "string"
+          },
+          "status_label": {
+            "title": "Status Label",
+            "type": "string"
+          },
+          "requestor": {
+            "title": "Requestor",
+            "type": "string"
+          },
+          "approver": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Approver"
+          },
+          "created": {
+            "format": "date-time",
+            "title": "Created",
+            "type": "string"
+          },
+          "closed": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Closed"
+          },
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/RequestItemSchema"
+            },
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "status",
+          "status_label",
+          "requestor",
+          "created",
+          "items"
+        ],
+        "title": "RequestDetailSchema",
+        "type": "object"
+      },
+      "RequestItemSchema": {
+        "properties": {
+          "type_id": {
+            "title": "Type Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "quantity": {
+            "title": "Quantity",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "type_id",
+          "name",
+          "quantity"
+        ],
+        "title": "RequestItemSchema",
+        "type": "object"
+      },
+      "ActionResponse": {
+        "description": "Response of an action endpoint, e.g. after creating an order.",
+        "properties": {
+          "success": {
+            "title": "Success",
+            "type": "boolean"
+          },
+          "message": {
+            "title": "Message",
+            "type": "string"
+          }
+        },
+        "required": [
+          "success",
+          "message"
+        ],
+        "title": "ActionResponse",
+        "type": "object"
+      },
+      "OrderCreateRequest": {
+        "properties": {
+          "items": {
+            "items": {
+              "$ref": "#/components/schemas/OrderItemRequest"
+            },
+            "minItems": 1,
+            "title": "Items",
+            "type": "array"
+          }
+        },
+        "required": [
+          "items"
+        ],
+        "title": "OrderCreateRequest",
+        "type": "object"
+      },
+      "OrderItemRequest": {
+        "properties": {
+          "asset_pk": {
+            "title": "Asset Pk",
+            "type": "integer"
+          },
+          "amount": {
+            "minimum": 1,
+            "title": "Amount",
+            "type": "integer"
+          }
+        },
+        "required": [
+          "asset_pk",
+          "amount"
+        ],
+        "title": "OrderItemRequest",
+        "type": "object"
+      },
+      "MenuLink": {
+        "description": "Represents a link in the menu.\n\nParameters:\n    name (str): The name of the menu link.\n    link (str | None): The URL or path the menu link points to.\n    is_external (bool): Indicates if the link leaves the React app.\n    badge (int | None): Number shown as badge next to the link.\n    has_errors (bool): Whether the badge pulses because of active errors.",
+        "properties": {
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "link": {
+            "title": "Link",
+            "type": "string"
+          },
+          "is_external": {
+            "default": false,
+            "title": "Is External",
+            "type": "boolean"
+          },
+          "badge": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Badge"
+          },
+          "has_errors": {
+            "default": false,
+            "title": "Has Errors",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "name"
+        ],
+        "title": "MenuLink",
+        "type": "object"
+      },
+      "MenuSchema": {
+        "description": "Schema for the overall menu.",
+        "properties": {
+          "left_links": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MenuLink"
+            },
+            "title": "Left Links",
+            "type": "array"
+          },
+          "right_links": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/MenuLink"
+            },
+            "title": "Right Links",
+            "type": "array"
+          }
+        },
+        "title": "MenuSchema",
+        "type": "object"
+      },
+      "UserData": {
+        "description": "The user and their main character, with the rights the frontend needs.",
+        "properties": {
+          "user_id": {
+            "title": "User Id",
+            "type": "integer"
+          },
+          "character_id": {
+            "title": "Character Id",
+            "type": "integer"
+          },
+          "character_name": {
+            "title": "Character Name",
+            "type": "string"
+          },
+          "corporation_id": {
+            "title": "Corporation Id",
+            "type": "integer"
+          },
+          "corporation_name": {
+            "title": "Corporation Name",
+            "type": "string"
+          },
+          "alliance_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alliance Id"
+          },
+          "alliance_name": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Alliance Name"
+          },
+          "portrait": {
+            "anyOf": [
+              {
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Portrait"
+          },
+          "is_admin": {
+            "default": false,
+            "title": "Is Admin",
+            "type": "boolean"
+          },
+          "can_manage_requests": {
+            "default": false,
+            "title": "Can Manage Requests",
+            "type": "boolean"
+          },
+          "can_add_corporation": {
+            "default": false,
+            "title": "Can Add Corporation",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "user_id",
+          "character_id",
+          "character_name",
+          "corporation_id",
+          "corporation_name"
+        ],
+        "title": "UserData",
+        "type": "object"
+      },
+      "AdminTasksRequest": {
+        "description": "Request body of the administration tasks.",
+        "properties": {
+          "force_refresh": {
+            "default": false,
+            "title": "Force Refresh",
+            "type": "boolean"
+          },
+          "clear_etags": {
+            "default": false,
+            "title": "Clear Etags",
+            "type": "boolean"
+          },
+          "update_assets": {
+            "default": false,
+            "title": "Update Assets",
+            "type": "boolean"
+          },
+          "update_locations": {
+            "default": false,
+            "title": "Update Locations",
+            "type": "boolean"
+          },
+          "update_parent_locations": {
+            "default": false,
+            "title": "Update Parent Locations",
+            "type": "boolean"
+          }
+        },
+        "title": "AdminTasksRequest",
+        "type": "object"
+      },
+      "UserSettingsSchema": {
+        "properties": {
+          "disable_notifications": {
+            "title": "Disable Notifications",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "disable_notifications"
+        ],
+        "title": "UserSettingsSchema",
+        "type": "object"
+      },
+      "UserSettingsUpdateRequest": {
+        "properties": {
+          "disable_notifications": {
+            "title": "Disable Notifications",
+            "type": "boolean"
+          }
+        },
+        "required": [
+          "disable_notifications"
+        ],
+        "title": "UserSettingsUpdateRequest",
+        "type": "object"
+      },
+      "OwnerSchema": {
+        "description": "An owner (character or corporation) with its aggregate update status.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "owner_type": {
+            "title": "Owner Type",
+            "type": "string"
+          },
+          "character_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Character Id"
+          },
+          "corporation_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corporation Id"
+          },
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "update_status": {
+            "title": "Update Status",
+            "type": "string"
+          },
+          "update_status_label": {
+            "title": "Update Status Label",
+            "type": "string"
+          },
+          "last_update": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Update"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "owner_type",
+          "active",
+          "update_status",
+          "update_status_label"
+        ],
+        "title": "OwnerSchema",
+        "type": "object"
+      },
+      "OwnerDetailSchema": {
+        "description": "An owner with the status of every section.",
+        "properties": {
+          "id": {
+            "title": "Id",
+            "type": "integer"
+          },
+          "name": {
+            "title": "Name",
+            "type": "string"
+          },
+          "owner_type": {
+            "title": "Owner Type",
+            "type": "string"
+          },
+          "character_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Character Id"
+          },
+          "corporation_id": {
+            "anyOf": [
+              {
+                "type": "integer"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Corporation Id"
+          },
+          "active": {
+            "title": "Active",
+            "type": "boolean"
+          },
+          "update_status": {
+            "title": "Update Status",
+            "type": "string"
+          },
+          "update_status_label": {
+            "title": "Update Status Label",
+            "type": "string"
+          },
+          "last_update": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Update"
+          },
+          "sections": {
+            "default": [],
+            "items": {
+              "$ref": "#/components/schemas/OwnerUpdateStatusSchema"
+            },
+            "title": "Sections",
+            "type": "array"
+          }
+        },
+        "required": [
+          "id",
+          "name",
+          "owner_type",
+          "active",
+          "update_status",
+          "update_status_label"
+        ],
+        "title": "OwnerDetailSchema",
+        "type": "object"
+      },
+      "OwnerUpdateStatusSchema": {
+        "description": "Update status of one section of an owner.",
+        "properties": {
+          "section": {
+            "title": "Section",
+            "type": "string"
+          },
+          "section_label": {
+            "title": "Section Label",
+            "type": "string"
+          },
+          "is_success": {
+            "anyOf": [
+              {
+                "type": "boolean"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Is Success"
+          },
+          "has_token_error": {
+            "default": false,
+            "title": "Has Token Error",
+            "type": "boolean"
+          },
+          "error_message": {
+            "default": "",
+            "title": "Error Message",
+            "type": "string"
+          },
+          "last_run_finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Run Finished At"
+          },
+          "last_update_finished_at": {
+            "anyOf": [
+              {
+                "format": "date-time",
+                "type": "string"
+              },
+              {
+                "type": "null"
+              }
+            ],
+            "title": "Last Update Finished At"
+          }
+        },
+        "required": [
+          "section",
+          "section_label"
+        ],
+        "title": "OwnerUpdateStatusSchema",
+        "type": "object"
+      }
+    },
+    "securitySchemes": {
+      "SessionAuth": {
+        "type": "apiKey",
+        "in": "cookie",
+        "name": "sessionid"
+      }
+    }
+  },
+  "servers": []
+}

@@ -1,9 +1,9 @@
 import globals from 'globals';
+import { defineConfig, globalIgnores } from 'eslint/config';
 import js from '@eslint/js';
 
-/** @type {import('eslint').Linter.FlatConfig[]} */
-
-export default [
+export default defineConfig([
+    globalIgnores(['**/static/**/react/**', 'frontend/**']),
     {
         languageOptions: {
             globals: {
@@ -31,4 +31,4 @@ export default [
             'no-unused-vars': 'off',
         },
     }
-];
+]);

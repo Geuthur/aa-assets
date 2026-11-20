@@ -1,13 +1,10 @@
 # Standard Library
 from http import HTTPStatus
-from typing import Any
 
 # Third Party
 from ninja import NinjaAPI
 
 # Django
-from django.urls import reverse
-from django.utils.safestring import mark_safe
 from django.utils.translation import gettext
 
 # AA Assets
@@ -55,14 +52,14 @@ class AssetsApiEndpoints:
                 if asset is False:
                     continue
 
-                try:
-                    price = asset.price * asset.quantity
-                except TypeError:
-                    price = "N/A"
+                price = (
+                    asset.price * asset.quantity if asset.price is not None else None
+                )
                 assets.append(
                     {
                         "asset_pk": asset.pk,
                         "item_id": asset.item_id,
+                        "type_id": asset.eve_type.id,
                         "name": asset.eve_type.name,
                         "quantity": asset.quantity,
                         "location_id": asset.location.id,
@@ -82,7 +79,7 @@ class AssetsApiEndpoints:
 
         @api.get(
             "location/",
-            response={200: Any, 403: schema.ErrorSchema},
+            response={200: list[schema.LocationSchema], 403: schema.ErrorSchema},
             tags=self.tags,
         )
         def get_locations(request):
@@ -114,18 +111,11 @@ class AssetsApiEndpoints:
             output = []
 
             for location in locations:
-                url = reverse(
-                    viewname="assets:assets",
-                    kwargs={"location_id": location.id, "location_flag": "all"},
-                )
-                html = f"<a href='{url}'><button class='btn btn-primary'>View Assets</button></a>"
-
                 output.append(
                     {
                         "location_id": location.id,
                         "name": location.location_name,
                         "solar_system": location.system_name,
-                        "view": mark_safe(html),
                     }
                 )
 
