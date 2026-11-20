@@ -141,11 +141,9 @@ class OwnerManagerBase(models.Manager):
             )
         assets = operation.results(force_refresh=force_refresh)
 
+        # An empty list is a real state (e.g. everything sold or moved):
+        # 304 and HTTP errors raise before, so the old assets must go too.
         items = owner.process_assets(assets)
-        if not items:
-            logger.info("No assets found for %s", owner.name)
-            return 0
-
         owner.replace_assets(items)
         logger.info("Updated %s assets for %s", len(items), owner.name)
         return len(items)

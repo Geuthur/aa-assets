@@ -44,6 +44,7 @@ Section Order:
 - Users only see and order assets they may see: `location/`, `location/{location_id}/flag/{location_flag}/`, `requests/order/{request_id}/`, the multi order form of the assets page and the `create_order` view no longer show or accept assets, locations and orders of other owners and users
 - Users without corporation or admin access see the assets of their own characters again (`View Assets` answered 403)
 - Orders can no longer exceed the available quantity of an asset when it has no other open orders
+- An empty asset list from ESI now removes the old assets of the owner instead of keeping them
 - The asset update links open orders only to the new assets of their own owner (orders whose asset is gone are linked again too); before, it took the open orders of all owners and stopped with `MultipleObjectsReturned` when two assets matched an order
 - The ESI operation `PostUniverseNames` is added to `__operations__`; without it the ESI client did not know the operation and resolving an unknown station owner (`EveEntity` manager) crashed the asset update with an `AttributeError`
 - The order notification texts in `Request` (new request, completed, canceled, reopened) are filled with `.format()` instead of f-strings inside `_()`, so they can be translated; existing translations of the old texts no longer match until Weblate updates them
