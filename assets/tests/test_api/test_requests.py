@@ -266,6 +266,30 @@ class TestRequestStatusChange(AuthTestCase):
                 self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
                 self.assertEqual(response.json(), {"error": "Permission Denied"})
 
+    def test_status_change_should_return_409_from_wrong_status(self, send):
+        # Test Data
+        self.client.force_login(self.manager)
+        cases = (
+            ("cancel", Request.STATUS_COMPLETED),
+            ("complete", Request.STATUS_CANCELLED),
+            ("reopen", Request.STATUS_OPEN),
+            ("reopen", Request.STATUS_COMPLETED),
+        )
+
+        for action, status in cases:
+            with self.subTest(action=action, status=status):
+                self.order.status = status
+                self.order.save()
+
+                # Test Action
+                response = self._post(action)
+
+                # Expected Result
+                self.assertEqual(response.status_code, HTTPStatus.CONFLICT)
+                self.order.refresh_from_db()
+                self.assertEqual(self.order.status, status)
+        send.delay.assert_not_called()
+
     def test_reopen_should_open_cancelled_order(self, send):
         # Test Data
         self.order.status = Request.STATUS_CANCELLED

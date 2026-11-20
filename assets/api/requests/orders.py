@@ -26,6 +26,13 @@ from assets.managers import GeneralManager
 from assets.models import Assets, Request, RequestAssets
 from assets.providers import logger
 
+# The status an order needs before each change (matches `request_permissions`)
+_FROM_STATUS = {
+    MODE_CANCELED: Request.STATUS_OPEN,
+    MODE_COMPLETED: Request.STATUS_OPEN,
+    MODE_OPEN: Request.STATUS_CANCELLED,
+}
+
 
 class OrdersApiEndpoints:
     tags = ["Requests"]
@@ -134,6 +141,13 @@ class OrdersApiEndpoints:
                     "error": gettext("Request does not exist")
                 }
 
+            if user_request.status != _FROM_STATUS[mode]:
+                return HTTPStatus.CONFLICT, {
+                    "error": gettext(
+                        "The request cannot be changed in its current status."
+                    )
+                }
+
             if get_apr_cooldown(request.user, request_id, mode):
                 return HTTPStatus.TOO_MANY_REQUESTS, {"error": cooldown_message()}
 
@@ -146,6 +160,7 @@ class OrdersApiEndpoints:
             HTTPStatus.OK: schema.ActionResponse,
             HTTPStatus.FORBIDDEN: schema.ErrorSchema,
             HTTPStatus.NOT_FOUND: schema.ErrorSchema,
+            HTTPStatus.CONFLICT: schema.ErrorSchema,
             HTTPStatus.TOO_MANY_REQUESTS: schema.ErrorSchema,
         }
 
