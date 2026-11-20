@@ -33,6 +33,7 @@ Section Order:
 
 ### Fixed
 
+- The asset update links open orders only to the new assets of their own owner; before, it took the open orders of all owners and stopped with `MultipleObjectsReturned` when two assets matched an order
 - The ESI operation `PostUniverseNames` is added to `__operations__`; without it the ESI client did not know the operation and resolving an unknown station owner (`EveEntity` manager) crashed the asset update with an `AttributeError`
 - The order notification texts in `Request` (new request, completed, canceled, reopened) are filled with `.format()` instead of f-strings inside `_()`, so they can be translated; existing translations of the old texts no longer match until Weblate updates them
 - The API endpoints `location/` and `location/{location_id}/flag/{location_flag}/` no longer set `auth=None`; the login check of the API applies to them like to all other endpoints
@@ -50,6 +51,7 @@ Section Order:
 
 ### Changed
 
+- The asset update of an owner runs through the `UpdateManager` of the app template: a new `OwnerUpdateStatus` keeps success, errors and token errors per owner and section (section `assets`), replacing `Owner.last_update` (migration `0004_owner_update_status`). Existing owners are updated on the next run. New setting `ASSETS_STALE_TYPES` (default: `ASSETS_UPDATE_PERIOD`)
 - `models.py` and `managers.py` are split into the packages `assets/models/` and `assets/managers/` (one module per model, like aa-example); imports from `assets.models` and `assets.managers` keep working, no new migration, no change in behavior
 - Uniform error format of the API: every error response of an endpoint is an `ErrorSchema` (`{"error": "<text>"}`) instead of a plain string, and every endpoint lists its 403 in the OpenAPI schema. Status codes are unchanged. The order modal shows the message of the API.
 - Removed the unreachable `basic_access` checks in `get_requests_statistics` and `get_request_order` and the dead `is None` checks in `get_requests` and `get_my_requests`; the decorator of the API already answers 403

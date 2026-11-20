@@ -19,11 +19,7 @@ from eve_sde.models.types import ItemType
 
 # AA Assets
 from assets import contexts
-from assets.app_settings import (
-    ASSETS_CACHE_KEY,
-    ASSETS_TASKS_TIME_LIMIT,
-    ASSETS_UPDATE_PERIOD,
-)
+from assets.app_settings import ASSETS_CACHE_KEY, ASSETS_TASKS_TIME_LIMIT
 from assets.constants import STANDARD_FLAG
 from assets.models import Assets, Location, Owner
 from assets.providers import esi, logger, retry_task_on_esi_error
@@ -43,30 +39,61 @@ TASK_DEFAULTS = {
 TASK_DEFAULTS_ONCE = {**TASK_DEFAULTS, **{"base": QueueOnce}}
 # Default params for tasks that need bind=True and run once only.
 TASK_DEFAULTS_BIND_ONCE = {**TASK_DEFAULTS, **{"bind": True, "base": QueueOnce}}
+# Default params for tasks that run once per owner and are bound to the task instance.
+TASK_DEFAULTS_BIND_ONCE_OWNER = {
+    **TASK_DEFAULTS_BIND_ONCE,
+    **{"once": {"keys": ["owner_pk"], "graceful": True}},
+}
 
 
 @shared_task(**TASK_DEFAULTS_ONCE)
-def update_all_assets(runs: int = 0, force_refresh=False):
-    """Update all assets."""
-    owners = Owner.objects.filter(is_active=True)
-    skip_date = timezone.now() - datetime.timedelta(minutes=ASSETS_UPDATE_PERIOD)
+def update_all_assets(force_refresh: bool = False) -> int:
+    """Queue an update for every active owner. Returns the number of queued updates."""
+    owner_pks = list(Owner.objects.filter(is_active=True).values_list("pk", flat=True))
+    for owner_pk in owner_pks:
+        update_assets_for_owner.apply_async(
+            args=[owner_pk], kwargs={"force_refresh": force_refresh}, priority=6
+        )
 
-    for owner in owners:
-        if owner.last_update <= skip_date or force_refresh:
-            update_assets_for_owner.apply_async(
-                kwargs={"owner_pk": owner.pk, "force_refresh": force_refresh},
-                priority=6,
-            )
-            runs = runs + 1
-    logger.info("Queued %s Assets Updates", len(owners))
+    logger.info("Queued %s Assets Updates", len(owner_pks))
+    return len(owner_pks)
 
 
-@shared_task(**TASK_DEFAULTS_BIND_ONCE)
-def update_assets_for_owner(self: Task, owner_pk: int, force_refresh=False):
-    """Fetch all assets for an owner from ESI."""
-    owner = Owner.objects.get(pk=owner_pk)
+@shared_task(**TASK_DEFAULTS_BIND_ONCE_OWNER)
+def update_assets_for_owner(
+    self: Task, owner_pk: int, force_refresh: bool = False
+) -> bool:
+    """
+    Update the stale sections of one owner.
+
+    ESI outages and limits retry the whole task through `retry_task_on_esi_error`,
+    errors of a single section end up in its update status.
+
+    Args:
+        owner_pk (int): Primary key of the Owner to update.
+        force_refresh (bool): If True, every section is fetched again.
+
+    Returns:
+        bool: True if at least one section was updated, False otherwise.
+    """
+    try:
+        owner = Owner.objects.get(pk=owner_pk)
+    except Owner.DoesNotExist:
+        logger.warning("Owner with pk %s not found.", owner_pk)
+        return False
+
+    sections = owner.get_sections_to_update(force_refresh=force_refresh)
+    if not sections:
+        logger.info("No updates needed for %s", owner)
+        return False
+
     with retry_task_on_esi_error(self):
-        owner.update_assets_esi(force_refresh=force_refresh)
+        for section in sections:
+            logger.debug("Updating %s for %s", section, owner)
+            owner.execute_section(section, force_refresh=force_refresh)
+
+    logger.debug("Executed %s section updates for %s", len(sections), owner)
+    return True
 
 
 @shared_task(**TASK_DEFAULTS_ONCE)

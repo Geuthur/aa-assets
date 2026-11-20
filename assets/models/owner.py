@@ -2,13 +2,11 @@
 
 # Django
 from django.db import models, transaction
-from django.utils import timezone
 
 # Alliance Auth
 from allianceauth.authentication.models import CharacterOwnership
 from allianceauth.eveonline.models import EveCharacter, EveCorporationInfo
 from esi.errors import TokenError
-from esi.exceptions import HTTPClientError, HTTPNotModified
 from esi.models import Token
 
 # Alliance Auth (External Libs)
@@ -17,11 +15,17 @@ from eve_sde.models.types import ItemType
 # AA Assets
 from assets import contexts
 from assets.managers.assets import get_market_price
-from assets.managers.owner import OwnerManager
+from assets.managers.owner import OwnerManager, OwnerUpdateStatusManager
 from assets.models.assets import Assets
+from assets.models.helpers.update_manager import (
+    OwnerUpdateSection,
+    UpdateManagerMixin,
+    UpdateSectionResult,
+    UpdateStatusBaseModel,
+)
 from assets.models.location import Location
 from assets.models.request import Request, RequestAssets
-from assets.providers import esi, logger
+from assets.providers import logger
 
 
 def get_or_create_location(location_id: int) -> "Location":
@@ -30,8 +34,11 @@ def get_or_create_location(location_id: int) -> "Location":
     return obj
 
 
-class Owner(models.Model):
+class Owner(UpdateManagerMixin, models.Model):
     """A model defining an owner of assets."""
+
+    update_section_class = OwnerUpdateSection
+    update_status_model = "OwnerUpdateStatus"  # set below, after the class exists
 
     corporation = models.OneToOneField(
         EveCorporationInfo,
@@ -55,7 +62,6 @@ class Owner(models.Model):
         default=True,
         help_text=("whether this owner is currently included in the sync process"),
     )
-    last_update = models.DateTimeField(auto_now=True)
 
     objects = OwnerManager()
 
@@ -68,6 +74,11 @@ class Owner(models.Model):
         if self.character and self.character.character:
             return f"{self.character.character.character_name} (Char)"
         return f"Owner #{self.pk} (No Corp/Char)"
+
+    @property
+    def active(self) -> bool:
+        """Return `is_active`, the name `UpdateManagerMixin.get_status` reads."""
+        return self.is_active
 
     @property
     def name(self) -> str:
@@ -139,95 +150,50 @@ class Owner(models.Model):
             items.append(asset_item)
         return items
 
-    def update_assets_esi(self, force_refresh=False):
-        try:
-            if self.corporation:
-                token = self.valid_token(self.get_esi_scopes())
-                assets = self._fetch_corporate_assets(
-                    token, force_refresh=force_refresh
-                )
-            else:
-                token = self.valid_token(self.get_esi_scopes())
-                assets = self._fetch_personal_assets(token, force_refresh=force_refresh)
+    def replace_assets(self, items: list[Assets]) -> None:
+        """Replace all assets of this owner and relink its open orders."""
+        with transaction.atomic():
+            orders = self.get_open_orders()
+            self.flush_assets()
+            Assets.objects.bulk_create(items)
+            self.update_order_assets(orders)
 
-            items = self.process_assets(assets)
-        except HTTPNotModified:
-            logger.info("No new Assets for: %s", self.name)
-            return
-        except HTTPClientError as e:
-            logger.error("Failed to fetch assets for %s: %s", self.name, e)
-            return
-
-        try:
-            if items:
-                with transaction.atomic():
-                    # Delete all assets before adding new ones
-                    self.flush_assets()
-                    # Create Bulk
-                    Assets.objects.bulk_create(items)
-                    logger.info("Updated %s assets for %s", len(assets), self.name)
-
-            else:
-                logger.info("No updates found for %s", self.name)
-        except Exception as e:  # pylint: disable=broad-exception-caught
-            logger.error(
-                "Error while updating assets for %s: %s",
-                self.name,
-                e,
+    def get_open_orders(self) -> list[RequestAssets]:
+        """Return the open orders of assets of this owner."""
+        return list(
+            RequestAssets.objects.filter(
+                request__status=Request.STATUS_OPEN,
+                asset_pk__in=Assets.objects.filter(owner=self).values("pk"),
             )
+        )
 
-        self.last_update = timezone.now()
-        self.save()
-        self.update_order_assets()
-
-    def update_order_assets(self):
-        # Filter offene Bestellungen
-        orders = RequestAssets.objects.filter(request__status=Request.STATUS_OPEN)
-
+    def update_order_assets(self, orders: list[RequestAssets]) -> None:
+        """Link the given orders to the matching current assets of this owner."""
         orders_to_update = []
         for order in orders:
-            try:
-                asset = Assets.objects.get(
+            asset = (
+                Assets.objects.filter(
+                    owner=self,
                     eve_type=order.eve_type,
                     location_id=order.asset_location_id,
                     location_flag=order.asset_location_flag,
                 )
-            except Assets.DoesNotExist:
+                .order_by("pk")
+                .first()
+            )
+            if asset is None:
                 continue
-            if asset:
-                order.asset_pk = asset.pk
-                orders_to_update.append(order)
+            order.asset_pk = asset.pk
+            orders_to_update.append(order)
 
-        # Bulk-Update der Bestellungen
         if orders_to_update:
             logger.info("Updated %s orders for %s", len(orders_to_update), self.name)
             RequestAssets.objects.bulk_update(orders_to_update, ["asset_pk"])
 
-    def _fetch_corporate_assets(self, token: Token, force_refresh=False) -> list:
-        """Fetch all assets for this owner from ESI."""
-        asset_esi = esi.client.Assets.GetCorporationsCorporationIdAssets(
-            corporation_id=self.corporation_strict.corporation_id,
-            token=token,
-        )
-        assets, response = asset_esi.results(
-            return_response=True,
-            force_refresh=force_refresh,
-        )
-        logger.debug("Response Status: %s", response.status_code)
-        return assets
-
-    def _fetch_personal_assets(self, token: Token, force_refresh=False) -> list:
-        """Fetch all assets for this owner from ESI."""
-        asset_esi = esi.client.Assets.GetCharactersCharacterIdAssets(
-            character_id=self.eve_character_strict.character_id,
-            token=token,
-        )
-        assets, response = asset_esi.results(
-            return_response=True,
-            force_refresh=force_refresh,
-        )
-        logger.debug("Response Status: %s", response.status_code)
-        return assets
+    # Task Area: one `update_<section>` method per OwnerUpdateSection
+    def update_assets(self, force_refresh: bool = False) -> UpdateSectionResult:
+        """Update the assets of this owner."""
+        return Owner.objects.update_assets_esi(self, force_refresh=force_refresh)
 
     def valid_token(self, scopes) -> Token:
         """Return a valid token for the owner or raise exception."""
@@ -251,3 +217,24 @@ class Owner(models.Model):
         delete_query = Assets.objects.filter(owner=self)  # Flush Assets
         if delete_query.exists():
             delete_query._raw_delete(delete_query.db)
+
+
+class OwnerUpdateStatus(UpdateStatusBaseModel):
+    """The update status of one section of an Owner."""
+
+    class Meta(UpdateStatusBaseModel.Meta):
+        default_permissions = ()
+
+    objects: OwnerUpdateStatusManager = OwnerUpdateStatusManager()
+
+    owner = models.ForeignKey(
+        Owner,
+        on_delete=models.CASCADE,
+        related_name="assets_update_status",
+    )
+    section = models.CharField(
+        max_length=32, choices=OwnerUpdateSection.choices, db_index=True
+    )
+
+
+Owner.update_status_model = OwnerUpdateStatus

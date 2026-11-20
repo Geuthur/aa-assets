@@ -152,6 +152,7 @@ With the Following IDs you can set up the permissions for the Assets
 The Following Settings can be setting up in the `local.py`
 
 - ASSETS_APP_NAME: `"YOURNAME"` - Set the name of the APP
+- ASSETS_STALE_TYPES: `{"assets": 60}` - Minutes after which the assets of an owner are fetched from ESI again
 
 ## Highlights<a name="highlights"></a>
 
