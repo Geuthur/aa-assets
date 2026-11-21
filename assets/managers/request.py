@@ -1,37 +1,28 @@
 """Manager of Request: access, open requests and their counts."""
 
-# The access rules repeat per model; kept as they were before the split.
-# pylint: disable=duplicate-code
+# Standard Library
+from typing import TYPE_CHECKING
 
 # Django
 from django.db import models
 from django.db.models import Q
 
 # AA Assets
-from assets.managers.general import GeneralManager
-from assets.providers import logger
+from assets.managers.general import AccessManager, AccessQuerySet, GeneralManager
+
+if TYPE_CHECKING:
+    # AA Assets
+    from assets.models.request import Request
 
 
-class RequestQuerySet(models.QuerySet):
-    def visible_to(self, user):
-        if GeneralManager.has_manage_requests_access(user):
-            logger.debug("Returning all for Assets Manager %s.", user)
-            return self
+class RequestQuerySet(AccessQuerySet["Request"]):
+    """Requests of the user; `manage_requests` instead of `admin_access` sees all."""
 
-        try:
-            char = user.profile.main_character
-            assert char
-            queries = [models.Q(requesting_user=user)]
+    def sees_all(self, user) -> bool:
+        return GeneralManager.has_manage_requests_access(user)
 
-            logger.debug("%s queries for user %s visible.", len(queries), user)
-
-            query = queries.pop()
-            for q in queries:
-                query |= q
-            return self.filter(query)
-        except AssertionError:
-            logger.debug("User %s has no main character. Nothing visible.", user)
-            return self.none()
+    def owned_by_q(self, user) -> models.Q:
+        return models.Q(requesting_user=user)
 
     def requests_open(self) -> models.QuerySet:
         """Add filter to only include requests with open status."""
@@ -41,12 +32,9 @@ class RequestQuerySet(models.QuerySet):
         return request_query
 
 
-class RequestManagerBase(models.Manager):
+class RequestManagerBase(AccessManager["Request"]):
     def get_queryset(self):
         return RequestQuerySet(self.model, using=self._db)
-
-    def visible_to(self, user):
-        return self.get_queryset().visible_to(user)
 
     def select_related_default(self) -> models.QuerySet:
         """Add default select related to this query."""

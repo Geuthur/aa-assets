@@ -1,21 +1,14 @@
 """Manager of Owner: access to owners and their characters."""
 
-# The access rules repeat per model; kept as they were before the split.
-# pylint: disable=duplicate-code
-
 # Standard Library
 from typing import TYPE_CHECKING
 
 # Django
-from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Case, Count, Q, Value, When
 
-# Alliance Auth
-from allianceauth.eveonline.models import EveCharacter
-
 # AA Assets
-from assets.managers.general import GeneralManager
+from assets.managers.general import AccessManager, AccessQuerySet, GeneralManager
 from assets.models.helpers.update_manager import (
     OwnerUpdateSection,
     UpdateSectionResult,
@@ -28,91 +21,29 @@ if TYPE_CHECKING:
     from assets.models.owner import Owner, OwnerUpdateStatus
 
 
-class OwnerQuerySet(models.QuerySet):
-    def visible_to(self, user):
-        if GeneralManager.has_admin_access(user):
-            logger.debug("Returning all for admin %s.", user)
-            return self
+class OwnerQuerySet(AccessQuerySet["Owner"]):
+    """
+    Owners of the user's characters, with `corporation_access` also the owner
+    of the main character's corporation. Managing stays with the own characters.
+    """
 
-        try:
-            char = user.profile.main_character
-            assert char
-            queries = [models.Q(character__user=user)]
+    has_manage_rule = True
 
-            logger.debug(
-                "%s queries for user %s visible characters.", len(queries), user
+    def owned_by_q(self, user) -> models.Q:
+        return models.Q(character__user=user)
+
+    def visible_q(self, user) -> models.Q:
+        query = self.owned_by_q(user)
+        if GeneralManager.has_corporation_access(user):
+            query |= models.Q(
+                corporation__corporation_id=user.profile.main_character.corporation_id
             )
-
-            if GeneralManager.has_corporation_access(user):
-                logger.debug(
-                    "Returning own corporation for Corporation Manager %s.", user
-                )
-                queries.append(
-                    models.Q(corporation__corporation_id=char.corporation_id)
-                )
-
-            query = queries.pop()
-            for q in queries:
-                query |= q
-            return self.filter(query)
-        except AssertionError:
-            logger.debug("User %s has no main character. Nothing visible.", user)
-            return self.none()
-
-    def manage_to(self, user: User):
-        if GeneralManager.has_management_access(user):
-            logger.debug("Returning all for manager %s.", user)
-            return self
-
-        try:
-            char = user.profile.main_character
-            assert char
-            queries = [models.Q(character__user=user)]
-
-            logger.debug(
-                "%s queries for user %s visible chracters.", len(queries), user
-            )
-
-            query = queries.pop()
-            for q in queries:
-                query |= q
-            return self.filter(query)
-        except AssertionError:
-            logger.debug("User %s has no main character. Nothing visible.", user)
-            return self.none()
+        return query
 
 
-class OwnerManagerBase(models.Manager):
+class OwnerManagerBase(AccessManager["Owner"]):
     def get_queryset(self):
         return OwnerQuerySet(self.model, using=self._db)
-
-    @staticmethod
-    def visible_eve_characters(user):
-        qs = EveCharacter.objects.get_queryset()
-        if GeneralManager.has_manage_requests_access(user):
-            logger.debug("Returning all for Assets Manager %s.", user)
-            return qs.all()
-
-        try:
-            char = user.profile.main_character
-            assert char
-            queries = [models.Q(character_ownership__user=user)]
-
-            logger.debug("%s queries for user %s visible.", len(queries), user)
-
-            query = queries.pop()
-            for q in queries:
-                query |= q
-            return qs.filter(query)
-        except AssertionError:
-            logger.debug("User %s has no main character. Nothing visible.", user)
-            return qs.none()
-
-    def visible_to(self, user):
-        return self.get_queryset().visible_to(user)
-
-    def manage_to(self, user):
-        return self.get_queryset().manage_to(user)
 
     # ESI section: the owner's `update_<section>` method calls this
     def update_assets_esi(

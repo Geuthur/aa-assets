@@ -1,11 +1,8 @@
 """Manager of Location: access, name annotations and ESI fetch."""
 
-# The access rules repeat per model; kept as they were before the split.
-# pylint: disable=duplicate-code
-
 # Standard Library
 import datetime as dt
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 # Django
 from django.db import models
@@ -20,40 +17,27 @@ from eve_sde.models.types import ItemType
 # AA Assets
 from assets import contexts
 from assets.app_settings import ASSETS_LOCATION_STALE_HOURS
-from assets.managers.general import GeneralManager
+from assets.managers.general import AccessManager, AccessQuerySet, GeneralManager
 from assets.providers import esi, logger
+
+if TYPE_CHECKING:
+    # AA Assets
+    from assets.models.location import Location
 
 EVE_TYPE_ID_SOLAR_SYSTEM = 5
 
 
-class LocationQuerySet(models.QuerySet):
-    def visible_to(self, user):
-        if GeneralManager.has_admin_access(user):
-            logger.debug("Returning all for admin %s.", user)
-            return self
+class LocationQuerySet(AccessQuerySet["Location"]):
+    """Locations owned by the user's main character, with `corporation_access` also by its corporation."""
 
-        try:
-            char = user.profile.main_character
-            assert char
-            queries = [models.Q(owner_id=char.character_id)]
+    def owned_by_q(self, user) -> models.Q:
+        return models.Q(owner_id=user.profile.main_character.character_id)
 
-            logger.debug(
-                "%s queries for user %s visible characters.", len(queries), user
-            )
-
-            if GeneralManager.has_corporation_access(user):
-                logger.debug(
-                    "Returning own corporation for Corporation Manager %s.", user
-                )
-                queries.append(models.Q(owner_id=char.corporation_id))
-
-            query = queries.pop()
-            for q in queries:
-                query |= q
-            return self.filter(query)
-        except AssertionError:
-            logger.debug("User %s has no main character. Nothing visible.", user)
-            return self.none()
+    def visible_q(self, user) -> models.Q:
+        query = self.owned_by_q(user)
+        if GeneralManager.has_corporation_access(user):
+            query |= models.Q(owner_id=user.profile.main_character.corporation_id)
+        return query
 
     def annotate_location_name(self) -> models.QuerySet:
         """Annotate calculated location name field
@@ -116,14 +100,11 @@ class LocationQuerySet(models.QuerySet):
         )
 
 
-class LocationManagerBase(models.Manager):
+class LocationManagerBase(AccessManager["Location"]):
     """A manager for the Location model."""
 
     def get_queryset(self):
         return LocationQuerySet(self.model, using=self._db)
-
-    def visible_to(self, user):
-        return self.get_queryset().visible_to(user)
 
     _UPDATE_EMPTY_GRACE_MINUTES = 360
 

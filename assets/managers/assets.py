@@ -1,7 +1,7 @@
 """Manager of Assets: access, name annotations and market prices."""
 
-# The access rules repeat per model; kept as they were before the split.
-# pylint: disable=duplicate-code
+# Standard Library
+from typing import TYPE_CHECKING
 
 # Third Party
 import requests
@@ -15,8 +15,12 @@ from django.db.models.functions import Concat
 # AA Assets
 from assets import __version__
 from assets.app_settings import STORAGE_BASE_KEY
-from assets.managers.general import GeneralManager
+from assets.managers.general import AccessManager, AccessQuerySet, GeneralManager
 from assets.providers import logger
+
+if TYPE_CHECKING:
+    # AA Assets
+    from assets.models.assets import Assets
 
 USERAGENT = f"assets v{__version__}"
 
@@ -35,36 +39,19 @@ def get_market_price(item_id: int) -> float:
     return cache.get(build_market_price_cache_tag(item_id))
 
 
-class AssetsQuerySet(models.QuerySet):
-    def visible_to(self, user):
-        if GeneralManager.has_admin_access(user):
-            logger.debug("Returning all for admin %s.", user)
-            return self
+class AssetsQuerySet(AccessQuerySet["Assets"]):
+    """Assets of the user's character owners, with `corporation_access` also of the main character's corporation."""
 
-        try:
-            char = user.profile.main_character
-            assert char
-            queries = [models.Q(owner__character__user=user)]
+    def owned_by_q(self, user) -> models.Q:
+        return models.Q(owner__character__user=user)
 
-            logger.debug(
-                "%s queries for user %s visible characters.", len(queries), user
+    def visible_q(self, user) -> models.Q:
+        query = self.owned_by_q(user)
+        if GeneralManager.has_corporation_access(user):
+            query |= models.Q(
+                owner__corporation__corporation_id=user.profile.main_character.corporation_id
             )
-
-            if GeneralManager.has_corporation_access(user):
-                logger.debug(
-                    "Returning own corporation for Corporation Manager %s.", user
-                )
-                queries.append(
-                    models.Q(owner__corporation__corporation_id=char.corporation_id)
-                )
-
-            query = queries.pop()
-            for q in queries:
-                query |= q
-            return self.filter(query)
-        except AssertionError:
-            logger.debug("User %s has no main character. Nothing visible.", user)
-            return self.none()
+        return query
 
     def annotate_owner_name(self) -> models.QuerySet:
         """Add owner_name Annotation to query."""
@@ -148,14 +135,11 @@ class AssetsQuerySet(models.QuerySet):
         }
 
 
-class AssetsManagerBase(models.Manager):
+class AssetsManagerBase(AccessManager["Assets"]):
     """A manager for the Assets model."""
 
     def get_queryset(self):
         return AssetsQuerySet(self.model, using=self._db)
-
-    def visible_to(self, user):
-        return self.get_queryset().visible_to(user)
 
 
 AssetsManager = AssetsManagerBase.from_queryset(AssetsQuerySet)
