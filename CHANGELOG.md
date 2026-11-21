@@ -64,6 +64,7 @@ Section Order:
 ### Changed
 
 - The app opens the React frontend; the old Django pages are removed
+- `.make/config.ini` names aa-assets instead of the app template, and `helpers/eveonline.py` matches the template (new `display_name` option)
 - The menu badge of open requests pulses (`has_errors` in `menu/`); `price` of an asset is `null` instead of `"N/A"` without a price
 - The asset update of an owner runs through the `UpdateManager` of the app template: a new `OwnerUpdateStatus` keeps success, errors and token errors per owner and section (section `assets`), replacing `Owner.last_update` (migration `0004_owner_update_status`). Existing owners are updated on the next run. New setting `ASSETS_STALE_TYPES` (default: `ASSETS_UPDATE_PERIOD`)
 - `models.py` and `managers.py` are split into the packages `assets/models/` and `assets/managers/` (one module per model, like aa-example); imports from `assets.models` and `assets.managers` keep working, no new migration, no change in behavior
