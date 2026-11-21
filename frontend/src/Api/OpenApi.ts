@@ -75,23 +75,6 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/assets/api/requests/statistics/": {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        /** Get Requests Statistics */
-        get: operations["assets_api_requests_requests_get_requests_statistics"];
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/assets/api/requests/{request_id}/": {
         parameters: {
             query?: never;
@@ -736,35 +719,6 @@ export interface operations {
                 };
                 content: {
                     "application/json": components["schemas"]["Requests"][];
-                };
-            };
-            /** @description Forbidden */
-            403: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": components["schemas"]["ErrorSchema"];
-                };
-            };
-        };
-    };
-    assets_api_requests_requests_get_requests_statistics: {
-        parameters: {
-            query?: never;
-            header?: never;
-            path?: never;
-            cookie?: never;
-        };
-        requestBody?: never;
-        responses: {
-            /** @description OK */
-            200: {
-                headers: {
-                    [name: string]: unknown;
-                };
-                content: {
-                    "application/json": unknown;
                 };
             };
             /** @description Forbidden */

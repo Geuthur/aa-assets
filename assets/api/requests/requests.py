@@ -1,6 +1,3 @@
-# Standard Library
-from typing import Any
-
 # Third Party
 from ninja import NinjaAPI
 
@@ -11,7 +8,6 @@ from django.utils import timezone
 # AA Assets
 from assets.api import schema
 from assets.api.requests.helper import request_permissions
-from assets.managers import GeneralManager
 from assets.models import Request
 
 
@@ -92,25 +88,5 @@ class RequestsApiEndpoints:
                         **request_permissions(req, request.user),
                     }
                 )
-
-            return output
-
-        @api.get(
-            "requests/statistics/",
-            response={200: Any, 403: schema.ErrorSchema},
-            tags=self.tags,
-        )
-        def get_requests_statistics(request: WSGIRequest):
-            if GeneralManager.has_manage_requests_access(request.user):
-                requests_count = Request.objects.open_requests_total_count()
-            else:
-                requests_count = None
-
-            my_requests_count = Request.objects.my_requests_total_count(request.user)
-
-            output = {
-                "requestCount": requests_count,
-                "myRequestCount": my_requests_count,
-            }
 
             return output

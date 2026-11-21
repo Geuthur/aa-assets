@@ -186,43 +186,6 @@
         ]
       }
     },
-    "/assets/api/requests/statistics/": {
-      "get": {
-        "operationId": "assets_api_requests_requests_get_requests_statistics",
-        "summary": "Get Requests Statistics",
-        "parameters": [],
-        "responses": {
-          "200": {
-            "description": "OK",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "title": "Response"
-                }
-              }
-            }
-          },
-          "403": {
-            "description": "Forbidden",
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/ErrorSchema"
-                }
-              }
-            }
-          }
-        },
-        "tags": [
-          "Requests"
-        ],
-        "security": [
-          {
-            "SessionAuth": []
-          }
-        ]
-      }
-    },
     "/assets/api/requests/{request_id}/": {
       "get": {
         "operationId": "assets_api_requests_orders_get_request",
