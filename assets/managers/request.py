@@ -4,7 +4,6 @@
 # pylint: disable=duplicate-code
 
 # Django
-from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Q
 
@@ -41,15 +40,6 @@ class RequestQuerySet(models.QuerySet):
         )
         return request_query
 
-    def my_requests_open(self, user) -> models.QuerySet:
-        """Add filter to only include requests with open status."""
-        request_query = self.filter(
-            Q(closed_at=None)
-            & Q(status=self.model.STATUS_OPEN)
-            & Q(requesting_user=user)
-        )
-        return request_query
-
 
 class RequestManagerBase(models.Manager):
     def get_queryset(self):
@@ -67,10 +57,6 @@ class RequestManagerBase(models.Manager):
     def open_requests_total_count(self) -> int:
         """Return total count of open requests for user"""
         return self.all().requests_open().count()
-
-    def my_requests_total_count(self, user: User) -> int:
-        """Return total count of open requests for user"""
-        return self.all().my_requests_open(user).count()
 
 
 RequestManager = RequestManagerBase.from_queryset(RequestQuerySet)
