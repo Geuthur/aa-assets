@@ -53,6 +53,30 @@ class TestEVEOnlineHelper(NoSocketsTestCase):
             '<img class="character-portrait rounded-circle" src="https://images.example/characters/1001" alt="Bruce Wayne">',
         )
 
+    @patch(f"{MODULE_PATH}.character_portrait_url")
+    def test_get_character_portrait_url_should_return_html_with_name(
+        self, mock_character_portrait_url
+    ):
+        mock_character_portrait_url.return_value = (
+            "https://images.example/characters/1001"
+        )
+
+        result = eveonline.get_character_portrait_url(
+            character_id=1001,
+            size=64,
+            character_name="Bruce Wayne",
+            as_html=True,
+            display_name=True,
+        )
+
+        self.assertEqual(
+            str(result),
+            '<div class="d-flex align-items-center">'
+            '<img class="character-portrait rounded-circle me-2" src="https://images.example/characters/1001" alt="Bruce Wayne">'
+            "<span>Bruce Wayne</span>"
+            "</div>",
+        )
+
     @patch(f"{MODULE_PATH}.corporation_logo_url")
     def test_get_corporation_logo_url_should_return_url(
         self, mock_corporation_logo_url
