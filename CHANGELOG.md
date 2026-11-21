@@ -40,6 +40,7 @@ Section Order:
 
 ### Fixed
 
+- `requests/{id}/`, its `cancel/`, `complete/` and `reopen/` and `owners/{id}/` answer an order or owner of someone else with 404 like a missing one (before 403 or 409), so they no longer reveal which IDs exist or the requestor's name
 - React Query no longer retries 403, 404 and other 4xx answers three times, so the error shows at once instead of after about seven seconds: `Routing.tsx` uses `createQueryClient` of `aa-geuthur-react` (`^1.7.0`), which retries only network errors and 502/503/504
 - Users only see and order assets they may see: `location/`, `location/{location_id}/flag/{location_flag}/`, `requests/order/{request_id}/`, the multi order form of the assets page and the `create_order` view no longer show or accept assets, locations and orders of other owners and users
 - Users without corporation or admin access see the assets of their own characters again (`View Assets` answered 403)
