@@ -342,3 +342,12 @@ class TestVisibleEveCharactersRules(AccessRulesTestCase):
             set(Owner.objects.visible_eve_characters(self.no_main_admin)),
             set(EveCharacter.objects.all()),
         )
+
+
+class TestManageToWithoutRule(AccessRulesTestCase):
+    def test_models_without_manage_rule_raise_for_every_user(self):
+        for model in [Assets, Location, Request]:
+            for user in [self.user, self.admin, self.superuser, self.no_main]:
+                with self.subTest(model=model.__name__, user=user):
+                    with self.assertRaises(NotImplementedError):
+                        model.objects.manage_to(user)
