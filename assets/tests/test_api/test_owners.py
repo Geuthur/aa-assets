@@ -75,7 +75,7 @@ class TestOwnersApi(AuthTestCase):
         self.assertEqual(sections[0]["section_label"], "Assets")
         self.assertTrue(sections[0]["is_success"])
 
-    def test_get_owner_should_return_403_for_owner_of_other_user(self):
+    def test_get_owner_should_return_404_for_owner_of_other_user(self):
         # Test Data
         self.client.force_login(self.user)
 
@@ -83,8 +83,8 @@ class TestOwnersApi(AuthTestCase):
         response = self.client.get(f"{API}/owners/{self.other_owner.pk}/")
 
         # Expected Result
-        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
-        self.assertEqual(response.json(), {"error": "Permission Denied"})
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertEqual(response.json(), {"error": "Owner not found"})
 
     def test_get_owner_should_return_404_for_unknown_owner(self):
         # Test Data

@@ -49,8 +49,10 @@ class OrdersApiEndpoints:
             summary="Get an order with its items",
         )
         def get_request(request: WSGIRequest, request_id: int):
+            # A request the user may not see answers like a missing one
             user_request = (
-                Request.objects.select_related("requesting_user", "approver_user")
+                Request.objects.visible_to(request.user)
+                .select_related("requesting_user", "approver_user")
                 .filter(pk=request_id)
                 .first()
             )
@@ -58,13 +60,6 @@ class OrdersApiEndpoints:
                 return HTTPStatus.NOT_FOUND, {
                     "error": gettext("Request does not exist")
                 }
-
-            if (
-                not Request.objects.visible_to(request.user)
-                .filter(pk=request_id)
-                .exists()
-            ):
-                return HTTPStatus.FORBIDDEN, {"error": gettext("Permission Denied")}
 
             items = RequestAssets.objects.filter(request=user_request).select_related(
                 "eve_type"
@@ -135,7 +130,11 @@ class OrdersApiEndpoints:
             )
 
         def _change_status(request: WSGIRequest, request_id: int, mode: str):
-            user_request = Request.objects.filter(pk=request_id).first()
+            # A request the user may not see answers like a missing one,
+            # before its status is checked
+            user_request = (
+                Request.objects.visible_to(request.user).filter(pk=request_id).first()
+            )
             if user_request is None:
                 return HTTPStatus.NOT_FOUND, {
                     "error": gettext("Request does not exist")
