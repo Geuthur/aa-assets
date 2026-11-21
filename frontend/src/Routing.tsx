@@ -7,6 +7,7 @@ import { QueryClientProvider } from "@tanstack/react-query";
 import { AaReactProvider, AuthBase, createQueryClient, ErrorPage } from "aa-geuthur-react";
 import { NuqsAdapter } from "nuqs/adapters/react-router/v8";
 
+// AA Assets
 import { AppName, ProjectName } from "@/constants";
 import AdminPage from "@/Pages/AdminPage";
 import LocationPage from "@/Pages/LocationPage";

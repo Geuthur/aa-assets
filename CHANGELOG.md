@@ -64,6 +64,7 @@ Section Order:
 
 ### Changed
 
+- ESLint enforces the import order React, third party, `@/`, styles (`// AA Assets` group in `frontend/eslint.config.js`); `Main.tsx` keeps the global `index.css` first
 - The app opens the React frontend; the old Django pages are removed
 - `.make/config.ini` names aa-assets instead of the app template, and `helpers/eveonline.py` matches the template (new `display_name` option)
 - The menu badge of open requests pulses (`has_errors` in `menu/`); `price` of an asset is `null` instead of `"N/A"` without a price
