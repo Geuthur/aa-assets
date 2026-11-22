@@ -64,6 +64,7 @@ Section Order:
 
 ### Changed
 
+- Stations are read from the SDE (`eve_sde` `NPCStation`) instead of the ESI route `/universe/stations/{station_id}`, which CCP removes with compatibility date `2026-11-19`; only the station name still comes from ESI (`PostUniverseNames`), as the SDE holds no station names
 - i18next 27, react-i18next 18 (aa-geuthur-react `^1.8.0`) and stylelint 18 (pre-commit hook with `--config-basedir`). A plural form left empty in a language (e.g. `_few` in pl, ru, uk) now shows that language's `_other` form instead of English.
 - Node 26 in the CI workflow and pre-commit, npm minor and patch updates in the root and `frontend/`, `jsdom` 31 and `@testing-library/jest-dom` 8 (development only)
 - The access rules of assets, locations, owners and requests share `AccessQuerySet` and `AccessManager` in `managers/general.py` (like aa-example); each model only states its own rule, no change in behavior

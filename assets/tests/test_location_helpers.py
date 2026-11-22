@@ -5,7 +5,7 @@ from http import HTTPStatus
 
 # Third Party
 import pook
-from evesde_factory.eve_sde import SolarSystemFactory
+from evesde_factory.eve_sde import NPCStationFactory, SolarSystemFactory
 
 # Django
 from django.core.cache import cache
@@ -21,8 +21,8 @@ from assets.task_helpers.location_helpers import (
 from assets.tests import AuthTestCase
 from assets.tests.testdata.esi_urls import (
     clear_esi_limits,
-    station_url,
     structure_url,
+    universe_names_url,
 )
 
 SOLAR_SYSTEM_ID = 30_000_142
@@ -73,27 +73,23 @@ class TestGetLocationType(AuthTestCase):
         self.assertIsNone(existing_location)
 
     @pook.on
-    def test_should_return_location_for_station_from_esi(self):
-        # Test Data
+    def test_should_return_location_for_station_from_sde(self):
+        # Test Data: the SDE holds no station names, the name comes from ESI
         clear_esi_limits()
         self.addCleanup(clear_esi_limits)
-        pook.get(
-            station_url(STATION_ID),
+        system = SolarSystemFactory(id=SOLAR_SYSTEM_ID, name="Jita")
+        NPCStationFactory(id=STATION_ID, name="", solar_system=system)
+        names_mock = pook.post(
+            universe_names_url(),
+            json=[STATION_ID],
             reply=HTTPStatus.OK,
-            response_json={
-                "max_dockable_ship_volume": 50000000,
-                "name": "Jita IV - Moon 4 - Caldari Navy Assembly Plant",
-                "office_rental_cost": 10000,
-                "owner": 1000035,
-                "position": {"x": 1.0, "y": 2.0, "z": 3.0},
-                "race_id": 1,
-                "reprocessing_efficiency": 0.5,
-                "reprocessing_stations_take": 0.05,
-                "services": ["market"],
-                "station_id": STATION_ID,
-                "system_id": SOLAR_SYSTEM_ID,
-                "type_id": 1531,
-            },
+            response_json=[
+                {
+                    "id": STATION_ID,
+                    "name": "Jita IV - Moon 4 - Caldari Navy Assembly Plant",
+                    "category": "station",
+                }
+            ],
         )
 
         # Test Action
@@ -106,6 +102,20 @@ class TestGetLocationType(AuthTestCase):
         )
         self.assertEqual(location.eve_solar_system_id, SOLAR_SYSTEM_ID)
         self.assertIsNone(existing_location)
+        self.assertTrue(names_mock.isdone())
+
+    @pook.on
+    def test_should_return_no_location_for_station_unknown_to_sde(self):
+        # Test Data
+        names_mock = pook.post(universe_names_url(), reply=HTTPStatus.OK, persist=True)
+
+        # Test Action
+        location, existing_location = get_location_type(STATION_ID)
+
+        # Expected Result
+        self.assertIsNone(location)
+        self.assertIsNone(existing_location)
+        self.assertEqual(names_mock.calls, 0)
 
 
 class TestFetchLocation(AuthTestCase):
@@ -174,9 +184,8 @@ class TestFetchLocation(AuthTestCase):
         self.assertEqual(structure_mock.calls, 0)
 
     @pook.on
-    def test_should_not_fetch_structure_for_station_not_modified(self):
+    def test_should_not_fetch_structure_for_station_unknown_to_sde(self):
         # Test Data
-        pook.get(station_url(STATION_ID), reply=HTTPStatus.NOT_MODIFIED)
         structure_mock = pook.get(
             structure_url(STATION_ID), reply=HTTPStatus.OK, persist=True
         )
@@ -289,9 +298,8 @@ class TestFetchParentLocation(AuthTestCase):
         self.assertEqual(structure_mock.calls, 0)
 
     @pook.on
-    def test_should_not_fetch_structure_for_station_not_modified(self):
+    def test_should_not_fetch_structure_for_station_unknown_to_sde(self):
         # Test Data
-        pook.get(station_url(STATION_ID), reply=HTTPStatus.NOT_MODIFIED)
         structure_mock = pook.get(
             structure_url(STATION_ID), reply=HTTPStatus.OK, persist=True
         )

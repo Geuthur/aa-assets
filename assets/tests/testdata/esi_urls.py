@@ -16,11 +16,6 @@ def corporation_assets_url(corporation_id: int) -> str:
     return f"{ESI_BASE_URL}/corporations/{corporation_id}/assets"
 
 
-def station_url(station_id: int) -> str:
-    """Return the ESI URL of a station."""
-    return f"{ESI_BASE_URL}/universe/stations/{station_id}"
-
-
 def structure_url(structure_id: int) -> str:
     """Return the ESI URL of a structure."""
     return f"{ESI_BASE_URL}/universe/structures/{structure_id}"

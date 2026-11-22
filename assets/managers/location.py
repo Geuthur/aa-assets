@@ -11,12 +11,12 @@ from django.db.models.functions import Concat
 from django.utils.timezone import now
 
 # Alliance Auth (External Libs)
-from eve_sde.models.map import SolarSystem
+from eve_sde.models.map import NPCStation, SolarSystem
 from eve_sde.models.types import ItemType
 
 # AA Assets
-from assets import contexts
 from assets.app_settings import ASSETS_LOCATION_STALE_HOURS
+from assets.errors import ObjectNotFound
 from assets.managers.general import AccessManager, AccessQuerySet, GeneralManager
 from assets.providers import esi, logger
 
@@ -25,6 +25,14 @@ if TYPE_CHECKING:
     from assets.models.location import Location
 
 EVE_TYPE_ID_SOLAR_SYSTEM = 5
+
+
+def fetch_station_name(station_id: int) -> str:
+    """Return the name of an NPC station from ESI, the SDE holds no station names."""
+    response = esi.client.Universe.PostUniverseNames(body=[station_id]).results()
+    if len(response) != 1:
+        raise ObjectNotFound(f"Station with ID {station_id} not found.")
+    return response[0].name
 
 
 class LocationQuerySet(AccessQuerySet["Location"]):
@@ -142,10 +150,8 @@ class LocationManagerBase(AccessManager["Location"]):
                 },
             )
         elif self.model.is_station_id(location_id):
-            logger.info("%s: Fetching station from ESI", location_id)
-            station = esi.client.Universe.GetUniverseStationsStationId(
-                station_id=location_id
-            ).result()
+            logger.info("%s: Reading station from SDE", location_id)
+            station = NPCStation.objects.get(id=location_id)
 
             location, created = self._station_update_or_create_dict(
                 location_id=location_id, station=station
@@ -158,34 +164,24 @@ class LocationManagerBase(AccessManager["Location"]):
         return location, created
 
     def _station_update_or_create_dict(
-        self, location_id: int, station: contexts.GetUniverseStationsStationIdContext
+        self, location_id: int, station: NPCStation
     ) -> tuple[Any, bool]:
         # pylint: disable=import-outside-toplevel
         # AA Assets
         from assets.models.eveentity import EveEntity
 
         logger.debug("Updating or creating station %s", station)
-        if station.system_id:
-            eve_solar_system = SolarSystem.objects.get(id=station.system_id)
-        else:
-            eve_solar_system = None
-
-        if station.type_id:
-            eve_type = ItemType.objects.get(id=station.type_id)
-        else:
-            eve_type = None
-
-        if station.owner:
-            owner, _ = EveEntity.objects.get_or_create_esi(eve_id=station.owner)
+        if station.owner_id_raw:
+            owner, _ = EveEntity.objects.get_or_create_esi(eve_id=station.owner_id_raw)
         else:
             owner = None
 
         return self.update_or_create(
             id=location_id,
             defaults={
-                "name": station.name,
-                "eve_solar_system": eve_solar_system,
-                "eve_type": eve_type,
+                "name": fetch_station_name(location_id),
+                "eve_solar_system": station.solar_system,
+                "eve_type": station.item_type,
                 "owner": owner,
             },
         )
