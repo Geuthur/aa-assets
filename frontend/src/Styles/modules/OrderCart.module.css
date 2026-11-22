@@ -1,0 +1,9 @@
+.cart-floating-bar {
+  min-width: 320px;
+  max-width: 500px;
+  width: 90%;
+}
+
+.cart-bar {
+  background-color: var(--aa-bg-blue-light);
+}
