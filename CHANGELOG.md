@@ -70,6 +70,7 @@ Section Order:
 - ESLint enforces the import order React, third party, `@/`, styles (`// AA Assets` group in `frontend/eslint.config.js`); `Main.tsx` keeps the global `index.css` first
 - The app opens the React frontend; the old Django pages are removed
 - `.make/config.ini` names aa-assets instead of the app template, and `helpers/eveonline.py` matches the template (new `display_name` option)
+- Tests for `is_retryable_esi_error` and the `display_name` option of all image helpers, taken over from aa-example (tests only)
 - The menu badge of open requests pulses (`has_errors` in `menu/`); `price` of an asset is `null` instead of `"N/A"` without a price
 - The asset update of an owner runs through the `UpdateManager` of the app template: a new `OwnerUpdateStatus` keeps success, errors and token errors per owner and section (section `assets`), replacing `Owner.last_update` (migration `0004_owner_update_status`). Existing owners are updated on the next run. New setting `ASSETS_STALE_TYPES` (default: `ASSETS_UPDATE_PERIOD`)
 - `models.py` and `managers.py` are split into the packages `assets/models/` and `assets/managers/` (one module per model, like aa-example); imports from `assets.models` and `assets.managers` keep working, no new migration, no change in behavior

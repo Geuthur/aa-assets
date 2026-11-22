@@ -6,6 +6,7 @@ from assets.helpers import eveonline
 from assets.tests import NoSocketsTestCase
 
 MODULE_PATH = "assets.helpers.eveonline"
+IMAGE_SERVER = "https://images.evetech.net"
 
 
 class TestEVEOnlineHelper(NoSocketsTestCase):
@@ -183,4 +184,79 @@ class TestEVEOnlineHelper(NoSocketsTestCase):
         self.assertEqual(
             str(result),
             '<img class="type-render rounded-circle" data-bs-tooltip="aa-assets" src="https://images.example/types/5001/icon" title="Warp Scrambler">',
+        )
+
+
+class TestDisplayName(NoSocketsTestCase):
+    """Tests for the `display_name` option of the image helpers."""
+
+    def test_character_should_ignore_display_name_without_html(self):
+        result = eveonline.get_character_portrait_url(
+            1001, character_name="Bruce Wayne", display_name=True
+        )
+
+        self.assertEqual(result, f"{IMAGE_SERVER}/characters/1001/portrait?size=32")
+
+    def test_character_should_escape_name(self):
+        result = eveonline.get_character_portrait_url(
+            1001, character_name="<b>Bruce</b>", as_html=True, display_name=True
+        )
+
+        self.assertNotIn("<b>", result)
+        self.assertIn("&lt;b&gt;Bruce&lt;/b&gt;", result)
+
+    def test_corporation_should_return_html_with_display_name(self):
+        result = eveonline.get_corporation_logo_url(
+            2001, corporation_name="Wayne Technologies", as_html=True, display_name=True
+        )
+
+        self.assertHTMLEqual(
+            result,
+            '<div class="d-flex align-items-center">'
+            '<img class="corporation-logo rounded-circle me-2" '
+            f'src="{IMAGE_SERVER}/corporations/2001/logo?size=32" alt="Wayne Technologies">'
+            "<span>Wayne Technologies</span>"
+            "</div>",
+        )
+
+    def test_alliance_should_return_html_with_display_name(self):
+        result = eveonline.get_alliance_logo_url(
+            3001, alliance_name="Wayne Enterprises", as_html=True, display_name=True
+        )
+
+        self.assertHTMLEqual(
+            result,
+            '<div class="d-flex align-items-center">'
+            '<img class="alliance-logo rounded-circle me-2" '
+            f'src="{IMAGE_SERVER}/alliances/3001/logo?size=32" alt="Wayne Enterprises">'
+            "<span>Wayne Enterprises</span>"
+            "</div>",
+        )
+
+    def test_type_render_should_return_html_with_display_name(self):
+        result = eveonline.get_type_render_url(
+            603, type_name="Merlin", as_html=True, display_name=True
+        )
+
+        self.assertHTMLEqual(
+            result,
+            '<div class="d-flex align-items-center">'
+            '<img class="type-render rounded-circle me-2" '
+            f'src="{IMAGE_SERVER}/types/603/render?size=32" alt="Merlin">'
+            "<span>Merlin</span>"
+            "</div>",
+        )
+
+    def test_icon_should_return_html_with_display_name(self):
+        result = eveonline.get_icon_render_url(
+            603, type_name="Merlin", as_html=True, display_name=True
+        )
+
+        self.assertHTMLEqual(
+            result,
+            '<div class="d-flex align-items-center">'
+            '<img class="type-render rounded-circle me-2" data-bs-tooltip="aa-assets" '
+            f'src="{IMAGE_SERVER}/types/603/icon?size=32" title="Merlin">'
+            "<span>Merlin</span>"
+            "</div>",
         )
