@@ -9,7 +9,7 @@ import {
   formatNumber,
   itemImageUrl,
 } from "aa-geuthur-react";
-import { ShoppingCart } from "lucide-react";
+import { Check, Plus } from "lucide-react";
 import { Button } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
@@ -23,22 +23,22 @@ export interface AssetsTableProps {
   isLoading?: boolean;
   isFetching?: boolean;
   isError?: boolean;
-  /** Called with the asset when its order button is clicked. */
-  onOrder: (asset: AssetSchema) => void;
-  /** Slot above the table, e.g. the button of the multi order. */
-  toolbar?: React.ReactNode;
+  /** `asset_pk` of the assets in the order cart. */
+  selectedIds: ReadonlySet<number>;
+  /** Called with the asset when its cart button is clicked: adds it or takes it out again. */
+  onToggleSelect: (asset: AssetSchema) => void;
   /** Prefills the filter of the location flag column, e.g. `CorpSAG5`. */
   initialFlag?: string;
 }
 
-/** Lists the assets of a location with price and an order button per row. */
+/** Lists the assets of a location with price and a button per row for the order cart. */
 export const AssetsTable = ({
   assets,
   isLoading = false,
   isFetching = false,
   isError = false,
-  onOrder,
-  toolbar,
+  selectedIds,
+  onToggleSelect,
   initialFlag,
 }: AssetsTableProps) => {
   const { t } = useTranslation();
@@ -91,19 +91,27 @@ export const AssetsTable = ({
         id: "actions",
         header: t("Actions"),
         meta: { align: "right" },
-        cell: ({ row }) => (
-          <Button
-            size="sm"
-            variant="primary"
-            aria-label={t("Order {{name}}", { name: row.original.name })}
-            onClick={() => onOrder(row.original)}
-          >
-            <ShoppingCart size={14} /> {t("Order")}
-          </Button>
-        ),
+        cell: ({ row }) => {
+          const selected = selectedIds.has(row.original.asset_pk);
+          return (
+            <Button
+              size="sm"
+              variant={selected ? "success" : "primary"}
+              aria-label={
+                selected
+                  ? t("Remove {{name}} from order", { name: row.original.name })
+                  : t("Add {{name}} to order", { name: row.original.name })
+              }
+              aria-pressed={selected}
+              onClick={() => onToggleSelect(row.original)}
+            >
+              {selected ? <Check size={14} /> : <Plus size={14} />} {selected ? t("Added") : t("Add")}
+            </Button>
+          );
+        },
       }),
     ],
-    [t, onOrder, flagLabels],
+    [t, selectedIds, onToggleSelect, flagLabels],
   );
 
   const initialState = useMemo(
@@ -118,7 +126,6 @@ export const AssetsTable = ({
       isLoading={isLoading}
       isFetching={isFetching}
       isError={isError}
-      toolbar={toolbar}
       initialState={initialState}
       loadingText={t("Loading assets...")}
       emptyText={t("No assets found at this location.")}

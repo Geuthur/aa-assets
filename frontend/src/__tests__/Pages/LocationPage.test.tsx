@@ -121,74 +121,123 @@ describe("LocationPage", () => {
     expect(assetsApi.loadAssets).not.toHaveBeenCalled();
   });
 
-  it("should order one asset limited to the available quantity", async () => {
+  it("should add an asset with its whole quantity and order the cart", async () => {
     // Test Data
     const user = userEvent.setup();
     vi.mocked(requestsApi.createOrder).mockResolvedValue({ success: true, message: "Order created successfully." });
 
     // Test Action
     renderLocation();
-    await user.click(await screen.findByRole("button", { name: "Order Rifter" }));
+    await user.click(await screen.findByRole("button", { name: "Add Rifter to order" }));
+    await user.click(screen.getByRole("button", { name: "Add Reaper to order" }));
+    expect(screen.getByText("Order cart: 2 assets")).toBeInTheDocument();
+    await user.click(screen.getByRole("button", { name: "Review Order" }));
     const dialog = await screen.findByRole("dialog");
-    await user.type(within(dialog).getByRole("spinbutton", { name: "Amount of Rifter" }), "9");
-    await user.click(within(dialog).getByRole("button", { name: "Confirm" }));
-
-    // Expected Result
-    expect(requestsApi.createOrder).toHaveBeenCalledWith([{ asset_pk: 11, amount: 5 }]);
-    expect(await screen.findByText("Order created successfully.")).toBeInTheDocument();
-  });
-
-  it("should order several assets at once", async () => {
-    // Test Data
-    const user = userEvent.setup();
-    vi.mocked(requestsApi.createOrder).mockResolvedValue({ success: true, message: "Order created successfully." });
-
-    // Test Action
-    renderLocation();
-    await user.click(await screen.findByRole("button", { name: "Multi Order" }));
-    const dialog = await screen.findByRole("dialog");
-    await user.type(within(dialog).getByRole("spinbutton", { name: "Amount of Rifter" }), "2");
-    const reaperRow = within(dialog).getByText("Reaper").closest("tr") as HTMLElement;
-    await user.click(within(reaperRow).getByRole("button", { name: "All" }));
-    await user.click(within(dialog).getByRole("button", { name: "Confirm" }));
+    await user.click(within(dialog).getByRole("button", { name: "Place Order" }));
 
     // Expected Result
     expect(requestsApi.createOrder).toHaveBeenCalledWith([
-      { asset_pk: 11, amount: 2 },
+      { asset_pk: 11, amount: 5 },
       { asset_pk: 12, amount: 2 },
     ]);
+    expect(await screen.findByText("Order created successfully.")).toBeInTheDocument();
+    expect(screen.queryByText(/Order cart:/)).not.toBeInTheDocument();
   });
 
-  it("should ask for an amount before ordering", async () => {
+  it("should take an asset out of the cart on the second click", async () => {
     // Test Data
     const user = userEvent.setup();
 
     // Test Action
     renderLocation();
-    await user.click(await screen.findByRole("button", { name: "Multi Order" }));
-    const dialog = await screen.findByRole("dialog");
-    await user.click(within(dialog).getByRole("button", { name: "Confirm" }));
+    await user.click(await screen.findByRole("button", { name: "Add Rifter to order" }));
+    await user.click(screen.getByRole("button", { name: "Remove Rifter from order" }));
 
     // Expected Result
-    expect(within(dialog).getByRole("alert")).toHaveTextContent("Enter an amount of at least 1 for one asset.");
-    expect(requestsApi.createOrder).not.toHaveBeenCalled();
+    expect(screen.getByRole("button", { name: "Add Rifter to order" })).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Review Order" })).not.toBeInTheDocument();
   });
 
-  it("should close the modal and show the message of a failed order", async () => {
+  it("should limit the amount in the review to the available quantity", async () => {
+    // Test Data
+    const user = userEvent.setup();
+    vi.mocked(requestsApi.createOrder).mockResolvedValue({ success: true, message: "Order created successfully." });
+
+    // Test Action
+    renderLocation();
+    await user.click(await screen.findByRole("button", { name: "Add Rifter to order" }));
+    await user.click(screen.getByRole("button", { name: "Review Order" }));
+    const dialog = await screen.findByRole("dialog");
+    const amount = within(dialog).getByRole("spinbutton", { name: "Amount of Rifter" });
+    expect(amount).toHaveValue(5);
+    await user.clear(amount);
+    await user.type(amount, "3");
+    await user.click(within(dialog).getByRole("button", { name: "Place Order" }));
+
+    // Expected Result
+    expect(requestsApi.createOrder).toHaveBeenCalledWith([{ asset_pk: 11, amount: 3 }]);
+  });
+
+  it("should not order an asset with an empty amount", async () => {
+    // Test Data
+    const user = userEvent.setup();
+
+    // Test Action
+    renderLocation();
+    await user.click(await screen.findByRole("button", { name: "Add Rifter to order" }));
+    await user.click(screen.getByRole("button", { name: "Review Order" }));
+    const dialog = await screen.findByRole("dialog");
+    await user.clear(within(dialog).getByRole("spinbutton", { name: "Amount of Rifter" }));
+
+    // Expected Result
+    expect(within(dialog).getByRole("button", { name: "Place Order" })).toBeDisabled();
+  });
+
+  it("should remove an asset in the review and clear the cart", async () => {
+    // Test Data
+    const user = userEvent.setup();
+
+    // Test Action
+    renderLocation();
+    await user.click(await screen.findByRole("button", { name: "Add Rifter to order" }));
+    await user.click(screen.getByRole("button", { name: "Add Reaper to order" }));
+    await user.click(screen.getByRole("button", { name: "Review Order" }));
+    const dialog = await screen.findByRole("dialog");
+    await user.click(within(dialog).getByRole("button", { name: "Remove Rifter from order" }));
+    expect(within(dialog).queryByText("Rifter")).not.toBeInTheDocument();
+    await user.click(within(dialog).getByRole("button", { name: "Cancel" }));
+    await user.click(screen.getByRole("button", { name: "Clear selection" }));
+
+    // Expected Result
+    expect(screen.queryByText(/Order cart:/)).not.toBeInTheDocument();
+    expect(screen.getByRole("button", { name: "Add Reaper to order" })).toBeInTheDocument();
+  });
+
+  it("should not show the multi order button anymore", async () => {
+    // Test Action
+    renderLocation();
+
+    // Expected Result
+    expect(await screen.findByText("Rifter")).toBeInTheDocument();
+    expect(screen.queryByRole("button", { name: "Multi Order" })).not.toBeInTheDocument();
+  });
+
+  it("should close the review, empty the cart and show the message of a failed order", async () => {
     // Test Data
     const user = userEvent.setup();
     vi.mocked(requestsApi.createOrder).mockRejectedValue(new Error("Requested amount exceeds available quantity."));
 
     // Test Action
     renderLocation();
-    await user.click(await screen.findByRole("button", { name: "Order Rifter" }));
+    await user.click(await screen.findByRole("button", { name: "Add Rifter to order" }));
+    await user.click(screen.getByRole("button", { name: "Review Order" }));
     const dialog = await screen.findByRole("dialog");
-    await user.click(within(dialog).getByRole("button", { name: "All" }));
-    await user.click(within(dialog).getByRole("button", { name: "Confirm" }));
+    await user.click(within(dialog).getByRole("button", { name: "Place Order" }));
 
     // Expected Result
     expect(await screen.findByRole("alert")).toHaveTextContent("Requested amount exceeds available quantity.");
     await waitFor(() => expect(screen.queryByRole("dialog")).not.toBeInTheDocument());
+    expect(screen.queryByText(/Order cart:/)).not.toBeInTheDocument();
     expect(assetsApi.loadAssets).toHaveBeenCalledTimes(2);
   });
 });
