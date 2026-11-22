@@ -65,6 +65,7 @@ class AssetsApiEndpoints:
                         "location_id": asset.location.id,
                         "location": asset.location_name,
                         "location_flag": asset.get_location_flag_display(),
+                        "location_flag_code": asset.location_flag,
                         "price": price,
                     }
                 )

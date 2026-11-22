@@ -5,6 +5,7 @@ from http import HTTPStatus
 
 # AA Assets
 from assets import __app_name__
+from assets.models import Assets
 from assets.tests import AuthTestCase
 from assets.tests.testdata.factory import UserMainFactory
 from assets.tests.testdata.orders import (
@@ -43,6 +44,19 @@ class TestAssetsApi(AuthTestCase):
         self.assertEqual(row["type_id"], self.asset.eve_type.id)
         self.assertEqual(row["name"], self.asset.eve_type.name)
         self.assertEqual(row["quantity"], 7)
+
+    def test_get_assets_should_return_location_flag_code_and_label(self):
+        # Test Data
+        self.asset.location_flag = Assets.LocationFlag.CORP_S_A_G_5
+        self.asset.save()
+
+        # Test Action
+        response = self.client.get(f"{API}/location/{LOCATION_ID}/flag/all/")
+
+        # Expected Result
+        row = response.json()["assets"][0]
+        self.assertEqual(row["location_flag_code"], "CorpSAG5")
+        self.assertEqual(row["location_flag"], "Corp Security Access Group 5")
 
     def test_get_assets_should_return_total_price(self):
         # Test Data

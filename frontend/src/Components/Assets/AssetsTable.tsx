@@ -43,6 +43,11 @@ export const AssetsTable = ({
 }: AssetsTableProps) => {
   const { t } = useTranslation();
 
+  const flagLabels = useMemo(
+    () => new Map(assets.map((asset) => [asset.location_flag_code, asset.location_flag])),
+    [assets],
+  );
+
   const columns = useMemo(
     () => [
       columnHelper.accessor("name", {
@@ -66,6 +71,11 @@ export const AssetsTable = ({
       }),
       columnHelper.accessor("location_flag", {
         header: t("Location Flag"),
+        // The ?flag= link filters by the ESI code, the column shows its translated label
+        filterFn: (row, columnId, filterValue: string) =>
+          row.original.location_flag_code === filterValue ||
+          String(row.getValue(columnId)).toLowerCase().includes(filterValue.toLowerCase()),
+        meta: { filterOptionLabel: (value: string) => flagLabels.get(value) ?? value },
       }),
       columnHelper.accessor((row) => row.price ?? null, {
         id: "price",
@@ -93,7 +103,7 @@ export const AssetsTable = ({
         ),
       }),
     ],
-    [t, onOrder],
+    [t, onOrder, flagLabels],
   );
 
   const initialState = useMemo(

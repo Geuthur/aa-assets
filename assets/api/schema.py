@@ -175,6 +175,7 @@ class AssetSchema(Schema):
     location_id: int
     location: str | None = None
     location_flag: str
+    location_flag_code: str
     price: float | None = None
 
 
