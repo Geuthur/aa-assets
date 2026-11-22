@@ -64,6 +64,7 @@ Section Order:
 
 ### Changed
 
+- Node 26 in the CI workflow and pre-commit, npm minor and patch updates in the root and `frontend/`, `jsdom` 31 and `@testing-library/jest-dom` 8 (development only)
 - The access rules of assets, locations, owners and requests share `AccessQuerySet` and `AccessManager` in `managers/general.py` (like aa-example); each model only states its own rule, no change in behavior
 - ESLint enforces the import order React, third party, `@/`, styles (`// AA Assets` group in `frontend/eslint.config.js`); `Main.tsx` keeps the global `index.css` first
 - The app opens the React frontend; the old Django pages are removed
