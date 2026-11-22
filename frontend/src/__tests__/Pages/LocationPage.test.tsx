@@ -37,7 +37,7 @@ describe("LocationPage", () => {
     vi.mocked(assetsApi.loadAssets).mockResolvedValue({
       location_id: 60003760,
       location_flag: "all",
-      assets: [asset, { ...secondAsset, location_flag: "CorpSAG5" }],
+      assets: [asset, { ...secondAsset, location_flag: "Corp Security Access Group 5", location_flag_code: "CorpSAG5" }],
     });
 
     // Test Action
@@ -46,6 +46,44 @@ describe("LocationPage", () => {
     // Expected Result
     expect(await screen.findByText("Reaper")).toBeInTheDocument();
     expect(screen.queryByText("Rifter")).not.toBeInTheDocument();
+    expect(screen.getByDisplayValue("Corp Security Access Group 5")).toBeInTheDocument();
+  });
+
+  it("should show no asset for a location flag without assets", async () => {
+    // Test Data
+    vi.mocked(assetsApi.loadAssets).mockResolvedValue({
+      location_id: 60003760,
+      location_flag: "all",
+      assets: [asset, { ...secondAsset, location_flag: "Corp Security Access Group 5", location_flag_code: "CorpSAG5" }],
+    });
+
+    // Test Action
+    renderLocation("60003760", "?flag=CorpSAG1");
+
+    // Expected Result
+    expect(await screen.findByText("No assets found at this location.")).toBeInTheDocument();
+    expect(screen.queryByText("Reaper")).not.toBeInTheDocument();
+    expect(screen.queryByText("Rifter")).not.toBeInTheDocument();
+  });
+
+  it("should filter the location flag by the typed label", async () => {
+    // Test Data
+    const user = userEvent.setup();
+    vi.mocked(assetsApi.loadAssets).mockResolvedValue({
+      location_id: 60003760,
+      location_flag: "all",
+      assets: [asset, { ...secondAsset, location_flag: "Corp Security Access Group 5", location_flag_code: "CorpSAG5" }],
+    });
+
+    // Test Action
+    renderLocation();
+    expect(await screen.findByText("Rifter")).toBeInTheDocument();
+    const flagFilter = screen.getAllByPlaceholderText("Filter…")[2];
+    await user.type(flagFilter, "security");
+
+    // Expected Result
+    expect(screen.getByText("Reaper")).toBeInTheDocument();
+    expect(screen.queryByText("Rifter")).not.toBeInTheDocument();
   });
 
   it("should not filter the location flag without the query parameter", async () => {
@@ -53,7 +91,7 @@ describe("LocationPage", () => {
     vi.mocked(assetsApi.loadAssets).mockResolvedValue({
       location_id: 60003760,
       location_flag: "all",
-      assets: [asset, { ...secondAsset, location_flag: "CorpSAG5" }],
+      assets: [asset, { ...secondAsset, location_flag: "Corp Security Access Group 5", location_flag_code: "CorpSAG5" }],
     });
 
     // Test Action

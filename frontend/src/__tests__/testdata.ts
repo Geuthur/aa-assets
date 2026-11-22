@@ -43,6 +43,7 @@ export const asset: AssetSchema = {
   location_id: 60003760,
   location: "Jita IV - Moon 4",
   location_flag: "Hangar",
+  location_flag_code: "Hangar",
   price: 1500000,
 };
 

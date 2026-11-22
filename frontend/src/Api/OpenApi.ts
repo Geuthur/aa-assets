@@ -285,6 +285,8 @@ export interface components {
             location?: string | null;
             /** Location Flag */
             location_flag: string;
+            /** Location Flag Code */
+            location_flag_code: string;
             /** Price */
             price?: number | null;
         };

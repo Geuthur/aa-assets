@@ -886,6 +886,10 @@
             "title": "Location Flag",
             "type": "string"
           },
+          "location_flag_code": {
+            "title": "Location Flag Code",
+            "type": "string"
+          },
           "price": {
             "anyOf": [
               {
@@ -905,7 +909,8 @@
           "name",
           "quantity",
           "location_id",
-          "location_flag"
+          "location_flag",
+          "location_flag_code"
         ],
         "title": "AssetSchema",
         "type": "object"
