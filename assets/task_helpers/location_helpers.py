@@ -6,12 +6,13 @@ from esi.exceptions import HTTPClientError, HTTPNotModified
 from esi.models import Token
 
 # Alliance Auth (External Libs)
-from eve_sde.models.map import SolarSystem
+from eve_sde.models.map import NPCStation, SolarSystem
 
 # AA Assets
 from assets import contexts
 from assets.app_settings import ASSETS_CACHE_KEY
 from assets.constants import STANDARD_FLAG
+from assets.managers.location import fetch_station_name
 from assets.models import Location
 from assets.providers import esi, logger
 
@@ -62,25 +63,20 @@ def get_location_type(location_id) -> tuple[Location | None, Location | None]:
         )
     # Location is a Station
     if is_station(location_id):
-        try:
-            station = esi.client.Universe.GetUniverseStationsStationId(
-                station_id=location_id
-            ).result()
-            station: contexts.GetUniverseStationsStationIdContext
-        except HTTPNotModified:
+        station = NPCStation.objects.filter(id=location_id).first()
+        if not station:
             # Stations (< 64_000_000) already in the DB returned above, so
             # there is no existing location to hand back here.
-            logger.debug("No Updates for Station: %s", location_id)
+            logger.debug("Unknown Station: %s", location_id)
             return None, None
 
         logger.debug("Fetched Station: %s", station)
-        # Stations (< 64_000_000) already in the DB returned above, so
-        # there is no existing location to hand back here.
+        # The SDE holds no station names, the name comes from ESI
         return (
             Location(
                 id=location_id,
-                name=station.name,
-                eve_solar_system_id=station.system_id,
+                name=fetch_station_name(location_id),
+                eve_solar_system_id=station.solar_system_id,
             ),
             None,
         )
@@ -120,7 +116,7 @@ def fetch_location(
         logger.debug("Unknown Solar System: %s", location_id)
         return None
 
-    # Station without update and not in DB yet, it is no structure
+    # Station unknown to the SDE and not in DB yet, it is no structure
     if is_station(location_id):
         logger.debug("No Station data for: %s", location_id)
         return None
@@ -201,7 +197,7 @@ def fetch_parent_location(
         logger.debug("Unknown Solar System: %s", parent_id)
         return None
 
-    # Station without update and not in DB yet, it is no structure
+    # Station unknown to the SDE and not in DB yet, it is no structure
     if is_station(parent_id):
         logger.debug("No Station data for: %s", parent_id)
         return None
