@@ -9,7 +9,7 @@ import pook
 from aiopenapi3 import RequestError
 from celery.exceptions import Retry
 from evesde_factory.allianceauth import EveCorporationInfoFactory
-from evesde_factory.eve_sde import ItemTypeFactory
+from evesde_factory.eve_sde import ItemTypeFactory, NPCStationFactory
 
 # Django
 from django.core.cache import cache
@@ -45,8 +45,8 @@ from assets.tests.testdata.esi_urls import (
     character_assets_url,
     clear_esi_limits,
     corporation_assets_url,
-    station_url,
     structure_url,
+    universe_names_url,
 )
 from assets.tests.testdata.factory import UserMainFactory
 from assets.tests.testdata.owner import OwnerUpdateStatusFactory
@@ -186,13 +186,20 @@ class TestUpdateAssetsForOwner(EsiTaskTestCase):
 )
 @patch.object(tasks.update_location, "retry", side_effect=Retry)
 class TestUpdateLocation(EsiTaskTestCase):
+    """The station comes from the SDE, only its name is fetched from ESI."""
+
+    @classmethod
+    def setUpClass(cls):
+        super().setUpClass()
+        NPCStationFactory(id=STATION_ID, name="")
+
     def test_should_retry_on_esi_server_errors(self, mock_retry):
         for status_code in SERVER_ERRORS:
             with self.subTest(status_code=status_code), pook.use():
                 # Test Data
                 mock_retry.reset_mock()
-                pook.get(
-                    station_url(STATION_ID),
+                pook.post(
+                    universe_names_url(),
                     reply=status_code,
                     response_json={"error": status_code.phrase},
                 )
@@ -207,7 +214,12 @@ class TestUpdateLocation(EsiTaskTestCase):
     @pook.on
     def test_should_retry_on_the_esi_error_limit(self, mock_retry):
         # Test Data
-        self._error_limit(station_url(STATION_ID))
+        pook.post(
+            universe_names_url(),
+            reply=420,
+            response_json={"error": "Error limited"},
+            response_headers={"X-RateLimit-Reset": "30"},
+        )
 
         # Test Action
         with self.assertRaises(Retry):
@@ -215,6 +227,26 @@ class TestUpdateLocation(EsiTaskTestCase):
 
         # Expected Result
         self._assert_retried(mock_retry, ESIErrorLimitException, 30)
+
+    @pook.on
+    def test_should_save_station_with_name_from_esi(self, mock_retry):
+        # Test Data
+        pook.post(
+            universe_names_url(),
+            json=[STATION_ID],
+            reply=HTTPStatus.OK,
+            response_json=[
+                {"id": STATION_ID, "name": "Jita IV - Moon 4", "category": "station"}
+            ],
+        )
+
+        # Test Action
+        tasks.update_location(STATION_ID)
+
+        # Expected Result
+        mock_retry.assert_not_called()
+        location = Location.objects.get(id=STATION_ID)
+        self.assertEqual(location.name, "Jita IV - Moon 4")
 
 
 @override_settings(
@@ -461,6 +493,29 @@ class TestUpdateAssetsForOwnerOrders(EsiTaskTestCase):
         )
         self.assertTrue(status.is_success)
         self.assertIsNotNone(status.last_update_finished_at)
+
+    @pook.on
+    def test_should_remove_old_assets_on_empty_esi_response(self):
+        # Test Data: the owner sold or moved everything
+        self._asset(self.owner)
+        other_asset = self._asset(self.other_owner)
+        pook.get(
+            character_assets_url(self.character.character_id),
+            reply=200,
+            response_json=[],
+        )
+
+        # Test Action
+        result = tasks.update_assets_for_owner(self.owner.pk, force_refresh=True)
+
+        # Expected Result
+        self.assertTrue(result)
+        self.assertFalse(Assets.objects.filter(owner=self.owner).exists())
+        self.assertTrue(Assets.objects.filter(pk=other_asset.pk).exists())
+        status = OwnerUpdateStatus.objects.get(
+            owner=self.owner, section=OwnerUpdateSection.ASSETS
+        )
+        self.assertTrue(status.is_success)
 
     @pook.on
     def test_should_fetch_corporation_assets(self):

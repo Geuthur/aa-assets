@@ -89,15 +89,14 @@ class OwnersApiEndpoints:
             summary="Get an owner with the update status of its sections",
         )
         def get_owner(request: WSGIRequest, owner_id: int):
+            # An owner the user may not see answers like a missing one
             owner = (
-                Owner.objects.select_related("character__character", "corporation")
+                Owner.objects.visible_to(request.user)
+                .select_related("character__character", "corporation")
                 .filter(pk=owner_id)
                 .first()
             )
             if owner is None:
                 return HTTPStatus.NOT_FOUND, {"error": _("Owner not found")}
-
-            if not Owner.objects.visible_to(request.user).filter(pk=owner.pk).exists():
-                return HTTPStatus.FORBIDDEN, {"error": _("Permission Denied")}
 
             return HTTPStatus.OK, _serialize_owner_detail(owner)

@@ -37,8 +37,7 @@ export default defineConfig([
             { heading: '// Third Party', pattern: '^@?\\w' },
 
             // 3. AA Assets (Eigene Komponenten, Helpers, API)
-            //{ heading: '// AA Assets', pattern: '^@/' },
-            //{ heading: '// AA Assets', pattern: '^\\.(?!.*\\.s?css$)' },
+            { heading: '// AA Assets', pattern: '^@/(?!.*\\.s?css$)' },
 
             // 4. Stylesheets & CSS-Module
             { heading: '// Styles', pattern: '\\.s?css$' },

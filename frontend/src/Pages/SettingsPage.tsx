@@ -7,10 +7,11 @@ import { BellOff, Settings2 } from "lucide-react";
 import { Card } from "react-bootstrap";
 import { useTranslation } from "react-i18next";
 
+// AA Assets
+import type { UserSettingsSchema, UserSettingsUpdateRequest } from "@/Api/schema";
+
 // Styles
 import styles from "@/Styles/modules/SettingsPage.module.css";
-
-import type { UserSettingsSchema, UserSettingsUpdateRequest } from "@/Api/schema";
 
 export const SettingsPage: React.FC = () => {
   const { t } = useTranslation();

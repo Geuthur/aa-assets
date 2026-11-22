@@ -16,7 +16,6 @@ __operations__ = [
     # Corporation operations
     "GetCorporationsCorporationIdAssets",
     # Universe operations
-    "GetUniverseStationsStationId",
     "GetUniverseStructuresStructureId",
     "PostUniverseNames",
 ]

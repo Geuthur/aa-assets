@@ -201,7 +201,7 @@ class TestRequestStatusChange(AuthTestCase):
             )
         )
 
-    def test_cancel_should_return_403_for_order_of_other_user(self, send):
+    def test_cancel_should_return_404_for_order_of_other_user(self, send):
         # Test Data
         self.client.force_login(self.other_user)
 
@@ -209,11 +209,24 @@ class TestRequestStatusChange(AuthTestCase):
         response = self._post("cancel")
 
         # Expected Result
-        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
-        self.assertIn("has failed", response.json()["error"])
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertEqual(response.json(), {"error": "Request does not exist"})
         self.order.refresh_from_db()
         self.assertEqual(self.order.status, Request.STATUS_OPEN)
         send.delay.assert_not_called()
+
+    def test_cancel_should_return_404_for_closed_order_of_other_user(self, send):
+        # Test Data
+        self.order.status = Request.STATUS_CANCELLED
+        self.order.save()
+        self.client.force_login(self.other_user)
+
+        # Test Action
+        response = self._post("cancel")
+
+        # Expected Result
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertEqual(response.json(), {"error": "Request does not exist"})
 
     def test_cancel_should_return_404_for_unknown_order(self, send):
         # Test Data
@@ -350,7 +363,7 @@ class TestGetRequest(AuthTestCase):
             ],
         )
 
-    def test_get_request_should_return_403_for_order_of_other_user(self):
+    def test_get_request_should_return_404_for_order_of_other_user(self):
         # Test Data
         self.client.force_login(self.other_user)
 
@@ -358,8 +371,8 @@ class TestGetRequest(AuthTestCase):
         response = self.client.get(f"{API}/requests/{self.order.pk}/")
 
         # Expected Result
-        self.assertEqual(response.status_code, HTTPStatus.FORBIDDEN)
-        self.assertEqual(response.json(), {"error": "Permission Denied"})
+        self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertEqual(response.json(), {"error": "Request does not exist"})
 
     def test_get_request_should_return_404_for_unknown_order(self):
         # Test Data
@@ -370,6 +383,7 @@ class TestGetRequest(AuthTestCase):
 
         # Expected Result
         self.assertEqual(response.status_code, HTTPStatus.NOT_FOUND)
+        self.assertEqual(response.json(), {"error": "Request does not exist"})
 
 
 class TestRequestListPermissions(AuthTestCase):

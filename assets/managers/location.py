@@ -1,82 +1,51 @@
 """Manager of Location: access, name annotations and ESI fetch."""
 
-# The access rules repeat per model; kept as they were before the split.
-# pylint: disable=duplicate-code
-
 # Standard Library
 import datetime as dt
-from typing import Any
+from typing import TYPE_CHECKING, Any
 
 # Django
-from django.contrib.auth.models import User
 from django.db import models
 from django.db.models import Case, F, Q, Value, When
 from django.db.models.functions import Concat
 from django.utils.timezone import now
 
 # Alliance Auth (External Libs)
-from eve_sde.models.map import SolarSystem
+from eve_sde.models.map import NPCStation, SolarSystem
 from eve_sde.models.types import ItemType
 
 # AA Assets
-from assets import contexts
 from assets.app_settings import ASSETS_LOCATION_STALE_HOURS
-from assets.managers.general import GeneralManager
+from assets.errors import ObjectNotFound
+from assets.managers.general import AccessManager, AccessQuerySet, GeneralManager
 from assets.providers import esi, logger
+
+if TYPE_CHECKING:
+    # AA Assets
+    from assets.models.location import Location
 
 EVE_TYPE_ID_SOLAR_SYSTEM = 5
 
 
-class LocationQuerySet(models.QuerySet):
-    def visible_to(self, user):
-        if GeneralManager.has_admin_access(user):
-            logger.debug("Returning all for admin %s.", user)
-            return self
+def fetch_station_name(station_id: int) -> str:
+    """Return the name of an NPC station from ESI, the SDE holds no station names."""
+    response = esi.client.Universe.PostUniverseNames(body=[station_id]).results()
+    if len(response) != 1:
+        raise ObjectNotFound(f"Station with ID {station_id} not found.")
+    return response[0].name
 
-        try:
-            char = user.profile.main_character
-            assert char
-            queries = [models.Q(owner_id=char.character_id)]
 
-            logger.debug(
-                "%s queries for user %s visible characters.", len(queries), user
-            )
+class LocationQuerySet(AccessQuerySet["Location"]):
+    """Locations owned by the user's main character, with `corporation_access` also by its corporation."""
 
-            if GeneralManager.has_corporation_access(user):
-                logger.debug(
-                    "Returning own corporation for Corporation Manager %s.", user
-                )
-                queries.append(models.Q(owner_id=char.corporation_id))
+    def owned_by_q(self, user) -> models.Q:
+        return models.Q(owner_id=user.profile.main_character.character_id)
 
-            query = queries.pop()
-            for q in queries:
-                query |= q
-            return self.filter(query)
-        except AssertionError:
-            logger.debug("User %s has no main character. Nothing visible.", user)
-            return self.none()
-
-    def manage_to(self, user: User):
-        if GeneralManager.has_management_access(user):
-            logger.debug("Returning all for manager %s.", user)
-            return self
-
-        try:
-            char = user.profile.main_character
-            assert char
-            queries = [models.Q(owner_id=user)]
-
-            logger.debug(
-                "%s queries for user %s visible chracters.", len(queries), user
-            )
-
-            query = queries.pop()
-            for q in queries:
-                query |= q
-            return self.filter(query)
-        except AssertionError:
-            logger.debug("User %s has no main character. Nothing visible.", user)
-            return self.none()
+    def visible_q(self, user) -> models.Q:
+        query = self.owned_by_q(user)
+        if GeneralManager.has_corporation_access(user):
+            query |= models.Q(owner_id=user.profile.main_character.corporation_id)
+        return query
 
     def annotate_location_name(self) -> models.QuerySet:
         """Annotate calculated location name field
@@ -139,17 +108,11 @@ class LocationQuerySet(models.QuerySet):
         )
 
 
-class LocationManagerBase(models.Manager):
+class LocationManagerBase(AccessManager["Location"]):
     """A manager for the Location model."""
 
     def get_queryset(self):
         return LocationQuerySet(self.model, using=self._db)
-
-    def visible_to(self, user):
-        return self.get_queryset().visible_to(user)
-
-    def manage_to(self, user: User):
-        return self.get_queryset().manage_to(user)
 
     _UPDATE_EMPTY_GRACE_MINUTES = 360
 
@@ -187,10 +150,8 @@ class LocationManagerBase(models.Manager):
                 },
             )
         elif self.model.is_station_id(location_id):
-            logger.info("%s: Fetching station from ESI", location_id)
-            station = esi.client.Universe.GetUniverseStationsStationId(
-                station_id=location_id
-            ).result()
+            logger.info("%s: Reading station from SDE", location_id)
+            station = NPCStation.objects.get(id=location_id)
 
             location, created = self._station_update_or_create_dict(
                 location_id=location_id, station=station
@@ -203,34 +164,24 @@ class LocationManagerBase(models.Manager):
         return location, created
 
     def _station_update_or_create_dict(
-        self, location_id: int, station: contexts.GetUniverseStationsStationIdContext
+        self, location_id: int, station: NPCStation
     ) -> tuple[Any, bool]:
         # pylint: disable=import-outside-toplevel
         # AA Assets
         from assets.models.eveentity import EveEntity
 
         logger.debug("Updating or creating station %s", station)
-        if station.system_id:
-            eve_solar_system = SolarSystem.objects.get(id=station.system_id)
-        else:
-            eve_solar_system = None
-
-        if station.type_id:
-            eve_type = ItemType.objects.get(id=station.type_id)
-        else:
-            eve_type = None
-
-        if station.owner:
-            owner, _ = EveEntity.objects.get_or_create_esi(eve_id=station.owner)
+        if station.owner_id_raw:
+            owner, _ = EveEntity.objects.get_or_create_esi(eve_id=station.owner_id_raw)
         else:
             owner = None
 
         return self.update_or_create(
             id=location_id,
             defaults={
-                "name": station.name,
-                "eve_solar_system": eve_solar_system,
-                "eve_type": eve_type,
+                "name": fetch_station_name(location_id),
+                "eve_solar_system": station.solar_system,
+                "eve_type": station.item_type,
                 "owner": owner,
             },
         )

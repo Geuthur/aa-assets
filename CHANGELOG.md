@@ -42,9 +42,12 @@ Section Order:
 
 - Tests no longer share the Redis cache with other processes in the AA 6 development settings (`testauth/settings/development/local.py`): each test run gets its own random cache `KEY_PREFIX`, like on master. Before, ESI responses cached by a running testauth instance on the same Redis were returned instead of the pook responses. Redis stays the cache backend because Alliance Auth needs `django_redis`
 - Django 6 compatibility: `format_html()` calls without arguments (raising `TypeError`) replaced by `mark_safe()` in the order notification messages
+- `requests/{id}/`, its `cancel/`, `complete/` and `reopen/` and `owners/{id}/` answer an order or owner of someone else with 404 like a missing one (before 403 or 409), so they no longer reveal which IDs exist or the requestor's name
+- React Query no longer retries 403, 404 and other 4xx answers three times, so the error shows at once instead of after about seven seconds: `Routing.tsx` uses `createQueryClient` of `aa-geuthur-react` (`^1.7.0`), which retries only network errors and 502/503/504
 - Users only see and order assets they may see: `location/`, `location/{location_id}/flag/{location_flag}/`, `requests/order/{request_id}/`, the multi order form of the assets page and the `create_order` view no longer show or accept assets, locations and orders of other owners and users
 - Users without corporation or admin access see the assets of their own characters again (`View Assets` answered 403)
 - Orders can no longer exceed the available quantity of an asset when it has no other open orders
+- An empty asset list from ESI now removes the old assets of the owner instead of keeping them
 - The asset update links open orders only to the new assets of their own owner (orders whose asset is gone are linked again too); before, it took the open orders of all owners and stopped with `MultipleObjectsReturned` when two assets matched an order
 - The ESI operation `PostUniverseNames` is added to `__operations__`; without it the ESI client did not know the operation and resolving an unknown station owner (`EveEntity` manager) crashed the asset update with an `AttributeError`
 - The order notification texts in `Request` (new request, completed, canceled, reopened) are filled with `.format()` instead of f-strings inside `_()`, so they can be translated; existing translations of the old texts no longer match until Weblate updates them
@@ -63,7 +66,14 @@ Section Order:
 
 ### Changed
 
+- Stations are read from the SDE (`eve_sde` `NPCStation`) instead of the ESI route `/universe/stations/{station_id}`, which CCP removes with compatibility date `2026-11-19`; only the station name still comes from ESI (`PostUniverseNames`), as the SDE holds no station names
+- i18next 27, react-i18next 18 (aa-geuthur-react `^1.8.0`) and stylelint 18 (pre-commit hook with `--config-basedir`). A plural form left empty in a language (e.g. `_few` in pl, ru, uk) now shows that language's `_other` form instead of English.
+- Node 26 in the CI workflow and pre-commit, npm minor and patch updates in the root and `frontend/`, `jsdom` 31 and `@testing-library/jest-dom` 8 (development only)
+- The access rules of assets, locations, owners and requests share `AccessQuerySet` and `AccessManager` in `managers/general.py` (like aa-example); each model only states its own rule, no change in behavior
+- ESLint enforces the import order React, third party, `@/`, styles (`// AA Assets` group in `frontend/eslint.config.js`); `Main.tsx` keeps the global `index.css` first
 - The app opens the React frontend; the old Django pages are removed
+- `.make/config.ini` names aa-assets instead of the app template, and `helpers/eveonline.py` matches the template (new `display_name` option)
+- Tests for `is_retryable_esi_error` and the `display_name` option of all image helpers, taken over from aa-example (tests only)
 - The menu badge of open requests pulses (`has_errors` in `menu/`); `price` of an asset is `null` instead of `"N/A"` without a price
 - The asset update of an owner runs through the `UpdateManager` of the app template: a new `OwnerUpdateStatus` keeps success, errors and token errors per owner and section (section `assets`), replacing `Owner.last_update` (migration `0004_owner_update_status`). Existing owners are updated on the next run. New setting `ASSETS_STALE_TYPES` (default: `ASSETS_UPDATE_PERIOD`)
 - `models.py` and `managers.py` are split into the packages `assets/models/` and `assets/managers/` (one module per model, like aa-example); imports from `assets.models` and `assets.managers` keep working, no new migration, no change in behavior
@@ -83,7 +93,10 @@ Section Order:
 
 ### Removed
 
+- Unused endpoint `requests/statistics/` with its manager methods `my_requests_open` and `my_requests_total_count`, and the empty `templatetags` module
+- Unused and broken `manage_to` of `Assets`, `Location` and `Request` querysets, plus the copies of `visible_eve_characters` and `manage_eve_characters` in the `Request` manager; `Owner.objects.visible_eve_characters` stays the only one
 - The old Django pages (locations, assets, requests), their order and status views, templates, jQuery/DataTables scripts and `forms.py`, plus the HTML fields `order`/`actions` of `requests/`, the field `view` of `location/` and the endpoint `requests/order/{id}/`
+- Unused `assets/decorators.py` (`log_timing` and two unused constants) and its test
 - Unused `HTTPGatewayTimeoutError` (`assets/errors.py`) and its dead `except` branch in `Owner.update_assets_esi`
 - Own HTTP 420 retry in `update_location` and `update_parent_location`: django-esi raises `ESIErrorLimitException` for HTTP 420, so this code path was never reached
 
