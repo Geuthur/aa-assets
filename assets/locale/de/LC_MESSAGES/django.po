@@ -8,7 +8,7 @@ msgstr ""
 "Project-Id-Version: AA Assets\n"
 "Report-Msgid-Bugs-To: \n"
 "POT-Creation-Date: 2026-11-19 16:22+0000\n"
-"PO-Revision-Date: 2026-10-25 13:06+0000\n"
+"PO-Revision-Date: 2026-11-23 06:20+0000\n"
 "Last-Translator: Geuthur <devgeuthur@gmail.com>\n"
 "Language-Team: German <https://weblate.geuthur.de/projects/allianceauth/aa-"
 "assets/de/>\n"
@@ -17,10 +17,10 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=2; plural=n != 1;\n"
-"X-Generator: Weblate 5.15.1\n"
+"X-Generator: Weblate 2026.11.2\n"
 
 msgid "Permission Denied"
-msgstr ""
+msgstr "Zugriff verweigert"
 
 msgid "Get Order Information"
 msgstr "Bestellinformationen abrufen"
@@ -57,25 +57,25 @@ msgid "Amount for "
 msgstr "Menge für "
 
 msgid "Can access this app"
-msgstr ""
+msgstr "Kann auf diese App zugreifen"
 
 msgid "Can access own corporation assets"
-msgstr ""
+msgstr "Kann auf die Assets der eigenen Corporation zugreifen"
 
 msgid "Can access all assets."
-msgstr ""
+msgstr "Kann auf alle Assets zugreifen."
 
 msgid "Can add corporation assets"
-msgstr ""
+msgstr "Kann Corporation-Assets hinzufügen"
 
 msgid "Can manage requests"
-msgstr ""
+msgstr "Kann Anfragen verwalten"
 
 msgid "ID"
 msgstr "ID"
 
 msgid "Category"
-msgstr ""
+msgstr "Kategorie"
 
 msgid "Name"
 msgstr "Name"
