@@ -6,8 +6,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: AA Assets\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 16:22+0000\n"
+"Report-Msgid-Bugs-To: https://weblate.geuthur.de/projects/alliance-auth/aa-"
+"assets/\n"
+"POT-Creation-Date: 2026-11-28 00:03+0100\n"
 "PO-Revision-Date: 2026-11-23 06:20+0000\n"
 "Last-Translator: Geuthur <devgeuthur@gmail.com>\n"
 "Language-Team: German <https://weblate.geuthur.de/projects/allianceauth/aa-"
@@ -22,63 +23,96 @@ msgstr ""
 msgid "Permission Denied"
 msgstr "Zugriff verweigert"
 
-msgid "Get Order Information"
-msgstr "Bestellinformationen abrufen"
+msgid "Locations"
+msgstr "Standorte"
 
-msgid "Mark Request as Canceled"
-msgstr "Antrag als storniert markieren"
+msgid "Requests"
+msgstr "Anfragen"
+
+msgid "My Requests"
+msgstr "Meine Anfragen"
+
+msgid "Settings"
+msgstr ""
+
+msgid "Add Character"
+msgstr "Charakter hinzufügen"
+
+msgid "Add Corporation"
+msgstr "Corporation hinzufügen"
+
+msgid "Administration"
+msgstr "Verwaltung"
+
+msgid "No task selected."
+msgstr ""
+
+msgid "Owner not found"
+msgstr ""
+
+msgid "Request does not exist"
+msgstr ""
+
+msgid "The asset does not exist."
+msgstr ""
+
+msgid "Requested amount exceeds available quantity."
+msgstr "Die angeforderte Menge übersteigt die verfügbare Menge."
+
+msgid "Order created successfully."
+msgstr ""
+
+msgid "The request cannot be changed in its current status."
+msgstr ""
+
+msgid "Queued Clear All ETags"
+msgstr "Alle zwischengespeicherten ETags löschen - in Warteschlange eingereiht"
+
+msgid "Queued Update All Assets"
+msgstr "Update aller Assets eingereiht"
+
+msgid "Queued Update All Locations"
+msgstr "Update aller Standorte eingereiht"
+
+msgid "Queued Update All Parent Locations"
+msgstr "Update aller übergeordneten Standorte eingereiht"
+
+msgid "You are on cooldown. Please wait 60 seconds before trying again."
+msgstr ""
+"Sie befinden sich im Cooldown. Bitte warten Sie 60 Sekunden und versuchen "
+"Sie es erneut."
 
 #, python-brace-format
-msgid "Cancel Request for {requestor} - ID: {request_id}"
-msgstr "Anfrage von {requestor} stornieren - ID: {request_id}"
-
-msgid "Mark Request as Completed"
-msgstr "Anfrage als abgeschlossen markieren"
-
-#, python-brace-format
-msgid "Complete Request for {requestor} - ID: {request_id}"
-msgstr "Anfrage von {requestor} abschließen - ID: {request_id}"
-
-msgid "Mark Request as Open"
-msgstr "Anfrage als offen markieren"
+msgid ""
+"The request for Order {user_request_pk} from {user_request_requesting_user} "
+"has been closed as cancelled."
+msgstr ""
+"Die Anfrage für die Bestellung {user_request_pk} von "
+"{user_request_requesting_user} wurde als storniert geschlossen."
 
 #, python-brace-format
-msgid "Reopen Request for {requestor} - ID: {request_id}"
-msgstr "Anfrage von {requestor} wieder öffnen - ID: {request_id}"
+msgid ""
+"The request for Order {user_request_pk} from {user_request_requesting_user} "
+"has been closed as completed."
+msgstr ""
+"Die Anfrage für die Bestellung {user_request_pk} von "
+"{user_request_requesting_user} wurde als abgeschlossen geschlossen."
 
 #, python-brace-format
-msgid "Order for {requestor} - ID: {request_id}"
-msgstr "Bestellung für {requestor} - ID: {request_id}"
+msgid ""
+"The request for Order {user_request_pk} from {user_request_requesting_user} "
+"has been reopened."
+msgstr ""
+"Die Anfrage für die Bestellung {user_request_pk} von "
+"{user_request_requesting_user} wurde erneut geöffnet."
 
-msgid "Amount"
-msgstr "Betrag"
-
-msgid "Amount for "
-msgstr "Menge für "
-
-msgid "Can access this app"
-msgstr "Kann auf diese App zugreifen"
-
-msgid "Can access own corporation assets"
-msgstr "Kann auf die Assets der eigenen Corporation zugreifen"
-
-msgid "Can access all assets."
-msgstr "Kann auf alle Assets zugreifen."
-
-msgid "Can add corporation assets"
-msgstr "Kann Corporation-Assets hinzufügen"
-
-msgid "Can manage requests"
-msgstr "Kann Anfragen verwalten"
-
-msgid "ID"
-msgstr "ID"
-
-msgid "Category"
-msgstr "Kategorie"
-
-msgid "Name"
-msgstr "Name"
+#, python-brace-format
+msgid ""
+"The request for Order {user_request_pk} from {user_request_requesting_user} "
+"has failed."
+msgstr ""
+"Die Anfrage für die Bestellung {user_request_pk} von "
+"{user_request_requesting_user} ist fehlgeschlagen."
 
 msgid "Asset Safety"
 msgstr "Asset-Sicherheit"
@@ -437,162 +471,200 @@ msgstr "Garderobe"
 msgid "undefined"
 msgstr "undefiniert"
 
-msgid "Administration"
-msgstr "Verwaltung"
+msgid "ID"
+msgstr "ID"
 
-msgid "Mark all tasks as Force Refresh"
-msgstr "Erzwinge Aktualisierung für alle markierten Tasks"
+msgid "Category"
+msgstr "Kategorie"
 
-msgid "Clear all cached ETags"
-msgstr "Alle zwischengespeicherten ETags löschen"
+msgid "Name"
+msgstr "Name"
 
-msgid "Update All Assets"
-msgstr "Alle Assets aktualisieren"
+msgid "Can access this app"
+msgstr "Kann auf diese App zugreifen"
 
-msgid "Update All Locations"
-msgstr "Alle Standorte aktualisieren"
+msgid "Can access own corporation assets"
+msgstr "Kann auf die Assets der eigenen Corporation zugreifen"
 
-msgid "Update All Parent Locations"
-msgstr "Alle übergeordneten Standorte aktualisieren"
+msgid "Can access all assets."
+msgstr "Kann auf alle Assets zugreifen."
 
-msgid "Submit"
-msgstr "Senden"
+msgid "Can add corporation assets"
+msgstr "Kann Corporation-Assets hinzufügen"
 
-msgid "Assets System"
-msgstr "Assets System"
+msgid "Can manage requests"
+msgstr "Kann Anfragen verwalten"
 
-msgid "Buy"
-msgstr "Kaufen"
+msgid "Disabled"
+msgstr ""
 
-msgid "Multi Buy"
-msgstr "Multi Buy"
+msgid "Token Error"
+msgstr ""
 
-msgid "Minimum one field is required"
-msgstr "Mindestens ein Feld ist erforderlich"
+msgid "Error"
+msgstr ""
 
-msgid "This field is required"
-msgstr "Dieses Feld ist erforderlich"
+msgid "OK"
+msgstr ""
 
-msgid "Add Character"
-msgstr "Charakter hinzufügen"
+msgid "Incomplete"
+msgstr ""
 
-msgid "Add Corporation"
-msgstr "Corporation hinzufügen"
-
-msgid "Locations"
-msgstr "Standorte"
+msgid "In Progress"
+msgstr ""
 
 msgid "Assets"
 msgstr "Assets"
 
-msgid "My Requests"
-msgstr "Meine Anfragen"
-
-msgid "Requests"
-msgstr "Anfragen"
-
-msgid "Manage Requests"
-msgstr "Anfragen verwalten"
-
-msgid "Cancel"
-msgstr "Abbrechen"
-
-msgid "Confirm"
-msgstr "Bestätigen"
-
-msgid "Close"
-msgstr "Schließen"
-
-msgid "All"
-msgstr "Alle"
-
-msgid "Order List"
-msgstr "Bestellliste"
-
-msgid "Quantity"
-msgstr "Menge"
-
-msgid "No data found..."
-msgstr "Keine Daten gefunden..."
-
-msgid "Location"
-msgstr "Standort"
-
-msgid "Location Flag"
-msgstr "Standort-Flag"
-
-msgid "Price"
-msgstr "Preis"
-
-msgid "Action"
-msgstr "Aktion"
-
-msgid "System"
-msgstr "System"
-
-msgid "Requestor"
-msgstr "Antragsteller"
-
-msgid "Status"
-msgstr "Status"
-
-msgid "Created"
-msgstr "Erstellt"
-
-msgid "You do not have permission to access this page."
-msgstr "Sie haben keine Berechtigung, diese Seite zu sehen."
-
-msgid "Queued Clear All ETags"
-msgstr "Alle zwischengespeicherten ETags löschen - in Warteschlange eingereiht"
-
-msgid "Queued Update All Assets"
-msgstr "Update aller Assets eingereiht"
-
-msgid "Queued Update All Locations"
-msgstr "Update aller Standorte eingereiht"
-
-msgid "Queued Update All Parent Locations"
-msgstr "Update aller übergeordneten Standorte eingereiht"
-
-msgid "Requested amount exceeds available quantity."
-msgstr "Die angeforderte Menge übersteigt die verfügbare Menge."
-
-msgid "You are on cooldown. Please wait 60 seconds before trying again."
+#, python-brace-format
+msgid "{requesting_user} has Requested a Order"
 msgstr ""
-"Sie befinden sich im Cooldown. Bitte warten Sie 60 Sekunden und versuchen "
-"Sie es erneut."
 
 #, python-brace-format
-msgid ""
-"The request for Order {user_request_pk} from {user_request_requesting_user} "
-"has been closed as cancelled."
+msgid "{requesting_user} has requested the following items:{items}\n"
 msgstr ""
-"Die Anfrage für die Bestellung {user_request_pk} von "
-"{user_request_requesting_user} wurde als storniert geschlossen."
 
 #, python-brace-format
-msgid ""
-"The request for Order {user_request_pk} from {user_request_requesting_user} "
-"has failed."
+msgid "{approver} has completed the Order for {requestor} ID: {request_id}."
 msgstr ""
-"Die Anfrage für die Bestellung {user_request_pk} von "
-"{user_request_requesting_user} ist fehlgeschlagen."
 
 #, python-brace-format
-msgid ""
-"The request for Order {user_request_pk} from {user_request_requesting_user} "
-"has been closed as completed."
+msgid "{approver} has completed the following items:{items}\n"
 msgstr ""
-"Die Anfrage für die Bestellung {user_request_pk} von "
-"{user_request_requesting_user} wurde als abgeschlossen geschlossen."
 
 #, python-brace-format
-msgid ""
-"The request for Order {user_request_pk} from {user_request_requesting_user} "
-"has been reopened."
+msgid "{canceler} has canceled the Order for {requestor} ID: {request_id}."
 msgstr ""
-"Die Anfrage für die Bestellung {user_request_pk} von "
-"{user_request_requesting_user} wurde erneut geöffnet."
+
+#, python-brace-format
+msgid "{canceler} has canceled the following items:{items}\n"
+msgstr ""
+
+#, python-brace-format
+msgid "{user} has reopened the Order for {requestor} ID: {request_id}."
+msgstr ""
+
+#, python-brace-format
+msgid "{user} has reopened the following items:{items}\n"
+msgstr ""
+
+#~ msgid "Get Order Information"
+#~ msgstr "Bestellinformationen abrufen"
+
+#~ msgid "Mark Request as Canceled"
+#~ msgstr "Antrag als storniert markieren"
+
+#, python-brace-format
+#~ msgid "Cancel Request for {requestor} - ID: {request_id}"
+#~ msgstr "Anfrage von {requestor} stornieren - ID: {request_id}"
+
+#~ msgid "Mark Request as Completed"
+#~ msgstr "Anfrage als abgeschlossen markieren"
+
+#, python-brace-format
+#~ msgid "Complete Request for {requestor} - ID: {request_id}"
+#~ msgstr "Anfrage von {requestor} abschließen - ID: {request_id}"
+
+#~ msgid "Mark Request as Open"
+#~ msgstr "Anfrage als offen markieren"
+
+#, python-brace-format
+#~ msgid "Reopen Request for {requestor} - ID: {request_id}"
+#~ msgstr "Anfrage von {requestor} wieder öffnen - ID: {request_id}"
+
+#, python-brace-format
+#~ msgid "Order for {requestor} - ID: {request_id}"
+#~ msgstr "Bestellung für {requestor} - ID: {request_id}"
+
+#~ msgid "Amount"
+#~ msgstr "Betrag"
+
+#~ msgid "Amount for "
+#~ msgstr "Menge für "
+
+#~ msgid "Mark all tasks as Force Refresh"
+#~ msgstr "Erzwinge Aktualisierung für alle markierten Tasks"
+
+#~ msgid "Clear all cached ETags"
+#~ msgstr "Alle zwischengespeicherten ETags löschen"
+
+#~ msgid "Update All Assets"
+#~ msgstr "Alle Assets aktualisieren"
+
+#~ msgid "Update All Locations"
+#~ msgstr "Alle Standorte aktualisieren"
+
+#~ msgid "Update All Parent Locations"
+#~ msgstr "Alle übergeordneten Standorte aktualisieren"
+
+#~ msgid "Submit"
+#~ msgstr "Senden"
+
+#~ msgid "Assets System"
+#~ msgstr "Assets System"
+
+#~ msgid "Buy"
+#~ msgstr "Kaufen"
+
+#~ msgid "Multi Buy"
+#~ msgstr "Multi Buy"
+
+#~ msgid "Minimum one field is required"
+#~ msgstr "Mindestens ein Feld ist erforderlich"
+
+#~ msgid "This field is required"
+#~ msgstr "Dieses Feld ist erforderlich"
+
+#~ msgid "Manage Requests"
+#~ msgstr "Anfragen verwalten"
+
+#~ msgid "Cancel"
+#~ msgstr "Abbrechen"
+
+#~ msgid "Confirm"
+#~ msgstr "Bestätigen"
+
+#~ msgid "Close"
+#~ msgstr "Schließen"
+
+#~ msgid "All"
+#~ msgstr "Alle"
+
+#~ msgid "Order List"
+#~ msgstr "Bestellliste"
+
+#~ msgid "Quantity"
+#~ msgstr "Menge"
+
+#~ msgid "No data found..."
+#~ msgstr "Keine Daten gefunden..."
+
+#~ msgid "Location"
+#~ msgstr "Standort"
+
+#~ msgid "Location Flag"
+#~ msgstr "Standort-Flag"
+
+#~ msgid "Price"
+#~ msgstr "Preis"
+
+#~ msgid "Action"
+#~ msgstr "Aktion"
+
+#~ msgid "System"
+#~ msgstr "System"
+
+#~ msgid "Requestor"
+#~ msgstr "Antragsteller"
+
+#~ msgid "Status"
+#~ msgstr "Status"
+
+#~ msgid "Created"
+#~ msgstr "Erstellt"
+
+#~ msgid "You do not have permission to access this page."
+#~ msgstr "Sie haben keine Berechtigung, diese Seite zu sehen."
 
 #, python-brace-format
 #~ msgid "{self.requesting_user} has Requested a Order"
