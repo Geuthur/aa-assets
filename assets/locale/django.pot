@@ -6,9 +6,9 @@
 #, fuzzy
 msgid ""
 msgstr ""
-"Project-Id-Version: PACKAGE VERSION\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 16:22+0000\n"
+"Project-Id-Version: AA Assets\n"
+"Report-Msgid-Bugs-To: https://weblate.geuthur.de/projects/alliance-auth/aa-assets/\n"
+"POT-Creation-Date: 2026-11-28 00:03+0100\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,564 +17,676 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 
+#: assets/api/assets/assets.py:31 assets/api/assets/assets.py:93
+#: assets/api/auth.py:28 assets/api/general/general.py:140
+#: assets/api/requests/orders.py:183 assets/api/requests/orders.py:194
 msgid "Permission Denied"
 msgstr ""
 
-msgid "Get Order Information"
-msgstr ""
-
-msgid "Mark Request as Canceled"
-msgstr ""
-
-#, python-brace-format
-msgid "Cancel Request for {requestor} - ID: {request_id}"
-msgstr ""
-
-msgid "Mark Request as Completed"
-msgstr ""
-
-#, python-brace-format
-msgid "Complete Request for {requestor} - ID: {request_id}"
-msgstr ""
-
-msgid "Mark Request as Open"
-msgstr ""
-
-#, python-brace-format
-msgid "Reopen Request for {requestor} - ID: {request_id}"
-msgstr ""
-
-#, python-brace-format
-msgid "Order for {requestor} - ID: {request_id}"
-msgstr ""
-
-msgid "Amount"
-msgstr ""
-
-msgid "Amount for "
-msgstr ""
-
-msgid "Can access this app"
-msgstr ""
-
-msgid "Can access own corporation assets"
-msgstr ""
-
-msgid "Can access all assets."
-msgstr ""
-
-msgid "Can add corporation assets"
-msgstr ""
-
-msgid "Can manage requests"
-msgstr ""
-
-msgid "ID"
-msgstr ""
-
-msgid "Category"
-msgstr ""
-
-msgid "Name"
-msgstr ""
-
-msgid "Asset Safety"
-msgstr ""
-
-msgid "Auto Fit"
-msgstr ""
-
-msgid "Bonus"
-msgstr ""
-
-msgid "Booster"
-msgstr ""
-
-msgid "Booster Hold"
-msgstr ""
-
-msgid "Capsule"
-msgstr ""
-
-msgid "Cargo"
-msgstr ""
-
-msgid "Corp Deliveries"
-msgstr ""
-
-msgid "Corp Security Access Group 1"
-msgstr ""
-
-msgid "Corp Security Access Group 2"
-msgstr ""
-
-msgid "Corp Security Access Group 3"
-msgstr ""
-
-msgid "Corp Security Access Group 4"
-msgstr ""
-
-msgid "Corp Security Access Group 5"
-msgstr ""
-
-msgid "Corp Security Access Group 6"
-msgstr ""
-
-msgid "Corp Security Access Group 7"
-msgstr ""
-
-msgid "Crate Loot"
-msgstr ""
-
-msgid "Deliveries"
-msgstr ""
-
-msgid "Drone Bay"
-msgstr ""
-
-msgid "Dust Battle"
-msgstr ""
-
-msgid "Dust Databank"
-msgstr ""
-
-msgid "Fighter Bay"
-msgstr ""
-
-msgid "Fighter Tube 0"
-msgstr ""
-
-msgid "Fighter Tube 1"
-msgstr ""
-
-msgid "Fighter Tube 2"
-msgstr ""
-
-msgid "Fighter Tube 3"
-msgstr ""
-
-msgid "Fighter Tube 4"
-msgstr ""
-
-msgid "Fleet Hangar"
-msgstr ""
-
-msgid "Frigate escape bay Hangar"
-msgstr ""
-
-msgid "Hangar"
-msgstr ""
-
-msgid "Hangar All"
-msgstr ""
-
-msgid "High power slot 1"
-msgstr ""
-
-msgid "High power slot 2"
-msgstr ""
-
-msgid "High power slot 3"
-msgstr ""
-
-msgid "High power slot 4"
-msgstr ""
-
-msgid "High power slot 5"
-msgstr ""
-
-msgid "High power slot 6"
-msgstr ""
-
-msgid "High power slot 7"
-msgstr ""
-
-msgid "High power slot 8"
-msgstr ""
-
-msgid "Hidden Modifiers"
-msgstr ""
-
-msgid "Implant"
-msgstr ""
-
-msgid "Impounded"
-msgstr ""
-
-msgid "This item was put into a junkyard through reprocessing."
-msgstr ""
-
-msgid "This item was put into a junkyard through being trashed by its owner."
-msgstr ""
-
-msgid "Low power slot 1"
-msgstr ""
-
-msgid "Low power slot 2"
-msgstr ""
-
-msgid "Low power slot 3"
-msgstr ""
-
-msgid "Low power slot 4"
-msgstr ""
-
-msgid "Low power slot 5"
-msgstr ""
-
-msgid "Low power slot 6"
-msgstr ""
-
-msgid "Low power slot 7"
-msgstr ""
-
-msgid "Low power slot 8"
-msgstr ""
-
-msgid "Locked item, can not be moved unless unlocked"
-msgstr ""
-
-msgid "Medium power slot 1"
-msgstr ""
-
-msgid "Medium power slot 2"
-msgstr ""
-
-msgid "Medium power slot 3"
-msgstr ""
-
-msgid "Medium power slot 4"
-msgstr ""
-
-msgid "Medium power slot 5"
-msgstr ""
-
-msgid "Medium power slot 6"
-msgstr ""
-
-msgid "Medium power slot 7"
-msgstr ""
-
-msgid "Medium power slot 8"
-msgstr ""
-
-msgid "Office Folder"
-msgstr ""
-
-msgid "Pilot"
-msgstr ""
-
-msgid "Planet Surface"
-msgstr ""
-
-msgid "Quafe Bay"
-msgstr ""
-
-msgid "Quantum Core Room"
-msgstr ""
-
-msgid "Reward"
-msgstr ""
-
-msgid "Rig power slot 1"
-msgstr ""
-
-msgid "Rig power slot 2"
-msgstr ""
-
-msgid "Rig power slot 3"
-msgstr ""
-
-msgid "Rig power slot 4"
-msgstr ""
-
-msgid "Rig power slot 5"
-msgstr ""
-
-msgid "Rig power slot 6"
-msgstr ""
-
-msgid "Rig power slot 7"
-msgstr ""
-
-msgid "Rig power slot 8"
-msgstr ""
-
-msgid "Secondary Storage"
-msgstr ""
-
-msgid "Service Slot 0"
-msgstr ""
-
-msgid "Service Slot 1"
-msgstr ""
-
-msgid "Service Slot 2"
-msgstr ""
-
-msgid "Service Slot 3"
-msgstr ""
-
-msgid "Service Slot 4"
-msgstr ""
-
-msgid "Service Slot 5"
-msgstr ""
-
-msgid "Service Slot 6"
-msgstr ""
-
-msgid "Service Slot 7"
-msgstr ""
-
-msgid "Ship Hangar"
-msgstr ""
-
-msgid "Ship Offline"
-msgstr ""
-
-msgid "Skill"
-msgstr ""
-
-msgid "Skill In Training"
-msgstr ""
-
-msgid "Specialized Ammo Hold"
-msgstr ""
-
-msgid "Specialized Command Center Hold"
-msgstr ""
-
-msgid "Specialized Fuel Bay"
-msgstr ""
-
-msgid "Specialized Gas Hold"
-msgstr ""
-
-msgid "Specialized Industrial Ship Hold"
-msgstr ""
-
-msgid "Specialized Large Ship Hold"
-msgstr ""
-
-msgid "Specialized Material Bay"
-msgstr ""
-
-msgid "Specialized Medium Ship Hold"
-msgstr ""
-
-msgid "Specialized Mineral Hold"
-msgstr ""
-
-msgid "Specialized Ore Hold"
-msgstr ""
-
-msgid "Specialized Planetary Commodities Hold"
-msgstr ""
-
-msgid "Specialized Salvage Hold"
-msgstr ""
-
-msgid "Specialized Ship Hold"
-msgstr ""
-
-msgid "Specialized Small Ship Hold"
-msgstr ""
-
-msgid "Structure Active"
-msgstr ""
-
-msgid "Structure Fuel"
-msgstr ""
-
-msgid "Structure Inactive"
-msgstr ""
-
-msgid "Structure Offline"
-msgstr ""
-
-msgid "Sub System Bay"
-msgstr ""
-
-msgid "Sub System Slot 0"
-msgstr ""
-
-msgid "Sub System Slot 1"
-msgstr ""
-
-msgid "Sub System Slot 2"
-msgstr ""
-
-msgid "Sub System Slot 3"
-msgstr ""
-
-msgid "Sub System Slot 4"
-msgstr ""
-
-msgid "Sub System Slot 5"
-msgstr ""
-
-msgid "Sub System Slot 6"
-msgstr ""
-
-msgid "Sub System Slot 7"
-msgstr ""
-
-msgid "Unlocked item, can be moved"
-msgstr ""
-
-msgid "Wallet"
-msgstr ""
-
-msgid "Wardrobe"
-msgstr ""
-
-msgid "undefined"
-msgstr ""
-
-msgid "Administration"
-msgstr ""
-
-msgid "Mark all tasks as Force Refresh"
-msgstr ""
-
-msgid "Clear all cached ETags"
-msgstr ""
-
-msgid "Update All Assets"
-msgstr ""
-
-msgid "Update All Locations"
-msgstr ""
-
-msgid "Update All Parent Locations"
-msgstr ""
-
-msgid "Submit"
-msgstr ""
-
-msgid "Assets System"
-msgstr ""
-
-msgid "Buy"
-msgstr ""
-
-msgid "Multi Buy"
-msgstr ""
-
-msgid "Minimum one field is required"
-msgstr ""
-
-msgid "This field is required"
-msgstr ""
-
-msgid "Add Character"
-msgstr ""
-
-msgid "Add Corporation"
-msgstr ""
-
+#: assets/api/general/general.py:36
 msgid "Locations"
 msgstr ""
 
-msgid "Assets"
-msgstr ""
-
-msgid "My Requests"
-msgstr ""
-
+#: assets/api/general/general.py:42
 msgid "Requests"
 msgstr ""
 
-msgid "Manage Requests"
+#: assets/api/general/general.py:50
+msgid "My Requests"
 msgstr ""
 
-msgid "Cancel"
+#: assets/api/general/general.py:52
+msgid "Settings"
 msgstr ""
 
-msgid "Confirm"
+#: assets/api/general/general.py:56
+msgid "Add Character"
 msgstr ""
 
-msgid "Close"
+#: assets/api/general/general.py:64
+msgid "Add Corporation"
 msgstr ""
 
-msgid "All"
+#: assets/api/general/general.py:71
+msgid "Administration"
 msgstr ""
 
-msgid "Order List"
+#: assets/api/general/general.py:152
+msgid "No task selected."
 msgstr ""
 
-msgid "Quantity"
+#: assets/api/owners/owners.py:100
+msgid "Owner not found"
 msgstr ""
 
-msgid "No data found..."
+#: assets/api/requests/orders.py:61 assets/api/requests/orders.py:140
+msgid "Request does not exist"
 msgstr ""
 
-msgid "Location"
+#: assets/api/requests/orders.py:114
+msgid "The asset does not exist."
 msgstr ""
 
-msgid "Location Flag"
-msgstr ""
-
-msgid "Price"
-msgstr ""
-
-msgid "Action"
-msgstr ""
-
-msgid "System"
-msgstr ""
-
-msgid "Requestor"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid "Created"
-msgstr ""
-
-msgid "You do not have permission to access this page."
-msgstr ""
-
-msgid "Queued Clear All ETags"
-msgstr ""
-
-msgid "Queued Update All Assets"
-msgstr ""
-
-msgid "Queued Update All Locations"
-msgstr ""
-
-msgid "Queued Update All Parent Locations"
-msgstr ""
-
+#: assets/api/requests/orders.py:122
 msgid "Requested amount exceeds available quantity."
 msgstr ""
 
+#: assets/api/requests/orders.py:129
+msgid "Order created successfully."
+msgstr ""
+
+#: assets/api/requests/orders.py:146
+msgid "The request cannot be changed in its current status."
+msgstr ""
+
+#: assets/helpers/admin.py:25
+msgid "Queued Clear All ETags"
+msgstr ""
+
+#: assets/helpers/admin.py:28
+msgid "Queued Update All Assets"
+msgstr ""
+
+#: assets/helpers/admin.py:33
+msgid "Queued Update All Locations"
+msgstr ""
+
+#: assets/helpers/admin.py:38
+msgid "Queued Update All Parent Locations"
+msgstr ""
+
+#: assets/helpers/orders.py:39
 msgid "You are on cooldown. Please wait 60 seconds before trying again."
 msgstr ""
 
+#: assets/helpers/orders.py:126
 #, python-brace-format
-msgid ""
-"The request for Order {user_request_pk} from {user_request_requesting_user} "
-"has been closed as cancelled."
+msgid "The request for Order {user_request_pk} from {user_request_requesting_user} has been closed as cancelled."
 msgstr ""
 
+#: assets/helpers/orders.py:134
 #, python-brace-format
-msgid ""
-"The request for Order {user_request_pk} from {user_request_requesting_user} "
-"has failed."
+msgid "The request for Order {user_request_pk} from {user_request_requesting_user} has been closed as completed."
 msgstr ""
 
+#: assets/helpers/orders.py:142
 #, python-brace-format
-msgid ""
-"The request for Order {user_request_pk} from {user_request_requesting_user} "
-"has been closed as completed."
+msgid "The request for Order {user_request_pk} from {user_request_requesting_user} has been reopened."
 msgstr ""
 
+#: assets/helpers/orders.py:174
 #, python-brace-format
-msgid ""
-"The request for Order {user_request_pk} from {user_request_requesting_user} "
-"has been reopened."
+msgid "The request for Order {user_request_pk} from {user_request_requesting_user} has failed."
+msgstr ""
+
+#: assets/models/assets.py:21
+msgid "Asset Safety"
+msgstr ""
+
+#: assets/models/assets.py:22
+msgid "Auto Fit"
+msgstr ""
+
+#: assets/models/assets.py:23
+msgid "Bonus"
+msgstr ""
+
+#: assets/models/assets.py:24
+msgid "Booster"
+msgstr ""
+
+#: assets/models/assets.py:25
+msgid "Booster Hold"
+msgstr ""
+
+#: assets/models/assets.py:26
+msgid "Capsule"
+msgstr ""
+
+#: assets/models/assets.py:27
+msgid "Cargo"
+msgstr ""
+
+#: assets/models/assets.py:28
+msgid "Corp Deliveries"
+msgstr ""
+
+#: assets/models/assets.py:29
+msgid "Corp Security Access Group 1"
+msgstr ""
+
+#: assets/models/assets.py:30
+msgid "Corp Security Access Group 2"
+msgstr ""
+
+#: assets/models/assets.py:31
+msgid "Corp Security Access Group 3"
+msgstr ""
+
+#: assets/models/assets.py:32
+msgid "Corp Security Access Group 4"
+msgstr ""
+
+#: assets/models/assets.py:33
+msgid "Corp Security Access Group 5"
+msgstr ""
+
+#: assets/models/assets.py:34
+msgid "Corp Security Access Group 6"
+msgstr ""
+
+#: assets/models/assets.py:35
+msgid "Corp Security Access Group 7"
+msgstr ""
+
+#: assets/models/assets.py:36
+msgid "Crate Loot"
+msgstr ""
+
+#: assets/models/assets.py:37
+msgid "Deliveries"
+msgstr ""
+
+#: assets/models/assets.py:38
+msgid "Drone Bay"
+msgstr ""
+
+#: assets/models/assets.py:39
+msgid "Dust Battle"
+msgstr ""
+
+#: assets/models/assets.py:40
+msgid "Dust Databank"
+msgstr ""
+
+#: assets/models/assets.py:41
+msgid "Fighter Bay"
+msgstr ""
+
+#: assets/models/assets.py:42
+msgid "Fighter Tube 0"
+msgstr ""
+
+#: assets/models/assets.py:43
+msgid "Fighter Tube 1"
+msgstr ""
+
+#: assets/models/assets.py:44
+msgid "Fighter Tube 2"
+msgstr ""
+
+#: assets/models/assets.py:45
+msgid "Fighter Tube 3"
+msgstr ""
+
+#: assets/models/assets.py:46
+msgid "Fighter Tube 4"
+msgstr ""
+
+#: assets/models/assets.py:47
+msgid "Fleet Hangar"
+msgstr ""
+
+#: assets/models/assets.py:48
+msgid "Frigate escape bay Hangar"
+msgstr ""
+
+#: assets/models/assets.py:49
+msgid "Hangar"
+msgstr ""
+
+#: assets/models/assets.py:50
+msgid "Hangar All"
+msgstr ""
+
+#: assets/models/assets.py:51
+msgid "High power slot 1"
+msgstr ""
+
+#: assets/models/assets.py:52
+msgid "High power slot 2"
+msgstr ""
+
+#: assets/models/assets.py:53
+msgid "High power slot 3"
+msgstr ""
+
+#: assets/models/assets.py:54
+msgid "High power slot 4"
+msgstr ""
+
+#: assets/models/assets.py:55
+msgid "High power slot 5"
+msgstr ""
+
+#: assets/models/assets.py:56
+msgid "High power slot 6"
+msgstr ""
+
+#: assets/models/assets.py:57
+msgid "High power slot 7"
+msgstr ""
+
+#: assets/models/assets.py:58
+msgid "High power slot 8"
+msgstr ""
+
+#: assets/models/assets.py:59
+msgid "Hidden Modifiers"
+msgstr ""
+
+#: assets/models/assets.py:60
+msgid "Implant"
+msgstr ""
+
+#: assets/models/assets.py:61
+msgid "Impounded"
+msgstr ""
+
+#: assets/models/assets.py:63
+msgid "This item was put into a junkyard through reprocessing."
+msgstr ""
+
+#: assets/models/assets.py:66
+msgid "This item was put into a junkyard through being trashed by its owner."
+msgstr ""
+
+#: assets/models/assets.py:68
+msgid "Low power slot 1"
+msgstr ""
+
+#: assets/models/assets.py:69
+msgid "Low power slot 2"
+msgstr ""
+
+#: assets/models/assets.py:70
+msgid "Low power slot 3"
+msgstr ""
+
+#: assets/models/assets.py:71
+msgid "Low power slot 4"
+msgstr ""
+
+#: assets/models/assets.py:72
+msgid "Low power slot 5"
+msgstr ""
+
+#: assets/models/assets.py:73
+msgid "Low power slot 6"
+msgstr ""
+
+#: assets/models/assets.py:74
+msgid "Low power slot 7"
+msgstr ""
+
+#: assets/models/assets.py:75
+msgid "Low power slot 8"
+msgstr ""
+
+#: assets/models/assets.py:76
+msgid "Locked item, can not be moved unless unlocked"
+msgstr ""
+
+#: assets/models/assets.py:77
+msgid "Medium power slot 1"
+msgstr ""
+
+#: assets/models/assets.py:78
+msgid "Medium power slot 2"
+msgstr ""
+
+#: assets/models/assets.py:79
+msgid "Medium power slot 3"
+msgstr ""
+
+#: assets/models/assets.py:80
+msgid "Medium power slot 4"
+msgstr ""
+
+#: assets/models/assets.py:81
+msgid "Medium power slot 5"
+msgstr ""
+
+#: assets/models/assets.py:82
+msgid "Medium power slot 6"
+msgstr ""
+
+#: assets/models/assets.py:83
+msgid "Medium power slot 7"
+msgstr ""
+
+#: assets/models/assets.py:84
+msgid "Medium power slot 8"
+msgstr ""
+
+#: assets/models/assets.py:85
+msgid "Office Folder"
+msgstr ""
+
+#: assets/models/assets.py:86
+msgid "Pilot"
+msgstr ""
+
+#: assets/models/assets.py:87
+msgid "Planet Surface"
+msgstr ""
+
+#: assets/models/assets.py:88
+msgid "Quafe Bay"
+msgstr ""
+
+#: assets/models/assets.py:89
+msgid "Quantum Core Room"
+msgstr ""
+
+#: assets/models/assets.py:90
+msgid "Reward"
+msgstr ""
+
+#: assets/models/assets.py:91
+msgid "Rig power slot 1"
+msgstr ""
+
+#: assets/models/assets.py:92
+msgid "Rig power slot 2"
+msgstr ""
+
+#: assets/models/assets.py:93
+msgid "Rig power slot 3"
+msgstr ""
+
+#: assets/models/assets.py:94
+msgid "Rig power slot 4"
+msgstr ""
+
+#: assets/models/assets.py:95
+msgid "Rig power slot 5"
+msgstr ""
+
+#: assets/models/assets.py:96
+msgid "Rig power slot 6"
+msgstr ""
+
+#: assets/models/assets.py:97
+msgid "Rig power slot 7"
+msgstr ""
+
+#: assets/models/assets.py:98
+msgid "Rig power slot 8"
+msgstr ""
+
+#: assets/models/assets.py:99
+msgid "Secondary Storage"
+msgstr ""
+
+#: assets/models/assets.py:100
+msgid "Service Slot 0"
+msgstr ""
+
+#: assets/models/assets.py:101
+msgid "Service Slot 1"
+msgstr ""
+
+#: assets/models/assets.py:102
+msgid "Service Slot 2"
+msgstr ""
+
+#: assets/models/assets.py:103
+msgid "Service Slot 3"
+msgstr ""
+
+#: assets/models/assets.py:104
+msgid "Service Slot 4"
+msgstr ""
+
+#: assets/models/assets.py:105
+msgid "Service Slot 5"
+msgstr ""
+
+#: assets/models/assets.py:106
+msgid "Service Slot 6"
+msgstr ""
+
+#: assets/models/assets.py:107
+msgid "Service Slot 7"
+msgstr ""
+
+#: assets/models/assets.py:108
+msgid "Ship Hangar"
+msgstr ""
+
+#: assets/models/assets.py:109
+msgid "Ship Offline"
+msgstr ""
+
+#: assets/models/assets.py:110
+msgid "Skill"
+msgstr ""
+
+#: assets/models/assets.py:111
+msgid "Skill In Training"
+msgstr ""
+
+#: assets/models/assets.py:112
+msgid "Specialized Ammo Hold"
+msgstr ""
+
+#: assets/models/assets.py:114
+msgid "Specialized Command Center Hold"
+msgstr ""
+
+#: assets/models/assets.py:116
+msgid "Specialized Fuel Bay"
+msgstr ""
+
+#: assets/models/assets.py:117
+msgid "Specialized Gas Hold"
+msgstr ""
+
+#: assets/models/assets.py:119
+msgid "Specialized Industrial Ship Hold"
+msgstr ""
+
+#: assets/models/assets.py:122
+msgid "Specialized Large Ship Hold"
+msgstr ""
+
+#: assets/models/assets.py:125
+msgid "Specialized Material Bay"
+msgstr ""
+
+#: assets/models/assets.py:128
+msgid "Specialized Medium Ship Hold"
+msgstr ""
+
+#: assets/models/assets.py:131
+msgid "Specialized Mineral Hold"
+msgstr ""
+
+#: assets/models/assets.py:133
+msgid "Specialized Ore Hold"
+msgstr ""
+
+#: assets/models/assets.py:136
+msgid "Specialized Planetary Commodities Hold"
+msgstr ""
+
+#: assets/models/assets.py:139
+msgid "Specialized Salvage Hold"
+msgstr ""
+
+#: assets/models/assets.py:141
+msgid "Specialized Ship Hold"
+msgstr ""
+
+#: assets/models/assets.py:143
+msgid "Specialized Small Ship Hold"
+msgstr ""
+
+#: assets/models/assets.py:145
+msgid "Structure Active"
+msgstr ""
+
+#: assets/models/assets.py:146
+msgid "Structure Fuel"
+msgstr ""
+
+#: assets/models/assets.py:147
+msgid "Structure Inactive"
+msgstr ""
+
+#: assets/models/assets.py:148
+msgid "Structure Offline"
+msgstr ""
+
+#: assets/models/assets.py:149
+msgid "Sub System Bay"
+msgstr ""
+
+#: assets/models/assets.py:150
+msgid "Sub System Slot 0"
+msgstr ""
+
+#: assets/models/assets.py:151
+msgid "Sub System Slot 1"
+msgstr ""
+
+#: assets/models/assets.py:152
+msgid "Sub System Slot 2"
+msgstr ""
+
+#: assets/models/assets.py:153
+msgid "Sub System Slot 3"
+msgstr ""
+
+#: assets/models/assets.py:154
+msgid "Sub System Slot 4"
+msgstr ""
+
+#: assets/models/assets.py:155
+msgid "Sub System Slot 5"
+msgstr ""
+
+#: assets/models/assets.py:156
+msgid "Sub System Slot 6"
+msgstr ""
+
+#: assets/models/assets.py:157
+msgid "Sub System Slot 7"
+msgstr ""
+
+#: assets/models/assets.py:158
+msgid "Unlocked item, can be moved"
+msgstr ""
+
+#: assets/models/assets.py:159
+msgid "Wallet"
+msgstr ""
+
+#: assets/models/assets.py:160
+msgid "Wardrobe"
+msgstr ""
+
+#: assets/models/assets.py:161
+msgid "undefined"
+msgstr ""
+
+#: assets/models/eveentity.py:44
+msgid "ID"
+msgstr ""
+
+#: assets/models/eveentity.py:47
+msgid "Category"
+msgstr ""
+
+#: assets/models/eveentity.py:49
+msgid "Name"
+msgstr ""
+
+#: assets/models/general.py:24
+msgid "Can access this app"
+msgstr ""
+
+#: assets/models/general.py:25
+msgid "Can access own corporation assets"
+msgstr ""
+
+#: assets/models/general.py:26
+msgid "Can access all assets."
+msgstr ""
+
+#: assets/models/general.py:27
+msgid "Can add corporation assets"
+msgstr ""
+
+#: assets/models/general.py:28
+msgid "Can manage requests"
+msgstr ""
+
+#: assets/models/helpers/update_manager.py:68
+msgid "Disabled"
+msgstr ""
+
+#: assets/models/helpers/update_manager.py:69
+msgid "Token Error"
+msgstr ""
+
+#: assets/models/helpers/update_manager.py:70
+msgid "Error"
+msgstr ""
+
+#: assets/models/helpers/update_manager.py:71
+msgid "OK"
+msgstr ""
+
+#: assets/models/helpers/update_manager.py:72
+msgid "Incomplete"
+msgstr ""
+
+#: assets/models/helpers/update_manager.py:73
+msgid "In Progress"
+msgstr ""
+
+#: assets/models/helpers/update_manager.py:97
+msgid "Assets"
+msgstr ""
+
+#: assets/models/request.py:155
+#, python-brace-format
+msgid "{requesting_user} has Requested a Order"
+msgstr ""
+
+#: assets/models/request.py:158
+#, python-brace-format
+msgid "{requesting_user} has requested the following items:{items}\n"
+msgstr ""
+
+#: assets/models/request.py:175
+#, python-brace-format
+msgid "{approver} has completed the Order for {requestor} ID: {request_id}."
+msgstr ""
+
+#: assets/models/request.py:181
+#, python-brace-format
+msgid "{approver} has completed the following items:{items}\n"
+msgstr ""
+
+#: assets/models/request.py:205
+#, python-brace-format
+msgid "{canceler} has canceled the Order for {requestor} ID: {request_id}."
+msgstr ""
+
+#: assets/models/request.py:211
+#, python-brace-format
+msgid "{canceler} has canceled the following items:{items}\n"
+msgstr ""
+
+#: assets/models/request.py:228
+#, python-brace-format
+msgid "{user} has reopened the Order for {requestor} ID: {request_id}."
+msgstr ""
+
+#: assets/models/request.py:234
+#, python-brace-format
+msgid "{user} has reopened the following items:{items}\n"
 msgstr ""
