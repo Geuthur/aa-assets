@@ -6,8 +6,9 @@
 msgid ""
 msgstr ""
 "Project-Id-Version: AA Assets\n"
-"Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-11-19 16:22+0000\n"
+"Report-Msgid-Bugs-To: https://weblate.geuthur.de/projects/alliance-auth/aa-"
+"assets/\n"
+"POT-Creation-Date: 2026-11-28 00:03+0100\n"
 "PO-Revision-Date: 2026-11-23 08:09+0000\n"
 "Last-Translator: Geuthur <devgeuthur@gmail.com>\n"
 "Language-Team: Dutch <https://weblate.geuthur.de/projects/allianceauth/aa-"
@@ -22,62 +23,85 @@ msgstr ""
 msgid "Permission Denied"
 msgstr ""
 
-msgid "Get Order Information"
+msgid "Locations"
 msgstr ""
 
-msgid "Mark Request as Canceled"
+msgid "Requests"
+msgstr ""
+
+msgid "My Requests"
+msgstr ""
+
+msgid "Settings"
+msgstr ""
+
+msgid "Add Character"
+msgstr ""
+
+msgid "Add Corporation"
+msgstr ""
+
+msgid "Administration"
+msgstr ""
+
+msgid "No task selected."
+msgstr ""
+
+msgid "Owner not found"
+msgstr ""
+
+msgid "Request does not exist"
+msgstr ""
+
+msgid "The asset does not exist."
+msgstr ""
+
+msgid "Requested amount exceeds available quantity."
+msgstr ""
+
+msgid "Order created successfully."
+msgstr ""
+
+msgid "The request cannot be changed in its current status."
+msgstr ""
+
+msgid "Queued Clear All ETags"
+msgstr ""
+
+msgid "Queued Update All Assets"
+msgstr ""
+
+msgid "Queued Update All Locations"
+msgstr ""
+
+msgid "Queued Update All Parent Locations"
+msgstr ""
+
+msgid "You are on cooldown. Please wait 60 seconds before trying again."
 msgstr ""
 
 #, python-brace-format
-msgid "Cancel Request for {requestor} - ID: {request_id}"
-msgstr ""
-
-msgid "Mark Request as Completed"
-msgstr ""
-
-#, python-brace-format
-msgid "Complete Request for {requestor} - ID: {request_id}"
-msgstr ""
-
-msgid "Mark Request as Open"
+msgid ""
+"The request for Order {user_request_pk} from {user_request_requesting_user} "
+"has been closed as cancelled."
 msgstr ""
 
 #, python-brace-format
-msgid "Reopen Request for {requestor} - ID: {request_id}"
+msgid ""
+"The request for Order {user_request_pk} from {user_request_requesting_user} "
+"has been closed as completed."
 msgstr ""
 
 #, python-brace-format
-msgid "Order for {requestor} - ID: {request_id}"
+msgid ""
+"The request for Order {user_request_pk} from {user_request_requesting_user} "
+"has been reopened."
 msgstr ""
 
-msgid "Amount"
-msgstr ""
-
-msgid "Amount for "
-msgstr ""
-
-msgid "Can access this app"
-msgstr ""
-
-msgid "Can access own corporation assets"
-msgstr ""
-
-msgid "Can access all assets."
-msgstr ""
-
-msgid "Can add corporation assets"
-msgstr ""
-
-msgid "Can manage requests"
-msgstr ""
-
-msgid "ID"
-msgstr ""
-
-msgid "Category"
-msgstr ""
-
-msgid "Name"
+#, python-brace-format
+msgid ""
+"The request for Order {user_request_pk} from {user_request_requesting_user} "
+"has failed."
 msgstr ""
 
 msgid "Asset Safety"
@@ -434,149 +458,85 @@ msgstr ""
 msgid "undefined"
 msgstr ""
 
-msgid "Administration"
+msgid "ID"
 msgstr ""
 
-msgid "Mark all tasks as Force Refresh"
+msgid "Category"
 msgstr ""
 
-msgid "Clear all cached ETags"
+msgid "Name"
 msgstr ""
 
-msgid "Update All Assets"
+msgid "Can access this app"
 msgstr ""
 
-msgid "Update All Locations"
+msgid "Can access own corporation assets"
 msgstr ""
 
-msgid "Update All Parent Locations"
+msgid "Can access all assets."
 msgstr ""
 
-msgid "Submit"
+msgid "Can add corporation assets"
 msgstr ""
 
-msgid "Assets System"
+msgid "Can manage requests"
 msgstr ""
 
-msgid "Buy"
+msgid "Disabled"
 msgstr ""
 
-msgid "Multi Buy"
+msgid "Token Error"
 msgstr ""
 
-msgid "Minimum one field is required"
+msgid "Error"
 msgstr ""
 
-msgid "This field is required"
+msgid "OK"
 msgstr ""
 
-msgid "Add Character"
+msgid "Incomplete"
 msgstr ""
 
-msgid "Add Corporation"
-msgstr ""
-
-msgid "Locations"
+msgid "In Progress"
 msgstr ""
 
 msgid "Assets"
 msgstr ""
 
-msgid "My Requests"
-msgstr ""
-
-msgid "Requests"
-msgstr ""
-
-msgid "Manage Requests"
-msgstr ""
-
-msgid "Cancel"
-msgstr ""
-
-msgid "Confirm"
-msgstr "Bevestigen"
-
-msgid "Close"
-msgstr ""
-
-msgid "All"
-msgstr ""
-
-msgid "Order List"
-msgstr ""
-
-msgid "Quantity"
-msgstr ""
-
-msgid "No data found..."
-msgstr ""
-
-msgid "Location"
-msgstr "Locatie"
-
-msgid "Location Flag"
-msgstr ""
-
-msgid "Price"
-msgstr ""
-
-msgid "Action"
-msgstr ""
-
-msgid "System"
-msgstr ""
-
-msgid "Requestor"
-msgstr ""
-
-msgid "Status"
-msgstr ""
-
-msgid "Created"
-msgstr ""
-
-msgid "You do not have permission to access this page."
-msgstr ""
-
-msgid "Queued Clear All ETags"
-msgstr ""
-
-msgid "Queued Update All Assets"
-msgstr ""
-
-msgid "Queued Update All Locations"
-msgstr ""
-
-msgid "Queued Update All Parent Locations"
-msgstr ""
-
-msgid "Requested amount exceeds available quantity."
-msgstr ""
-
-msgid "You are on cooldown. Please wait 60 seconds before trying again."
+#, python-brace-format
+msgid "{requesting_user} has Requested a Order"
 msgstr ""
 
 #, python-brace-format
-msgid ""
-"The request for Order {user_request_pk} from {user_request_requesting_user} "
-"has been closed as cancelled."
+msgid "{requesting_user} has requested the following items:{items}\n"
 msgstr ""
 
 #, python-brace-format
-msgid ""
-"The request for Order {user_request_pk} from {user_request_requesting_user} "
-"has failed."
+msgid "{approver} has completed the Order for {requestor} ID: {request_id}."
 msgstr ""
 
 #, python-brace-format
-msgid ""
-"The request for Order {user_request_pk} from {user_request_requesting_user} "
-"has been closed as completed."
+msgid "{approver} has completed the following items:{items}\n"
 msgstr ""
 
 #, python-brace-format
-msgid ""
-"The request for Order {user_request_pk} from {user_request_requesting_user} "
-"has been reopened."
+msgid "{canceler} has canceled the Order for {requestor} ID: {request_id}."
 msgstr ""
+
+#, python-brace-format
+msgid "{canceler} has canceled the following items:{items}\n"
+msgstr ""
+
+#, python-brace-format
+msgid "{user} has reopened the Order for {requestor} ID: {request_id}."
+msgstr ""
+
+#, python-brace-format
+msgid "{user} has reopened the following items:{items}\n"
+msgstr ""
+
+#~ msgid "Confirm"
+#~ msgstr "Bevestigen"
+
+#~ msgid "Location"
+#~ msgstr "Locatie"
